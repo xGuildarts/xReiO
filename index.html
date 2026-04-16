@@ -697,7 +697,7 @@ function loginUser(f){
   currentUser=f;
   sessionStorage.setItem('mtr_sess',JSON.stringify({username:f.username,password:f.password}));
   hideAll();show('app');
-  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
+  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'xReiOgami',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
   document.getElementById('dark-btn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
   document.getElementById('lang-btn').textContent=lang==='ar'?'EN':'ع';
   applyPerms();updateLogoDsp();
