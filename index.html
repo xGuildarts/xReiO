@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -696,13 +697,16 @@ function loginUser(f){
   currentUser=f;
   sessionStorage.setItem('mtr_sess',JSON.stringify({username:f.username,password:f.password}));
   hideAll();show('app');
-  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',viewer:'مشاهد'}[f.role]:f.role);
+  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
   document.getElementById('dark-btn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
   document.getElementById('lang-btn').textContent=lang==='ar'?'EN':'ع';
   applyPerms();updateLogoDsp();
   populateConvoys();populateCities();renderGrid();
   document.getElementById('acc-date').value=new Date().toISOString().split('T')[0];
+  // Restore last tab
+  const lastTab=sessionStorage.getItem('mtr_last_tab')||'dash';
   renderDash();
+  setTimeout(()=>showTab(lastTab),100);
 }
 async function doLogout(){
   await addLog('تسجيل خروج','login',currentUser?.name||'');
@@ -842,6 +846,7 @@ function populateSupSel(){
 // SHOW TAB
 // ============================================================
 function showTab(t){
+  sessionStorage.setItem('mtr_last_tab',t);
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   const tb=document.getElementById('tab-'+t);if(tb)tb.classList.add('active');
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
@@ -1101,10 +1106,12 @@ function viewClient(id){
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:.875rem;flex-wrap:wrap">
       <div style="width:42px;height:42px;border-radius:50%;background:var(--pr);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff">${b.name.charAt(0)}</div>
       <div style="flex:1">
-        <div style="font-size:15px;font-weight:700;color:var(--pr)">${b.name}</div>
-        <div style="font-size:11px;color:var(--tx2)">${b.phone||''} · ${b.checkin} → ${b.checkout} · ${b.createdBy||'—'}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--pr)">${b.name}${b.partyType==='supplier'?'<span class="badge b-pu" style="margin-right:6px;font-size:10px">مورد</span>':''}</div>
+        <div style="font-size:11px;color:var(--tx2)">${b.phone||''} · فوج ${b.convoy} · ${b.checkin} → ${b.checkout}</div>
         ${b.pickup?`<div style="font-size:12px;color:var(--ac);font-weight:600">مكان الركوب: ${b.pickup}</div>`:''}
         ${as?`<div style="font-size:11px;color:var(--tx2)">مقاعد الباص: ${as}</div>`:''}
+        ${(b.adults||0)>0||(b.children||0)>0?`<div style="font-size:12px;color:var(--pu)">الأفراد: ${b.adults||0} كبار${(b.children||0)>0?' · '+(b.children||0)+' أطفال':''}</div>`:''}
+        <div style="font-size:11px;color:var(--tx3)">المسؤول: ${b.createdBy||'—'}</div>
       </div>
       <div style="display:flex;gap:5px;flex-wrap:wrap">
         <button class="btn btn-p btn-sm" onclick="printReceipt(${b.id})">إيصال</button>
@@ -1610,8 +1617,8 @@ function genReport(){
   const allBks=bookings,allAcc=accEntries;
   function bkTable(bks){
     if(!bks.length)return '<div style="text-align:center;color:var(--tx3);padding:2rem">لا توجد بيانات</div>';
-    return `<table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>مكان الركوب</th><th>المسؤول</th><th>الكراسي</th><th>أفراد</th><th>أطفال</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>
-    ${bks.map(b=>`<tr><td style="font-weight:700">${b.name}</td><td>${b.phone||'-'}</td><td>${(b.apts||[]).join('، ')}</td><td style="font-size:11px">${b.checkin}</td><td>${b.pickup||'-'}</td><td>${b.createdBy||'-'}</td><td>${effSeats(b)}</td><td>${b.adults||0}</td><td>${b.children||0}</td><td style="font-weight:700">${b.total.toLocaleString()} ج</td><td style="color:var(--ac)">${b.paid.toLocaleString()} ج</td><td style="color:${b.remaining>0?'var(--dn)':'var(--ac)'}">${b.remaining.toLocaleString()} ج</td><td>${b.remaining<=0?'مكتمل':'باقي'}</td></tr>`).join('')}
+    return `<table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>مكان الركوب</th><th>المسؤول</th><th>باص</th><th>داخلي</th><th>أفراد</th><th>أطفال</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>
+    ${bks.map(b=>`<tr><td style="font-weight:700">${b.name}</td><td>${b.phone||'-'}</td><td>${(b.apts||[]).join('، ')}</td><td style="font-size:11px">${b.checkin}</td><td>${b.pickup||'-'}</td><td>${b.createdBy||'-'}</td><td>${effSeats(b)}</td><td>${b.intSeats||0}</td><td>${b.adults||0}</td><td>${b.children||0}</td><td style="font-weight:700">${b.total.toLocaleString()} ج</td><td style="color:var(--ac)">${b.paid.toLocaleString()} ج</td><td style="color:${b.remaining>0?'var(--dn)':'var(--ac)'}">${b.remaining.toLocaleString()} ج</td><td>${b.remaining<=0?'مكتمل':'باقي'}</td></tr>`).join('')}
     </tbody></table>`;
   }
   function accTable(ents,mode){
@@ -1692,17 +1699,71 @@ function updateLogoDsp(){
 function renderPriceMgr(){
   const el=document.getElementById('price-mgr');if(!el)return;
   const pm=PRICE_MAP;
+  // Calculate totals
+  let totS=0,totD=0,totSeats=0,totSeatCost=0;
+  CONVOYS.forEach(c=>{const p=pm[c.checkin]||{single:9400,double:12800};totS+=p.single;totD+=p.double;totSeats+=(p.singleSeats||2)+(p.doubleSeats||4);totSeatCost+=((p.singleSeats||2)*(p.seatPrice||600))+((p.doubleSeats||4)*(p.seatPrice||600));});
   el.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">
-    <thead><tr><th style="padding:6px 8px;background:var(--sf2);border-bottom:2px solid var(--prl)">تاريخ الفوج</th><th style="padding:6px 8px;background:var(--sf2);border-bottom:2px solid var(--prl)">سعر الغرفة (ج)</th><th style="padding:6px 8px;background:var(--sf2);border-bottom:2px solid var(--prl)">سعر الغرفتين (ج)</th></tr></thead>
-    <tbody>${CONVOYS.map(c=>{const p=pm[c.checkin]||{single:9400,double:12800};return`<tr><td style="padding:5px 8px;border-bottom:1px solid var(--bd);font-weight:700;color:var(--pr)">${c.checkin}<br><span style="font-size:10px;color:var(--tx3);font-weight:400">${c.label}</span></td><td style="padding:4px 8px;border-bottom:1px solid var(--bd)"><input type="number" id="pm-s-${c.checkin}" value="${p.single}" style="width:90px;font-size:12px;padding:4px 6px"></td><td style="padding:4px 8px;border-bottom:1px solid var(--bd)"><input type="number" id="pm-d-${c.checkin}" value="${p.double}" style="width:90px;font-size:12px;padding:4px 6px"></td></tr>`;}).join('')}
-    </tbody></table></div>`;
+    <thead><tr>
+      <th style="padding:7px 8px;background:var(--prl);border-bottom:2px solid var(--pr);color:var(--pr)">الفوج</th>
+      <th style="padding:7px 8px;background:var(--prl);border-bottom:2px solid var(--pr);color:var(--pr)" colspan="2">الغرفة الواحدة</th>
+      <th style="padding:7px 8px;background:var(--acl);border-bottom:2px solid var(--ac);color:var(--ac)" colspan="2">الغرفتين</th>
+      <th style="padding:7px 8px;background:var(--gdl);border-bottom:2px solid var(--gd);color:var(--gd)">سعر الكرسي</th>
+      <th style="padding:7px 8px;background:var(--sf2);border-bottom:2px solid var(--bd);color:var(--tx2)">الإجمالي شامل الكراسي</th>
+    </tr>
+    <tr style="background:var(--sf2);font-size:10px;color:var(--tx3)">
+      <th style="padding:4px 8px"></th>
+      <th style="padding:4px 8px">سعر الشقة</th><th style="padding:4px 8px">عدد الكراسي</th>
+      <th style="padding:4px 8px">سعر الشقة</th><th style="padding:4px 8px">عدد الكراسي</th>
+      <th style="padding:4px 8px">للغرفتين</th>
+      <th style="padding:4px 8px;font-size:10px">غرفة / غرفتين</th>
+    </tr></thead>
+    <tbody>${CONVOYS.map(c=>{
+      const p=pm[c.checkin]||{single:9400,double:12800,singleSeats:2,doubleSeats:4,seatPrice:600};
+      const sS=p.singleSeats||2,dS=p.doubleSeats||4,sp=p.seatPrice||600;
+      const sTot=p.single+(sS*sp),dTot=p.double+(dS*sp);
+      return`<tr style="border-bottom:1px solid var(--bd)">
+        <td style="padding:5px 8px;font-weight:700;color:var(--pr);font-size:11px">${c.checkin}<br><span style="font-weight:400;color:var(--tx3);font-size:10px">${c.label}</span></td>
+        <td style="padding:4px 8px"><input type="number" id="pm-s-${c.checkin}" value="${p.single}" oninput="updatePmTot('${c.checkin}')" style="width:80px;font-size:12px;padding:3px 5px"></td>
+        <td style="padding:4px 8px"><input type="number" id="pm-ss-${c.checkin}" value="${sS}" min="0" max="10" oninput="updatePmTot('${c.checkin}')" style="width:55px;font-size:12px;padding:3px 5px"></td>
+        <td style="padding:4px 8px"><input type="number" id="pm-d-${c.checkin}" value="${p.double}" oninput="updatePmTot('${c.checkin}')" style="width:80px;font-size:12px;padding:3px 5px"></td>
+        <td style="padding:4px 8px"><input type="number" id="pm-ds-${c.checkin}" value="${dS}" min="0" max="10" oninput="updatePmTot('${c.checkin}')" style="width:55px;font-size:12px;padding:3px 5px"></td>
+        <td style="padding:4px 8px"><input type="number" id="pm-sp-${c.checkin}" value="${sp}" min="0" oninput="updatePmTot('${c.checkin}')" style="width:65px;font-size:12px;padding:3px 5px"></td>
+        <td style="padding:4px 8px;font-weight:700">
+          <span id="pm-tot-${c.checkin}" style="color:var(--pr)">${sTot.toLocaleString()}</span> /
+          <span style="color:var(--ac)">${dTot.toLocaleString()}</span> ج
+        </td>
+      </tr>`;}).join('')}
+    </tbody>
+    <tfoot><tr style="background:var(--gdl);border-top:2px solid var(--gd)">
+      <td style="padding:7px 8px;font-weight:800;color:var(--gd)">إجمالي الموسم</td>
+      <td id="tot-single-price" style="padding:7px 8px;font-weight:700;color:var(--gd)" colspan="2">${totS.toLocaleString()} ج</td>
+      <td id="tot-double-price" style="padding:7px 8px;font-weight:700;color:var(--ac)" colspan="2">${totD.toLocaleString()} ج</td>
+      <td style="padding:7px 8px;font-weight:700;color:var(--gd)">${CONVOYS.length} فوج</td>
+      <td id="tot-all" style="padding:7px 8px;font-weight:800;color:var(--gd)">${(totS+totD).toLocaleString()} ج كل الشقق</td>
+    </tr></tfoot>
+  </table></div>
+  <div style="margin-top:.75rem;padding:.75rem;background:var(--sf2);border-radius:var(--r);font-size:12px;color:var(--tx2)">
+    💡 السعر المعروض للعميل = سعر الشقة + (عدد الكراسي × سعر الكرسي). قابل للتعديل في الإعدادات فقط.
+  </div>`;
+}
+function updatePmTot(ci){
+  const s=parseFloat(document.getElementById('pm-s-'+ci)?.value)||0;
+  const ss=parseFloat(document.getElementById('pm-ss-'+ci)?.value)||2;
+  const d=parseFloat(document.getElementById('pm-d-'+ci)?.value)||0;
+  const ds=parseFloat(document.getElementById('pm-ds-'+ci)?.value)||4;
+  const sp=parseFloat(document.getElementById('pm-sp-'+ci)?.value)||600;
+  const el=document.getElementById('pm-tot-'+ci);
+  if(el) el.parentElement.innerHTML=`<span id="pm-tot-${ci}" style="color:var(--pr)">${(s+ss*sp).toLocaleString()}</span> / <span style="color:var(--ac)">${(d+ds*sp).toLocaleString()}</span> ج`;
 }
 async function savePriceMgr(applyAll){
   const newPM={};
   CONVOYS.forEach(c=>{
     const s=parseFloat(document.getElementById('pm-s-'+c.checkin)?.value)||0;
+    const ss=parseFloat(document.getElementById('pm-ss-'+c.checkin)?.value)||2;
     const d=parseFloat(document.getElementById('pm-d-'+c.checkin)?.value)||0;
-    if(s>0||d>0) newPM[c.checkin]={single:s,double:d};
+    const ds=parseFloat(document.getElementById('pm-ds-'+c.checkin)?.value)||4;
+    const sp=parseFloat(document.getElementById('pm-sp-'+c.checkin)?.value)||600;
+    if(s>0||d>0) newPM[c.checkin]={single:s+ss*sp,double:d+ds*sp,baseS:s,baseD:d,singleSeats:ss,doubleSeats:ds,seatPrice:sp};
   });
   PRICE_MAP={...newPM};
   // Save to settings as JSON
@@ -1814,9 +1875,14 @@ function editBooking(id){
       <div class="fg"><label>كراسي داخلية</label><input type="number" id="edit-int-seats" value="${b.intSeats||0}" min="0" oninput="calcEditTotal(${id})"></div>
       <div class="fg"><label>سعر الكرسي الداخلي</label><input type="number" id="edit-int-seatp" value="${b.intSeatPrice||0}" min="0" oninput="calcEditTotal(${id})"></div>
     </div>
-    <div class="g2">
+    <div class="g3">
       <div class="fg"><label>خصم عام (ج)</label><input type="number" id="edit-disc" value="${b.disc||0}" min="0" oninput="calcEditTotal(${id})"></div>
       <div class="fg"><label>سبب الخصم</label><input type="text" id="edit-disc-reason" value="${b.discReason||''}"></div>
+      <div class="fg"><label>عمولة التحويل (ج)</label><input type="number" id="edit-transfer-fee" value="${b.transferFee||0}" min="0" oninput="calcEditTotal(${id})"></div>
+    </div>
+    <div class="g2">
+      <div class="fg"><label>عدد الأفراد الكبار</label><input type="number" id="edit-adults" value="${b.adults||0}" min="0"></div>
+      <div class="fg"><label>عدد الأطفال</label><input type="number" id="edit-children" value="${b.children||0}" min="0"></div>
     </div>
     <div class="fg"><label>ملاحظات</label><textarea id="edit-notes" style="min-height:60px">${b.notes||''}</textarea></div>
     <div id="edit-total-display" class="tsum" style="margin:.75rem 0;padding:.75rem"></div>
@@ -1836,6 +1902,7 @@ function calcEditTotal(id){
   const intS=parseFloat(document.getElementById('edit-int-seats')?.value)||0;
   const intP=parseFloat(document.getElementById('edit-int-seatp')?.value)||0;
   const disc=parseFloat(document.getElementById('edit-disc')?.value)||0;
+  const tfee=parseFloat(document.getElementById('edit-transfer-fee')?.value)||0;
   const st=extra*sp;const intT=intS*intP;const sda=sd*600;
   const total=at+st+intT+tfee-sda-disc;
   const el=document.getElementById('edit-total-display');
@@ -1862,19 +1929,23 @@ async function saveEditBooking(id){
   const newAptPrices={};
   newApts.forEach(a=>{const el=document.getElementById('edit-apt-'+a);newAptPrices[a]=el?parseFloat(el.value)||0:((b.aptPrices||{})[a]||0);});
   const at=Object.values(newAptPrices).reduce((s,v)=>s+v,0);
+  const tfee=parseFloat(document.getElementById('edit-transfer-fee')?.value)||0;
   const st=extra*sp;const intT=intS*intP;const sda=sd*600;
   const total=at+st+intT+tfee-sda-disc;
   const remaining=total-b.paid;
-  const payload={name,phone,pickup,convoy:newConvNum,checkin:newConv?.checkin||b.checkin,checkout:newConv?.checkout||b.checkout,apts:newApts,apt_prices:newAptPrices,apts_total:at,extra_seats:extra,seat_price:sp,seat_discount:sd,seat_disc_amt:sda,int_seats:intS,int_seat_price:intP,int_total:intT,disc,total,remaining,notes};
+  const adultsVal=parseInt(document.getElementById('edit-adults')?.value)||0;
+  const childrenVal=parseInt(document.getElementById('edit-children')?.value)||0;
+  const payload={name,phone,pickup,convoy:newConvNum,checkin:newConv?.checkin||b.checkin,checkout:newConv?.checkout||b.checkout,apts:newApts,apt_prices:newAptPrices,apts_total:at,extra_seats:extra,seat_price:sp,seat_discount:sd,seat_disc_amt:sda,int_seats:intS,int_seat_price:intP,int_total:intT,disc,total,remaining,notes,adults:adultsVal,children:childrenVal};
   try{
-    await sbFetch('mtr_bookings','PATCH',payload,`?id=eq.${id}`);
+    const patchRes=await sbFetch('mtr_bookings','PATCH',payload,`?id=eq.${id}`);
     // Update local state
-    Object.assign(b,{name,phone,pickup,convoy:newConvNum,checkin:newConv?.checkin||b.checkin,checkout:newConv?.checkout||b.checkout,apts:newApts,aptPrices:newAptPrices,aptsTotal:at,extraSeats:extra,seatPrice:sp,seatDiscount:sd,seatDiscAmt:sda,intSeats:intS,intSeatPrice:intP,intTotal:intT,disc,discReason,total,remaining,notes});
-    await addLog(`تعديل حجز: ${name} - فوج ${b.convoy}`,'edit',`${total.toLocaleString()} ج`);
+    Object.assign(b,{name,phone,pickup,convoy:newConvNum,checkin:newConv?.checkin||b.checkin,checkout:newConv?.checkout||b.checkout,apts:newApts,aptPrices:newAptPrices,aptsTotal:at,extraSeats:extra,seatPrice:sp,seatDiscount:sd,seatDiscAmt:sda,intSeats:intS,intSeatPrice:intP,intTotal:intT,disc,discReason:document.getElementById('edit-disc-reason')?.value||'',total,remaining,notes,adults:parseInt(document.getElementById('edit-adults')?.value)||b.adults||0,children:parseInt(document.getElementById('edit-children')?.value)||b.children||0});
+    await addLog(`تعديل حجز: ${name} - فوج ${newConvNum}`,'edit',`${total.toLocaleString()} ج`);
     closeEditModal();
-    viewClient(id);
-    alert('تم حفظ التعديلات!');
-  }catch(e){alert('فشل: '+e.message)}
+    if(document.getElementById('cl-det').style.display!=='none') viewClient(id);
+    renderDash();
+    alert('✓ تم حفظ التعديلات!');
+  }catch(e){alert('فشل الحفظ: '+e.message)}
 }
 let editSelApts={};
 function toggleEditApt(aptNum,bookingId){
@@ -2288,4 +2359,699 @@ function printClosing(){
   window.open(url,'_blank');
   setTimeout(()=>URL.revokeObjectURL(url),15000);
 }
+</script>
+<script>
+// ====== MULTI-PARTY ACCOUNTING ENTRIES ======
+// Replaces single double-entry form with flexible N-party form
+
+(function(){
+// Override the accounts section to add multi-party form
+const origRenderAccs = window.renderAccs;
+window.renderAccs = function(){
+  if(origRenderAccs) origRenderAccs();
+  buildMultiEntryForm();
+};
+
+function buildMultiEntryForm(){
+  // Add multi-party form after existing double-entry form
+  const accSec = document.getElementById('accs');
+  if(!accSec || document.getElementById('multi-entry-card')) return;
+  const card = document.createElement('div');
+  card.id = 'multi-entry-card';
+  card.className = 'card';
+  card.style.marginTop = '.875rem';
+  card.innerHTML = `
+    <div class="ctitle">قيد متعدد الأطراف (أكثر من طرفين)</div>
+    <div class="info-box" style="font-size:11px;margin-bottom:.65rem">أضف أطرافاً مدينة ودائنة متعددة. مجموع المدين = مجموع الدائن.</div>
+    <div class="g3" style="margin-bottom:.65rem">
+      <div class="fg"><label>المبلغ الإجمالي (ج)</label><input type="number" id="me-amount" placeholder="0" oninput="updateMeRows()"></div>
+      <div class="fg"><label>التاريخ</label><input type="date" id="me-date"></div>
+      <div class="fg"><label>البيان العام</label><input type="text" id="me-desc" placeholder="وصف القيد..."></div>
+    </div>
+    <div id="me-rows-cont">
+      <div style="display:flex;gap:10px;margin-bottom:.5rem">
+        <div style="flex:1;font-size:11px;font-weight:700;color:var(--dn);text-align:center">الطرف المدين (الخارج منه)</div>
+        <div style="flex:1;font-size:11px;font-weight:700;color:var(--ac);text-align:center">الطرف الدائن (الداخل إليه)</div>
+      </div>
+      <div id="me-rows"></div>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:.65rem;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-sm" onclick="addMeRow('debit')" style="background:var(--dnl);color:var(--dn);border-color:var(--dn)">+ مدين</button>
+      <button class="btn btn-sm" onclick="addMeRow('credit')" style="background:var(--acl);color:var(--ac);border-color:var(--ac)">+ دائن</button>
+      <span id="me-balance" style="font-size:12px;font-weight:700;color:var(--tx3)">التوازن: 0</span>
+      <button class="btn btn-p" onclick="saveMeEntry()" style="margin-right:auto">حفظ القيد</button>
+    </div>`;
+  accSec.appendChild(card);
+  document.getElementById('me-date').value = new Date().toISOString().split('T')[0];
+  addMeRow('debit'); addMeRow('credit');
+}
+
+let meRowId = 0;
+window.addMeRow = function(type){
+  const cont = document.getElementById('me-rows');
+  if(!cont) return;
+  const id = ++meRowId;
+  const isDebit = type === 'debit';
+  const color = isDebit ? 'var(--dnl)' : 'var(--acl)';
+  const borderColor = isDebit ? 'var(--dn)' : 'var(--ac)';
+  const label = isDebit ? 'مدين' : 'دائن';
+  const row = document.createElement('div');
+  row.id = 'me-row-' + id;
+  row.style.cssText = `display:flex;gap:6px;align-items:center;margin-bottom:6px;padding:8px;background:${color};border:1px solid ${borderColor};border-radius:var(--r)`;
+  row.innerHTML = `
+    <span class="badge" style="background:${borderColor};color:#fff;flex-shrink:0">${label}</span>
+    <select id="me-sec-${id}" onchange="fillMeSel(${id})" style="flex:none;width:100px">
+      <option value="accounts">حساب</option>
+      <option value="expenses">مصروف</option>
+      <option value="supplier">مورد</option>
+    </select>
+    <select id="me-type-${id}" style="flex:1;min-width:100px"></select>
+    <input type="number" id="me-amt-${id}" placeholder="المبلغ" oninput="calcMeBalance()" style="width:90px;flex:none">
+    <span style="font-size:12px;color:var(--tx3);flex:none">ج</span>
+    <button class="btn btn-sm" onclick="document.getElementById('me-row-${id}').remove();calcMeBalance()" style="flex:none;padding:2px 7px">×</button>
+    <input type="hidden" id="me-op-${id}" value="${isDebit?'expense':'in'}">`;
+  cont.appendChild(row);
+  fillMeSel(id);
+};
+
+window.fillMeSel = function(id){
+  const sec = document.getElementById('me-sec-'+id)?.value || 'accounts';
+  const sel = document.getElementById('me-type-'+id);
+  if(!sel) return;
+  if(sec==='accounts') sel.innerHTML = PM_TYPES.map(p=>`<option>${p}</option>`).join('');
+  else if(sec==='expenses') sel.innerHTML = EXP_CATS.map(c=>`<option>${c}</option>`).join('');
+  else sel.innerHTML = suppliers.map(s=>`<option value="sup_${s.id}">${s.name}</option>`).join('') || '<option>لا يوجد</option>';
+};
+
+window.calcMeBalance = function(){
+  let debit=0, credit=0;
+  document.querySelectorAll('#me-rows [id^="me-op-"]').forEach(inp=>{
+    const id = inp.id.replace('me-op-','');
+    const amt = parseFloat(document.getElementById('me-amt-'+id)?.value)||0;
+    if(inp.value==='expense') debit+=amt; else credit+=amt;
+  });
+  const bal = document.getElementById('me-balance');
+  if(bal){
+    const diff = Math.abs(debit-credit);
+    bal.textContent = `مدين: ${debit.toLocaleString()} | دائن: ${credit.toLocaleString()} | فرق: ${diff.toLocaleString()} ج`;
+    bal.style.color = diff===0 ? 'var(--ac)' : 'var(--dn)';
+  }
+};
+
+window.updateMeRows = function(){
+  // Auto-distribute total amount to rows if only 1 debit + 1 credit
+  calcMeBalance();
+};
+
+window.saveMeEntry = async function(){
+  const date = document.getElementById('me-date')?.value || new Date().toISOString().split('T')[0];
+  const desc = document.getElementById('me-desc')?.value?.trim() || '';
+  if(!desc){alert('أدخل البيان');return;}
+  const rows = [];
+  document.querySelectorAll('#me-rows [id^="me-op-"]').forEach(inp=>{
+    const id = inp.id.replace('me-op-','');
+    const sec = document.getElementById('me-sec-'+id)?.value||'accounts';
+    const val = document.getElementById('me-type-'+id)?.value||'';
+    const amt = parseFloat(document.getElementById('me-amt-'+id)?.value)||0;
+    const op = inp.value;
+    if(amt <= 0) return;
+    let type='',category='',supplierId=null;
+    if(sec==='accounts'){type=val;category='';}
+    else if(sec==='expenses'){type='مصاريف';category=val;}
+    else if(sec==='supplier'&&val.startsWith('sup_')){
+      supplierId=parseInt(val.replace('sup_',''));
+      const sup=suppliers.find(s=>s.id===supplierId);
+      type=sup?.name||'مورد';
+    }
+    rows.push({type,op,amount:amt,entry_date:date,description:desc,client_name:desc,category,booking_ref:'',booking_pay_ref:'',supplier_id:supplierId});
+  });
+  if(!rows.length){alert('أضف أطرافاً بمبالغ');return;}
+  const debitTotal = rows.filter(r=>r.op==='expense').reduce((s,r)=>s+r.amount,0);
+  const creditTotal = rows.filter(r=>r.op==='in').reduce((s,r)=>s+r.amount,0);
+  if(Math.abs(debitTotal-creditTotal) > 0.01){
+    if(!confirm(`تحذير: المدين (${debitTotal.toLocaleString()}) ≠ الدائن (${creditTotal.toLocaleString()}). هل تريد الحفظ؟`)) return;
+  }
+  const pairRef = 'pair_'+Date.now();
+  try{
+    await Promise.all(rows.map(r=>sbFetch('mtr_acc','POST',{...r,booking_ref:pairRef},'').then(res=>{if(res&&res[0])accEntries.push(mA(res[0]));})));
+    await addLog(`قيد متعدد: ${desc} - ${rows.length} أطراف`,'add','');
+    document.getElementById('me-desc').value='';
+    document.getElementById('me-amount').value='';
+    const cont=document.getElementById('me-rows');if(cont)cont.innerHTML='';
+    meRowId=0; addMeRow('debit'); addMeRow('credit');
+    alert('✓ تم حفظ القيد!');
+    renderAccs();
+  }catch(e){alert('فشل: '+e.message);}
+};
+
+// ENTRY DETAIL POPUP
+document.addEventListener('click', function(e){
+  if(e.target.closest('[data-ev-id]')){
+    const id = parseInt(e.target.closest('[data-ev-id]').dataset.evId);
+    showEntryPopup(id);
+  }
+});
+
+window.showEntryPopup = function(id){
+  const e = accEntries.find(x=>x.id===id);
+  if(!e) return;
+  // Find paired entries
+  const paired = e.bookingRef && e.bookingRef.startsWith('pair_') ?
+    accEntries.filter(x=>x.bookingRef===e.bookingRef&&x.id!==id) : [];
+  // Build popup
+  let existing = document.getElementById('entry-popup-overlay');
+  if(existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'entry-popup-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem';
+  overlay.onclick = function(ev){if(ev.target===overlay)overlay.remove();};
+  const sideLabel = op => op==='in'?'<span class="badge b-gr">دائن</span>':'<span class="badge b-rd">مدين</span>';
+  const pairedHtml = paired.length ? paired.map(p=>`
+    <div style="background:var(--sf2);border-radius:var(--r);padding:.65rem;margin-top:.5rem">
+      ${sideLabel(p.op)} <b>${p.type||'-'}</b>${p.category?' / '+p.category:''}
+      <span style="float:left;font-weight:700;color:${p.op==='in'?'var(--ac)':'var(--dn)'}">${p.op==='in'?'+':'-'}${p.amount.toLocaleString()} ج</span>
+    </div>`).join('') : '';
+  overlay.innerHTML = `
+    <div style="background:var(--sf);border-radius:var(--rl);padding:1.5rem;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div style="font-size:15px;font-weight:800;color:var(--pr)">تفاصيل القيد #${id}</div>
+        <button class="btn btn-sm" onclick="document.getElementById('entry-popup-overlay').remove()">✕</button>
+      </div>
+      <div style="background:var(--prl);border-radius:var(--r);padding:.875rem;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:700;margin-bottom:5px">${e.desc||e.clientName||'-'}</div>
+        <div style="font-size:12px;color:var(--tx2)">${e.date||'-'}</div>
+      </div>
+      <div style="margin-bottom:.5rem;font-size:12px;font-weight:700;color:var(--tx2)">هذا الطرف:</div>
+      <div style="background:var(--sf2);border-radius:var(--r);padding:.65rem">
+        ${sideLabel(e.op)} <b>${e.type||'-'}</b>${e.category?' / '+e.category:''}
+        <span style="float:left;font-weight:700;color:${e.op==='in'?'var(--ac)':'var(--dn)'}">${e.op==='in'?'+':'-'}${e.amount.toLocaleString()} ج</span>
+      </div>
+      ${paired.length?`<div style="margin-top:.75rem;margin-bottom:.5rem;font-size:12px;font-weight:700;color:var(--tx2)">الأطراف الأخرى في القيد (${paired.length}):</div>${pairedHtml}`:''}
+      ${e.bookingRef&&!e.bookingRef.startsWith('pair_')?`<div style="margin-top:.5rem;font-size:11px;color:var(--tx3)">رقم الحجز: ${e.bookingRef}</div>`:''}
+      <div style="display:flex;gap:7px;margin-top:1rem">
+        <button class="btn btn-sm" onclick="toggleEe(${id})">✏ تعديل</button>
+        <button class="btn btn-d btn-sm" onclick="document.getElementById('entry-popup-overlay').remove();delAccE(${id})">🗑 حذف</button>
+      </div>
+      <div id="ee-popup-${id}" style="display:none;margin-top:.75rem">
+        <div class="g2">
+          <div class="fg"><label>المبلغ</label><input type="number" id="ea-${id}" value="${e.amount}" style="font-size:13px"></div>
+          <div class="fg"><label>البيان</label><input type="text" id="ed-${id}" value="${e.desc||''}" style="font-size:13px"></div>
+        </div>
+        <button class="btn btn-s" onclick="saveEe(${id});document.getElementById('entry-popup-overlay').remove()">حفظ التعديل</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  // Override toggleEe for popup
+  const orig = window.toggleEe;
+  window.toggleEe = function(eid){
+    const el = document.getElementById('ee-popup-'+eid);
+    if(el){ el.style.display = el.style.display==='none'?'block':'none'; return; }
+    if(orig) orig(eid);
+  };
+};
+
+// Override the 👁 button to use popup
+window.toggleEntryView = window.showEntryPopup;
+
+})();
+</script>
+
+<script>
+// ====== CONVOY CLOSING TAB ======
+document.addEventListener('DOMContentLoaded', function(){
+  const tabsEl=document.querySelector('.tabs');
+  if(tabsEl&&!document.getElementById('tab-closing')){
+    const btn=document.createElement('button');
+    btn.className='tab h';btn.id='tab-closing';
+    btn.textContent='تقفيلة الفوج';
+    btn.onclick=function(){showTab('closing');};
+    tabsEl.insertBefore(btn,document.getElementById('tab-mgr'));
+  }
+  const mainEl=document.getElementById('main-area');
+  if(mainEl&&!document.getElementById('closing')){
+    const sec=document.createElement('div');
+    sec.id='closing';sec.className='sec';
+    sec.innerHTML=`
+    <div class="card" style="margin-bottom:.75rem">
+      <div class="ctitle">تقفيلة الفوج</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="cl-convoy-sel" style="max-width:240px;font-weight:700"></select>
+        <button class="btn btn-p" onclick="renderClosing()">عرض</button>
+        <button class="btn" onclick="printClosing()">🖨 طباعة</button>
+      </div>
+    </div>
+    <div id="closing-output"></div>`;
+    mainEl.insertBefore(sec,document.getElementById('mgr'));
+  }
+  // Override showTab for closing
+  const origShow=window.showTab;
+  window.showTab=function(t){
+    if(t==='closing'){
+      sessionStorage.setItem('mtr_last_tab','closing');
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      const ct=document.getElementById('tab-closing');if(ct)ct.classList.add('active');
+      document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+      const cs=document.getElementById('closing');if(cs)cs.classList.add('active');
+      populateClosingSel();
+    } else {
+      origShow(t);
+    }
+  };
+  // Override applyPerms to show tab
+  const origApply=window.applyPerms;
+  window.applyPerms=function(){
+    origApply&&origApply();
+    ['tab-closing'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('h');});
+  };
+});
+
+function populateClosingSel(){
+  const sel=document.getElementById('cl-convoy-sel');
+  if(!sel)return;
+  sel.innerHTML='<option value="">-- اختار الفوج --</option>';
+  CONVOYS.forEach(c=>{
+    const cnt=bookings.filter(b=>b.convoy===c.num).length;
+    const o=document.createElement('option');
+    o.value=c.num;
+    o.textContent=c.label+(cnt?` · ${cnt} حجز`:'');
+    sel.appendChild(o);
+  });
+}
+
+function renderClosing(){
+  populateClosingSel();
+  const sel=document.getElementById('cl-convoy-sel');
+  const cn=sel?parseInt(sel.value)||0:0;
+  const out=document.getElementById('closing-output');
+  if(!cn||!out){out&&(out.innerHTML='<div class="info-box">اختار الفوج من الأعلى</div>');return;}
+  const conv=getConv(cn);
+  const bks=bookings.filter(b=>b.convoy===cn&&b.partyType!=='supplier');
+  const SP=600,IP=200;
+  const rows=bks.map((b,i)=>{
+    const baseSeats=(b.apts||[]).reduce((s,a)=>{const inf=APTS[a];return s+(inf?(inf.type==='single'?2:4):0);},0);
+    const disc=b.seatDiscount||0;
+    const extra=b.extraSeats||0;
+    const busSeats=Math.max(0,baseSeats-disc)+extra;
+    const goingIncluded=Math.max(0,baseSeats-disc);
+    const aptNet=Math.max(0,(b.aptsTotal||0)-(goingIncluded*SP));
+    const busTot=busSeats*SP;
+    const intSeats=b.intSeats||0;
+    const intTot=intSeats*IP;
+    const hasTransport=busSeats>0;
+    return {i:i+1,name:b.name,phone:b.phone||'-',apts:(b.apts||[]).join('،'),pickup:b.pickup||'-',
+      busSeats,busTot,intSeats,intTot,aptNet,disc:b.disc||0,total:b.total||0,paid:b.paid||0,
+      remaining:(b.total||0)-(b.paid||0),hasTransport,b};
+  });
+  const T={busSeats:rows.reduce((s,r)=>s+r.busSeats,0),busTot:rows.reduce((s,r)=>s+r.busTot,0),
+    intSeats:rows.reduce((s,r)=>s+r.intSeats,0),intTot:rows.reduce((s,r)=>s+r.intTot,0),
+    aptNet:rows.reduce((s,r)=>s+r.aptNet,0),disc:rows.reduce((s,r)=>s+r.disc,0),
+    total:rows.reduce((s,r)=>s+r.total,0),paid:rows.reduce((s,r)=>s+r.paid,0),
+    remaining:rows.reduce((s,r)=>s+r.remaining,0)};
+  const collBus=rows.filter(r=>r.remaining>0&&r.hasTransport);
+  const collBuilding=rows.filter(r=>r.remaining>0&&!r.hasTransport);
+  const n=v=>(v||0).toLocaleString('ar-EG');
+  const hs=c=>`background:linear-gradient(135deg,${c},${c}dd);color:#fff;padding:9px 10px;text-align:right;font-size:11px;font-weight:700;white-space:nowrap`;
+  const ts=`border:1px solid #e0e7f0;padding:7px 9px;text-align:right;font-size:12px`;
+  const fs=c=>`background:${c};padding:7px 9px;font-weight:800;text-align:right;font-size:12px;border-top:2px solid ${c.replace('44','ff').replace('0.2)','1)')}`;
+  function mkTable(data,title,color,light){
+    if(!data.length)return'';
+    const TT={busSeats:data.reduce((s,r)=>s+r.busSeats,0),busTot:data.reduce((s,r)=>s+r.busTot,0),
+      intSeats:data.reduce((s,r)=>s+r.intSeats,0),intTot:data.reduce((s,r)=>s+r.intTot,0),
+      aptNet:data.reduce((s,r)=>s+r.aptNet,0),disc:data.reduce((s,r)=>s+r.disc,0),
+      total:data.reduce((s,r)=>s+r.total,0),paid:data.reduce((s,r)=>s+r.paid,0),
+      remaining:data.reduce((s,r)=>s+r.remaining,0)};
+    return `<div style="margin-top:1.25rem">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:.65rem">
+        <div style="width:4px;height:22px;background:${color};border-radius:2px"></div>
+        <div style="font-size:15px;font-weight:800;color:${color}">${title} · ${data.length} عميل · ${n(TT.remaining)} ج متبقي</div>
+      </div>
+      <div style="overflow-x:auto;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08)">
+      <table style="width:100%;border-collapse:collapse;min-width:800px">
+        <thead><tr>
+          <th style="${hs(color)}">م</th><th style="${hs(color)}">الاسم</th><th style="${hs(color)}">الهاتف</th>
+          <th style="${hs(color)}">الشقة</th><th style="${hs(color)}">مكان الركوب</th>
+          <th style="${hs(color)}">كراسي باص</th><th style="${hs(color)}">× 600</th>
+          <th style="${hs(color)}">داخلي</th><th style="${hs(color)}">× 200</th>
+          <th style="${hs(color)}">سعر الشقة</th><th style="${hs(color)}">الخصم</th>
+          <th style="${hs(color)}">الإجمالي</th><th style="${hs(color)}">المدفوع</th><th style="${hs(color)}">المتبقي</th>
+        </tr></thead>
+        <tbody>${data.map((r,idx)=>`<tr style="background:${idx%2===0?'#fff':light}">
+          <td style="${ts};font-weight:700;color:${color}">${r.i}</td>
+          <td style="${ts};font-weight:700">${r.name}</td>
+          <td style="${ts};font-size:11px;direction:ltr;text-align:left">${r.phone}</td>
+          <td style="${ts};text-align:center"><span style="background:${light};color:${color};border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700">${r.apts}</span></td>
+          <td style="${ts};color:#117a65;font-size:11px">${r.pickup}</td>
+          <td style="${ts};text-align:center;font-weight:700">${r.busSeats||'-'}</td>
+          <td style="${ts};text-align:center;font-weight:700;color:#1a5276">${r.busSeats?n(r.busTot):'-'}</td>
+          <td style="${ts};text-align:center;font-weight:700;color:#7d3c98">${r.intSeats||'-'}</td>
+          <td style="${ts};text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'-'}</td>
+          <td style="${ts};font-weight:700">${n(r.aptNet)}</td>
+          <td style="${ts};color:${r.disc?'#c0392b':'#aaa'}">${r.disc?n(r.disc):'-'}</td>
+          <td style="${ts};font-weight:800;color:#1a5276">${n(r.total)}</td>
+          <td style="${ts};font-weight:700;color:#117a65">${n(r.paid)}</td>
+          <td style="${ts};font-weight:800;color:${color}">${n(r.remaining)}</td>
+        </tr>`).join('')}</tbody>
+        <tfoot><tr style="background:${light}">
+          <td style="padding:7px 9px;font-weight:800;font-size:13px;color:${color}" colspan="5">الإجمالي</td>
+          <td style="${fs(light)};text-align:center;color:${color}">${TT.busSeats}</td>
+          <td style="${fs(light)};text-align:center;color:#1a5276">${n(TT.busTot)}</td>
+          <td style="${fs(light)};text-align:center;color:#7d3c98">${TT.intSeats||'-'}</td>
+          <td style="${fs(light)};text-align:center;color:#7d3c98">${TT.intSeats?n(TT.intTot):'-'}</td>
+          <td style="${fs(light)};color:${color}">${n(TT.aptNet)}</td>
+          <td style="${fs(light)};color:#c0392b">${TT.disc?n(TT.disc):'-'}</td>
+          <td style="${fs(light)};color:#1a5276">${n(TT.total)}</td>
+          <td style="${fs(light)};color:#117a65">${n(TT.paid)}</td>
+          <td style="${fs(light)};color:${color}">${n(TT.remaining)}</td>
+        </tr></tfoot>
+      </table></div></div>`;
+  }
+  const mainTbl=mkTable(rows,'تقفيلة الفوج','#1a5276','#e8f4fd');
+  const busColl=mkTable(collBus,'تحصيلات في الباص (لهم نقل)','#d68910','#fef9e7');
+  const bldColl=mkTable(collBuilding,'تحصيلات في البرج (بدون نقل)','#c0392b','#fdf2f0');
+  const allOk=!collBus.length&&!collBuilding.length?
+    `<div style="background:var(--acl);border:1px solid var(--ac);border-radius:var(--r);padding:.875rem;font-weight:700;color:var(--ac);margin-top:1rem">✓ لا توجد تحصيلات متبقية</div>`:'';
+  out.innerHTML=`
+    <div style="background:linear-gradient(135deg,#1a5276,#117a65);border-radius:14px;padding:1rem 1.5rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div><div style="font-size:18px;font-weight:800;color:#fff">تقفيلة فوج ${conv.label}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">دخول ${conv.checkin} · خروج ${conv.checkout} · ${rows.length} عميل</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:.5rem .875rem;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.7)">الإجمالي</div><div style="font-size:16px;font-weight:800;color:#fff">${n(T.total)} ج</div></div>
+        <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:.5rem .875rem;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.7)">المحصل</div><div style="font-size:16px;font-weight:800;color:#2ecc71">${n(T.paid)} ج</div></div>
+        <div style="background:rgba(192,57,43,.4);border-radius:8px;padding:.5rem .875rem;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.7)">المتبقي</div><div style="font-size:16px;font-weight:800;color:#ff8a80">${n(T.remaining)} ج</div></div>
+      </div>
+    </div>
+    ${mainTbl}${busColl}${bldColl}${allOk}`;
+}
+
+function printClosing(){
+  const out=document.getElementById('closing-output');
+  if(!out||!out.innerHTML.trim()){alert('أنشئ التقفيلة أولاً');return;}
+  const cn=parseInt(document.getElementById('cl-convoy-sel')?.value)||0;
+  const conv=cn?getConv(cn):null;
+  const setts=settings||{};
+  const h='<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">'
+    +'<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Cairo,Arial,sans-serif;direction:rtl;padding:10px;font-size:12px}'
+    +'*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}'
+    +'@media print{@page{margin:5mm;size:A4 landscape}body{padding:0}}</style></head><body>'
+    +`<div style="text-align:center;font-size:17px;font-weight:800;color:#1a5276;margin-bottom:8px">${setts.name||''} · تقفيلة فوج ${conv?conv.label:''}</div>`
+    +out.innerHTML
+    +'<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\\/script>'
+    +'</body></html>';
+  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  window.open(url,'_blank');
+  setTimeout(()=>URL.revokeObjectURL(url),15000);
+}
+</script>
+<script>
+// ====== BEAUTIFUL POPUPS ======
+
+// ── 1. ENTRY DETAIL POPUP (like the screenshot) ──────────────
+window.showEntryPopup = function(id){
+  const e = accEntries.find(x=>x.id===id);
+  if(!e) return;
+  const pairRef = e.bookingRef;
+  const paired = pairRef && pairRef.startsWith('pair_') ?
+    accEntries.filter(x=>x.bookingRef===pairRef) : [e];
+
+  document.getElementById('entry-popup-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id='entry-popup-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)';
+  overlay.onclick=ev=>{if(ev.target===overlay)overlay.remove();};
+
+  let rowsHtml='';
+  let totalDr=0,totalCr=0;
+  paired.forEach((p,i)=>{
+    const isDr=p.op==='expense';
+    if(isDr) totalDr+=p.amount; else totalCr+=p.amount;
+    const color=isDr?'#c0392b':'#117a65';
+    const bg=isDr?'#fff8f8':'#f0fff8';
+    rowsHtml+=`<tr style="background:${bg}">
+      <td style="padding:10px 12px;border-bottom:1px solid #eee;font-weight:700;color:#1a5276;font-size:13px">${i+1}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #eee">
+        <div style="font-weight:700;color:#1a5276;font-size:13px">${p.type||'-'}</div>
+        ${p.category?`<div style="font-size:11px;color:#888;margin-top:2px">${p.category}</div>`:''}
+        ${p.supplierId?`<div style="font-size:11px;color:#7d3c98">مورد</div>`:''}
+      </td>
+      <td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;color:#555;max-width:240px">
+        <div>${p.desc||p.clientName||'-'}</div>
+        ${p.date?`<div style="font-size:11px;color:#aaa;margin-top:2px">${p.date}</div>`:''}
+      </td>
+      <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:left;font-weight:800;font-size:14px;color:${isDr?'#c0392b':'#888'}">${isDr?p.amount.toLocaleString():''}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:left;font-weight:800;font-size:14px;color:${!isDr?'#117a65':'#888'}">${!isDr?p.amount.toLocaleString():''}</td>
+    </tr>`;
+  });
+
+  const balanced=Math.abs(totalDr-totalCr)<0.01;
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:680px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3);direction:rtl">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#1a3a5c,#1a5276);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:12px;opacity:.7;margin-bottom:3px">تفاصيل القيد #${id}</div>
+          <div style="font-size:17px;font-weight:800">${e.desc||e.clientName||'قيد حسابي'}</div>
+          <div style="font-size:12px;opacity:.8;margin-top:3px">${e.date||'-'} ${pairRef&&pairRef.startsWith('pair_')?'· قيد مزدوج ('+paired.length+' أطراف)':'· قيد مفرد'}</div>
+        </div>
+        <button onclick="document.getElementById('entry-popup-overlay').remove()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <!-- Table -->
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-family:Cairo,Arial,sans-serif">
+          <thead>
+            <tr style="background:#f4f7fb">
+              <th style="padding:10px 12px;text-align:right;font-size:12px;color:#1a5276;border-bottom:2px solid #d6eaf8">#</th>
+              <th style="padding:10px 12px;text-align:right;font-size:12px;color:#1a5276;border-bottom:2px solid #d6eaf8">الحساب</th>
+              <th style="padding:10px 12px;text-align:right;font-size:12px;color:#1a5276;border-bottom:2px solid #d6eaf8">البيان</th>
+              <th style="padding:10px 12px;text-align:left;font-size:12px;color:#c0392b;border-bottom:2px solid #d6eaf8">مدين Dr</th>
+              <th style="padding:10px 12px;text-align:left;font-size:12px;color:#117a65;border-bottom:2px solid #d6eaf8">دائن Cr</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+          <tfoot>
+            <tr style="background:#f9e79f">
+              <td colspan="3" style="padding:10px 12px;font-weight:800;color:#7d6608;font-size:13px;text-align:right">الإجمالي</td>
+              <td style="padding:10px 12px;font-weight:800;color:#c0392b;font-size:14px;text-align:left">${totalDr.toLocaleString()}</td>
+              <td style="padding:10px 12px;font-weight:800;color:#117a65;font-size:14px;text-align:left">${totalCr.toLocaleString()}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <!-- Balance indicator -->
+      <div style="padding:12px 20px;background:${balanced?'#f0fff8':'#fff8f8'};border-top:1px solid ${balanced?'#d5f5e3':'#fadbd8'}">
+        <span style="font-weight:700;color:${balanced?'#117a65':'#c0392b'};font-size:13px">
+          ${balanced?'✓ القيد متوازن (المدين = الدائن)':'⚠ القيد غير متوازن · فرق: '+(Math.abs(totalDr-totalCr)).toLocaleString()+' ج'}
+        </span>
+      </div>
+      <!-- Actions -->
+      <div style="padding:14px 20px;display:flex;gap:8px;justify-content:flex-end;background:#f8fafc;border-top:1px solid #eee">
+        <button class="btn btn-sm" onclick="openEntryEdit(${id})" style="font-size:12px">✏ تعديل</button>
+        <button class="btn btn-d btn-sm" onclick="document.getElementById('entry-popup-overlay').remove();delAccE(${id})" style="font-size:12px">🗑 حذف</button>
+        <button class="btn btn-p btn-sm" onclick="document.getElementById('entry-popup-overlay').remove()" style="font-size:12px">إغلاق</button>
+      </div>
+      <!-- Inline edit form (hidden) -->
+      <div id="entry-edit-inline" style="display:none;padding:14px 20px;background:#fff;border-top:1px solid #eee">
+        <div class="g2"><div class="fg"><label>المبلغ</label><input type="number" id="ea-${id}" value="${e.amount}" style="font-size:13px"></div>
+        <div class="fg"><label>البيان</label><input type="text" id="ed-${id}" value="${e.desc||''}" style="font-size:13px"></div></div>
+        <button class="btn btn-s" onclick="saveEe(${id}).then(()=>document.getElementById('entry-popup-overlay').remove())">حفظ التعديل</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+};
+
+window.openEntryEdit = function(id){
+  const el=document.getElementById('entry-edit-inline');
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+};
+
+// Override the eye button in table rows
+window.toggleEntryView = window.showEntryPopup;
+
+// ── 2. ADD PAYMENT POPUP ──────────────────────────────────
+window.addPayTo = async function(id){
+  const b = bookings.find(x=>x.id===id);
+  if(!b) return;
+
+  document.getElementById('pay-popup-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id='pay-popup-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)';
+  overlay.onclick=ev=>{if(ev.target===overlay)overlay.remove();};
+
+  const today=new Date().toISOString().split('T')[0];
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3);direction:rtl;font-family:Cairo,Arial,sans-serif">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#117a65,#1abc9c);color:#fff;padding:16px 20px">
+        <div style="font-size:12px;opacity:.8;margin-bottom:3px">إضافة دفعة جديدة</div>
+        <div style="font-size:17px;font-weight:800">${b.name}</div>
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <div style="background:rgba(255,255,255,.2);border-radius:8px;padding:5px 12px;font-size:12px">
+            <span style="opacity:.8">الإجمالي</span><br><b>${b.total.toLocaleString()} ج</b>
+          </div>
+          <div style="background:rgba(255,255,255,.2);border-radius:8px;padding:5px 12px;font-size:12px">
+            <span style="opacity:.8">المدفوع</span><br><b style="color:#2ecc71">${b.paid.toLocaleString()} ج</b>
+          </div>
+          <div style="background:rgba(192,57,43,.4);border-radius:8px;padding:5px 12px;font-size:12px">
+            <span style="opacity:.8">المتبقي</span><br><b style="color:#ff8a80">${b.remaining.toLocaleString()} ج</b>
+          </div>
+        </div>
+      </div>
+      <!-- Form -->
+      <div style="padding:20px">
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;font-weight:700;color:#4a6278;display:block;margin-bottom:5px">المبلغ (ج) <span style="color:#c0392b">*</span></label>
+          <input type="number" id="pay-popup-amt" value="${b.remaining>0?b.remaining:''}" placeholder="0"
+            style="width:100%;font-size:20px;font-weight:700;padding:10px 14px;border:2px solid #d6eaf8;border-radius:10px;color:#1a5276;outline:none;font-family:Cairo,Arial"
+            oninput="document.getElementById('pay-popup-remaining').textContent=((${b.remaining})-(parseFloat(this.value)||0)).toLocaleString()+' ج'">
+          <div style="margin-top:6px;font-size:12px;color:#888">المتبقي بعد الدفع: <b id="pay-popup-remaining" style="color:#c0392b">${b.remaining.toLocaleString()} ج</b></div>
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;font-weight:700;color:#4a6278;display:block;margin-bottom:5px">طريقة الدفع</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px" id="pay-method-btns">
+            ${PM_TYPES.map((p,i)=>`<button onclick="selectPayMethod(this,'${p}')"
+              style="padding:6px 12px;border:1.5px solid ${i===0?'#1a5276':'#d6eaf8'};border-radius:20px;background:${i===0?'#1a5276':'#fff'};color:${i===0?'#fff':'#4a6278'};cursor:pointer;font-size:12px;font-weight:700;font-family:Cairo,Arial"
+              data-method="${p}">${p}</button>`).join('')}
+          </div>
+          <input type="hidden" id="pay-popup-method" value="${PM_TYPES[0]||'خزينة (كاش)'}">
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;font-weight:700;color:#4a6278;display:block;margin-bottom:5px">التاريخ</label>
+          <input type="date" id="pay-popup-date" value="${today}"
+            style="width:100%;font-size:14px;padding:9px 12px;border:2px solid #d6eaf8;border-radius:10px;outline:none;font-family:Cairo,Arial">
+        </div>
+        <div style="margin-bottom:6px">
+          <label style="font-size:12px;font-weight:700;color:#4a6278;display:block;margin-bottom:5px">ملاحظة (اختياري)</label>
+          <input type="text" id="pay-popup-note" placeholder="مثلاً: دفعة أولى..."
+            style="width:100%;font-size:13px;padding:9px 12px;border:2px solid #d6eaf8;border-radius:10px;outline:none;font-family:Cairo,Arial">
+        </div>
+      </div>
+      <!-- Actions -->
+      <div style="padding:14px 20px;display:flex;gap:8px;background:#f8fafc;border-top:1px solid #eee">
+        <button onclick="doAddPay(${id})" style="flex:1;background:linear-gradient(135deg,#117a65,#1abc9c);color:#fff;border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Cairo,Arial">✓ تأكيد الدفعة</button>
+        <button onclick="document.getElementById('pay-popup-overlay').remove()" style="padding:12px 18px;border:1.5px solid #ddd;border-radius:10px;background:#fff;cursor:pointer;font-size:13px;font-family:Cairo,Arial">إلغاء</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById('pay-popup-amt')?.focus(),100);
+};
+
+window.selectPayMethod = function(btn, method){
+  document.querySelectorAll('#pay-method-btns button').forEach(b=>{
+    b.style.background='#fff';b.style.color='#4a6278';b.style.borderColor='#d6eaf8';
+  });
+  btn.style.background='#1a5276';btn.style.color='#fff';btn.style.borderColor='#1a5276';
+  document.getElementById('pay-popup-method').value=method;
+};
+
+window.doAddPay = async function(id){
+  const amt=parseFloat(document.getElementById('pay-popup-amt')?.value);
+  if(!amt||isNaN(amt)||amt<=0){alert('أدخل مبلغاً صحيحاً');return;}
+  const pm=document.getElementById('pay-popup-method')?.value||PM_TYPES[0];
+  const dt=document.getElementById('pay-popup-date')?.value||new Date().toISOString().split('T')[0];
+  const note=document.getElementById('pay-popup-note')?.value||'';
+  const b=bookings.find(x=>x.id===id);if(!b)return;
+  const np=[...b.payments,{amount:amt,date:dt,payMethod:pm,note}];
+  try{
+    await sbFetch('mtr_bookings','PATCH',{payments:np,paid:b.paid+amt,remaining:b.remaining-amt},`?id=eq.${id}`);
+    b.payments=np;b.paid+=amt;b.remaining-=amt;
+    await addLog(`دفعة: ${b.name} - ${pm} - ${amt.toLocaleString()} ج`,'edit','');
+    document.getElementById('pay-popup-overlay').remove();
+    if(document.getElementById('cl-det').style.display!=='none') viewClient(id);
+    renderDash();
+  }catch(e){alert('فشل: '+e.message);}
+};
+
+// ── 3. EDIT PERMISSION LABELS ────────────────────────────────
+window.editPermLabel = function(key){
+  const cur=ALL_PERMS[key]||key;
+  const newLabel=prompt('اسم الصلاحية الجديد:',cur);
+  if(newLabel&&newLabel.trim()){
+    ALL_PERMS[key]=newLabel.trim();
+    try{
+      const saved=JSON.parse(localStorage.getItem('mtr_perm_labels')||'{}');
+      saved[key]=newLabel.trim();
+      localStorage.setItem('mtr_perm_labels',JSON.stringify(saved));
+    }catch(e){}
+    renderUsers();
+  }
+};
+
+// Load custom perm labels
+(function(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('mtr_perm_labels')||'{}');
+    Object.entries(saved).forEach(([k,v])=>{if(ALL_PERMS[k])ALL_PERMS[k]=v;});
+  }catch(e){}
+})();
+
+// Override renderUsers to add edit icons for perm labels
+const _origRenderUsers=window.renderUsers;
+window.renderUsers=function(){
+  if(_origRenderUsers)_origRenderUsers();
+  // Add edit icons to perm labels
+  document.querySelectorAll('[data-perm-key]').forEach(el=>{
+    if(!el.querySelector('.perm-edit-btn')){
+      const btn=document.createElement('button');
+      btn.className='perm-edit-btn';
+      btn.textContent='✎';
+      btn.title='تعديل اسم الصلاحية';
+      btn.style.cssText='background:none;border:none;cursor:pointer;font-size:11px;color:var(--pr);margin-right:3px;padding:0';
+      btn.onclick=e=>{e.stopPropagation();editPermLabel(el.dataset.permKey);};
+      el.insertBefore(btn,el.firstChild);
+    }
+  });
+};
+
+// Add data-perm-key to perm labels in renderUsers
+const _origRenderUsers2=window.renderUsers;
+window.renderUsers=function(){
+  // Rebuild with edit icons directly in permsHtml
+  const el=document.getElementById('users-list');
+  if(!el) return;
+  el.innerHTML=users.map(u=>{
+    const perms=u.custom_perms||ROLE_DEFAULTS[u.role]||[];
+    const isAdmin=u.role==='admin';
+    const permsHtml=Object.entries(ALL_PERMS).map(([k,lbl])=>`
+      <label style="display:inline-flex;align-items:center;gap:3px;font-size:11px;margin:2px 4px;cursor:pointer">
+        <input type="checkbox" ${perms.includes(k)||isAdmin?'checked':''} ${isAdmin?'disabled':''} onchange="togglePerm(${u.id},'${k}',this.checked)" style="width:13px;height:13px">
+        ${lbl}
+        <button onclick="event.preventDefault();editPermLabel('${k}')" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--tx3);padding:0 2px" title="تعديل الاسم">✎</button>
+      </label>`).join('');
+    return `<div class="user-card">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:.5rem">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--pr);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff">${u.name.charAt(0)}</div>
+        <div style="flex:1">
+          <div style="font-weight:700">${u.name}</div>
+          <div style="font-size:11px;color:var(--tx2)">${u.username} · ${u.role}</div>
+          <div style="display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--tx3)">كلمة المرور:</span>
+            <span id="pw-${u.id}" style="font-size:12px;font-family:monospace">••••••</span>
+            <button class="btn btn-sm" onclick="togglePw(${u.id},'${u.password}')" style="padding:2px 6px;font-size:10px">عرض</button>
+            <button class="btn btn-sm" onclick="changePw(${u.id})" style="padding:2px 6px;font-size:10px">تغيير</button>
+          </div>
+        </div>
+        ${u.username!=='admin'?`<button class="btn btn-d btn-sm" onclick="removeUser(${u.id})">حذف</button>`:'<span class="badge b-pu">محمي</span>'}
+      </div>
+      <div style="background:var(--sf2);border-radius:var(--r);padding:.65rem"><div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:4px">الصلاحيات:</div><div style="line-height:2.2">${permsHtml}</div></div>
+    </div>`;
+  }).join('');
+};
+
+// ── 4. MAKE ENTRY ROWS CLICKABLE ─────────────────────────────
+// Override renderAccDetail to make rows clickable
+const _origRenderAccDetail = window.renderAccDetail;
+window.renderAccDetail = function(key){
+  if(_origRenderAccDetail) _origRenderAccDetail(key);
+  // Make 👁 buttons use the popup
+  setTimeout(()=>{
+    document.querySelectorAll('[onclick*="toggleEntryView"]').forEach(btn=>{
+      const match=btn.getAttribute('onclick').match(/\d+/);
+      if(match){
+        btn.setAttribute('onclick',`showEntryPopup(${match[0]})`);
+      }
+    });
+  },100);
+};
 </script>
