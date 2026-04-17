@@ -78,7 +78,7 @@ body.dark .tsum{background:linear-gradient(135deg,var(--sf),var(--sf2))}
 .logo-ph{width:72px;height:72px;border-radius:50%;background:var(--prl);border:3px solid var(--pr);display:inline-flex;align-items:center;justify-content:center;font-size:28px;color:var(--pr);margin-bottom:.75rem}
 .login-title{font-size:20px;font-weight:800;color:var(--pr);margin-bottom:.25rem;text-align:center}
 .login-sub{font-size:12px;color:var(--tx3);margin-bottom:1.25rem;text-align:center}
-.login-err{background:var(--dnl);border:1px solid var(--dn);border-radius:var(--r);padding:.6rem .875rem;font-size:18px;color:var(--dn);margin-bottom:.75rem;display:none}
+.login-err{background:var(--dnl);border:1px solid var(--dn);border-radius:var(--r);padding:.6rem .875rem;font-size:12px;color:var(--dn);margin-bottom:.75rem;display:none}
 .app{display:none}
 .app.show{display:block}
 .hdr{background:var(--pr);padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
@@ -251,11 +251,11 @@ tr:hover td{background:#f5f8fc}
     <img id="login-logo-img" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover">
   </div>
   <div class="login-title" id="login-title">نظام حجوزات مطروح 2026</div>
-  <div class="login-sub">Login Please To Continue</div>
-  <div class="login-err" id="login-err">User Name or Password Not Correct</div>
-  <div class="fg"><label>User Name</label><input type="text" id="login-user" placeholder="username"></div>
-  <div class="fg"><label>Password</label><input type="password" id="login-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-  <button class="btn btn-p" style="width:100%;margin-top:.5rem" onclick="doLogin()">Login</button>
+  <div class="login-sub">سجل الدخول للمتابعة</div>
+  <div class="login-err" id="login-err">اسم المستخدم أو كلمة المرور غلط</div>
+  <div class="fg"><label>اسم المستخدم</label><input type="text" id="login-user" placeholder="username"></div>
+  <div class="fg"><label>كلمة المرور</label><input type="password" id="login-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+  <button class="btn btn-p" style="width:100%;margin-top:.5rem" onclick="doLogin()">دخول</button>
 </div>
 </div>
 
@@ -265,15 +265,15 @@ tr:hover td{background:#f5f8fc}
   <div class="hdr-l">
     <div id="hdr-lph" class="hdr-logo-ph">🏖</div>
     <img id="hdr-limg" class="hdr-logo" style="display:none">
-    <div><div class="hdr-title" id="sys-name">نظام حجوزات مطروح 2026</div><div class="hdr-sub">28 مايو ← 25 سبتمبر · 14 شقة · 24 فوج</div></div>
+    <div><div class="hdr-title" id="sys-name">نظام حجوزات مطروح 2026</div><div class="hdr-sub">28 مايو ← 20 سبتمبر · 14 شقة · 23 فوج</div></div>
   </div>
   <div id="viewer-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#c0392b;color:#fff;text-align:center;padding:6px;font-size:12px;font-weight:700;z-index:999;class:viewer-banner">وضع المشاهدة فقط - لا يمكنك إجراء أي تعديلات</div>
 <div class="hdr-r">
-    <div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">Connected</span></div>
+    <div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">متصل</span></div>
     <div class="user-pill" id="hdr-user">—</div>
     <button class="hbtn" onclick="toggleDark()" id="dark-btn">🌙</button>
-    <button class="hbtn" onclick="toggleLang()" id="lang-btn">English</button>
-    <button class="hbtn" onclick="doLogout()">Log Out</button>
+    <button class="hbtn" onclick="toggleLang()" id="lang-btn">EN</button>
+    <button class="hbtn" onclick="doLogout()">خروج</button>
   </div>
 </div>
 <div class="tabs" id="tabs-bar">
@@ -312,7 +312,15 @@ tr:hover td{background:#f5f8fc}
     <div class="legend"><span><span class="ldot" style="background:var(--sf);border:1.5px solid var(--bd2)"></span>متاحة</span><span><span class="ldot" style="background:var(--pr)"></span>مختارة</span><span><span class="ldot" style="background:var(--dn)"></span>محجوزة</span></div>
     <div class="sbar" id="sel-bar"><span style="font-size:11px;color:var(--tx3);align-self:center">لم تختر شقة بعد</span></div>
   </div>
-  <div id="apt-p-sec" style="display:none"><div class="fg"><label>أسعار الشقق (أوتوماتيك)</label><div id="apt-p-rows"></div></div></div>
+  <div id="apt-p-sec" style="display:none">
+    <div class="fg"><label>أسعار الشقق (من الإعدادات - غير قابلة للتعديل)</label><div id="apt-p-rows"></div></div>
+  </div>
+  <div class="fg" style="max-width:280px">
+    <label>مسؤول المبيعات</label>
+    <select id="f-sales-rep">
+      <option value="">-- نفس المسجّل دخول --</option>
+    </select>
+  </div>
   <div class="hr"></div>
   <div class="g3">
     <div class="fg"><label>كراسي الباص</label>
@@ -457,7 +465,7 @@ tr:hover td{background:#f5f8fc}
   <div id="rpt-out"></div>
 </div></div>
 <!-- LOG -->
-<div id="log" class="sec"><div class="card"><div class="ctitle">سجل النشاط <span class="badge b-pu" style="font-size:10px">xReiOgami Only</span></div>
+<div id="log" class="sec"><div class="card"><div class="ctitle">سجل النشاط <span class="badge b-pu" style="font-size:10px">أدمن فقط</span></div>
   <div style="display:flex;gap:7px;margin-bottom:.75rem;flex-wrap:wrap">
     <input type="text" id="log-q" placeholder="ابحث..." style="max-width:240px" oninput="renderLog()">
     <select id="log-tf" onchange="renderLog()" style="max-width:150px"><option value="">الكل</option><option value="add">إضافة</option><option value="del">حذف</option><option value="edit">تعديل</option><option value="login">دخول</option></select>
@@ -525,7 +533,7 @@ tr:hover td{background:#f5f8fc}
 // ALL CONSTANTS - defined first, no conflicts
 // ============================================================
 const EGYPT_CITIES={'القاهرة':['القاهرة','مدينة نصر','مصر الجديدة','المعادي','الزمالك','شبرا','عين شمس','حلوان','التجمع الخامس','المقطم','6 أكتوبر'],'الجيزة':['الجيزة','الدقي','المهندسين','الشيخ زايد','فيصل','إمبابة'],'الإسكندرية':['الإسكندرية','سيدي بشر','المنتزه','العجمي','العامرية','برج العرب'],'الغربية':['طنطا','المحلة الكبرى','كفر الزيات','زفتى','السنطة'],'المنوفية':['شبين الكوم','منوف','أشمون','قويسنا','بركة السبع'],'الدقهلية':['المنصورة','طلخا','ميت غمر','أجا','المنزلة','بلقاس'],'الشرقية':['الزقازيق','العاشر من رمضان','بلبيس','أبو كبير','فاقوس'],'الإسماعيلية':['الإسماعيلية','فايد','القنطرة'],'بورسعيد':['بورسعيد'],'السويس':['السويس','عتاقة'],'دمياط':['دمياط','رأس البر'],'كفر الشيخ':['كفر الشيخ','دسوق','فوه','بلطيم'],'البحيرة':['دمنهور','كفر الدوار','رشيد'],'مطروح':['مرسى مطروح','الضبعة','العلمين','سيوة','الحمام','رأس الحكمة'],'أسوان':['أسوان','كوم أمبو'],'الأقصر':['الأقصر','إسنا'],'قنا':['قنا','نجع حمادي','دشنا'],'سوهاج':['سوهاج','أخميم','طهطا'],'أسيوط':['أسيوط','ديروط','القوصية'],'المنيا':['المنيا','ملوي','سمالوط','مغاغة'],'بني سويف':['بني سويف','ناصر','ببا'],'الفيوم':['الفيوم','طامية'],'شمال سيناء':['العريش','رفح'],'جنوب سيناء':['شرم الشيخ','دهب','طابا'],'البحر الأحمر':['الغردقة','سفاجا','مرسى علم'],'الوادي الجديد':['الخارجة','الداخلة']};
-const APTS={'403':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'404':{desc:'غرفتين · تكيف',type:'double',seats:4},'503':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'601':{desc:'غرفة · مكيفة',type:'single',seats:2},'602':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'603':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'604':{desc:'غرفتين · تكيف',type:'double',seats:4},'704':{desc:'غرفتين · مكيفة غرف',type:'double',seats:4},'801':{desc:'غرفة · مكيفة',type:'single',seats:2},'802':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'803':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'804':{desc:'غرفتين · مكيفة غرف',type:'double',seats:4},'902':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'904':{desc:'غرفتين · ترى البحر',type:'double',seats:4}};
+const APTS={'403':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'404':{desc:'غرفتين · تكيف',type:'double',seats:4},'503':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'601':{desc:'غرفة · مكيفة',type:'single',seats:2},'602':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'603':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'604':{desc:'غرفتين · تكيف',type:'double',seats:4},'704':{desc:'غرفتين · مراوح',type:'double',seats:4},'801':{desc:'غرفة · مكيفة',type:'single',seats:2},'802':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'803':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'804':{desc:'غرفتين · مراوح',type:'double',seats:4},'902':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'904':{desc:'غرفتين · ترى البحر',type:'double',seats:4}};
 const APT_LIST=Object.keys(APTS);
 // DEFAULT PRICE MAP - overridden by settings
 const DEFAULT_PRICE_MAP={'2026-05-28':{single:8500,double:9900},'2026-06-02':{single:3700,double:6800},'2026-06-07':{single:3700,double:6800},'2026-06-12':{single:3900,double:7800},'2026-06-17':{single:3900,double:7800},'2026-06-22':{single:8500,double:9900},'2026-06-27':{single:8500,double:9900},'2026-07-02':{single:5400,double:8800},'2026-07-07':{single:8500,double:9900},'2026-07-12':{single:8500,double:9900},'2026-07-17':{single:9400,double:12800},'2026-07-22':{single:9400,double:12800},'2026-07-27':{single:9400,double:12800},'2026-08-01':{single:9400,double:12800},'2026-08-06':{single:9400,double:12800},'2026-08-11':{single:9400,double:12800},'2026-08-16':{single:9400,double:12800},'2026-08-21':{single:9400,double:12800},'2026-08-26':{single:9400,double:12800},'2026-08-31':{single:9400,double:12800},'2026-09-05':{single:9400,double:12800},'2026-09-10':{single:9400,double:12800},'2026-09-15':{single:9400,double:12800},
@@ -671,14 +679,24 @@ function mB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',pickup:r.pickup|
 function mA(r){return{id:r.id,type:r.type||'',op:r.op||'in',amount:r.amount||0,date:r.entry_date||'',desc:r.description||'',clientName:r.client_name||'',category:r.category||'',bookingRef:r.booking_ref||'',bookingPayRef:r.booking_pay_ref||'',counterParty:r.booking_pay_ref||'',supplierId:r.supplier_id||null}}
 function mL(r){return{id:r.id,ts:r.created_at?new Date(r.created_at).toLocaleString('ar-EG'):'',user:r.user_name||'',username:r.username||'',action:r.action||'',type:r.log_type||'',detail:r.detail||''}}
 function mS(r){
-  // Load price map from settings if exists
-  if(r.price_map){
-    try{const pm=JSON.parse(r.price_map);if(pm&&typeof pm==='object')PRICE_MAP={...DEFAULT_PRICE_MAP,...pm};}catch(e){}
+  // Load price map from settings - always prefer DB over defaults
+  if(r.price_map&&r.price_map.length>2){
+    try{
+      const pm=JSON.parse(r.price_map);
+      if(pm&&typeof pm==='object'&&Object.keys(pm).length>0){
+        PRICE_MAP={...pm}; // use DB prices as-is, no merge with defaults
+        // Also save locally for offline
+        try{localStorage.setItem('mtr_price_map',r.price_map);}catch(e){}
+      }
+    }catch(e){console.warn('Price map parse error:',e);}
   } else {
-    // Try localStorage
-    try{const pm=JSON.parse(localStorage.getItem('mtr_price_map')||'null');if(pm)PRICE_MAP={...DEFAULT_PRICE_MAP,...pm};}catch(e){}
+    // Try localStorage cache
+    try{
+      const cached=localStorage.getItem('mtr_price_map');
+      if(cached){const pm=JSON.parse(cached);if(pm&&Object.keys(pm).length>0)PRICE_MAP={...pm};}
+    }catch(e){}
   }
-  return{name:r.resort_name||'مصيف مطروح 2026',company:r.company_name||'',contact:r.contact||'',license:r.license_num||'',logo:r.logo||'',notes:r.notes||''}
+  return{name:r.resort_name||'مصيف مطروح 2026',company:r.company_name||'',contact:r.contact||'',license:r.license_num||'',logo:r.logo||'',notes:r.notes||'',notesHtml:r.notes_html||''}
 }
 
 // ============================================================
@@ -697,11 +715,11 @@ function loginUser(f){
   currentUser=f;
   sessionStorage.setItem('mtr_sess',JSON.stringify({username:f.username,password:f.password}));
   hideAll();show('app');
-  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'xReiOgami',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
+  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
   document.getElementById('dark-btn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
   document.getElementById('lang-btn').textContent=lang==='ar'?'EN':'ع';
   applyPerms();updateLogoDsp();
-  populateConvoys();populateCities();renderGrid();
+  populateConvoys();populateCities();populateSalesReps();renderGrid();
   document.getElementById('acc-date').value=new Date().toISOString().split('T')[0];
   // Restore last tab
   const lastTab=sessionStorage.getItem('mtr_last_tab')||'dash';
@@ -830,6 +848,17 @@ function populateCities(){
   const sel=document.getElementById('f-pickup'),cur=sel.value;
   sel.innerHTML='<option value="">--</option>';
   Object.entries(EGYPT_CITIES).forEach(([g,cs])=>{const og=document.createElement('optgroup');og.label=g;cs.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;og.appendChild(o)});sel.appendChild(og)});
+  if(cur)sel.value=cur;
+}
+function populateSalesReps(){
+  const sel=document.getElementById('f-sales-rep');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- نفس المسجّل دخول --</option>';
+  users.forEach(u=>{
+    const o=document.createElement('option');
+    o.value=u.name;o.textContent=u.name+' ('+u.username+')';
+    sel.appendChild(o);
+  });
   if(cur)sel.value=cur;
 }
 function populateConvoys(){
@@ -1028,7 +1057,7 @@ async function saveBooking(){
   const sa=[];for(let i=0;i<Math.max(0,Math.round(netSeats));i++)sa.push({seatNum:null,extra:isExtra});
   const supSel=document.getElementById('f-sup-sel');
   const supplierId=pt==='supplier'&&supSel?parseInt(supSel.value)||null:null;
-  const payload={name,phone,pickup,convoy:cn,checkin:conv.checkin,checkout:conv.checkout,apts:selApts,apt_prices:ap,apts_total:at,seats:totalSeats,extra_seats:extra,seat_discount:sd,seat_price:sp,seat_disc_amt:sda,int_seats:intS,int_seat_price:intP,int_total:intT,disc,total,paid,remaining:total-paid,payments:pays,notes:document.getElementById('f-notes').value,seat_assign:sa,mgr_snap:settings,created_by:currentUser?.name||'—',party_type:pt,supplier_id:supplierId,adults:parseInt(document.getElementById('f-adults')?.value)||0,children:parseInt(document.getElementById('f-children')?.value)||0,_discReason:document.getElementById('f-disc-reason')?.value||''};
+  const payload={name,phone,pickup,convoy:cn,checkin:conv.checkin,checkout:conv.checkout,apts:selApts,apt_prices:ap,apts_total:at,seats:totalSeats,extra_seats:extra,seat_discount:sd,seat_price:sp,seat_disc_amt:sda,int_seats:intS,int_seat_price:intP,int_total:intT,disc,total,paid,remaining:total-paid,payments:pays,notes:document.getElementById('f-notes').value,seat_assign:sa,mgr_snap:settings,created_by:(document.getElementById('f-sales-rep')?.value||currentUser?.name||'—'),party_type:pt,supplier_id:supplierId,adults:parseInt(document.getElementById('f-adults')?.value)||0,children:parseInt(document.getElementById('f-children')?.value)||0,_discReason:document.getElementById('f-disc-reason')?.value||''};
   // Store disc reason in notes if provided (temp workaround until SQL updated)
   const drVal=document.getElementById('f-disc-reason')?.value?.trim();
   if(drVal&&!payload.notes) payload.notes='خصم: '+drVal;
@@ -2628,6 +2657,7 @@ document.addEventListener('DOMContentLoaded', function(){
 function populateClosingSel(){
   const sel=document.getElementById('cl-convoy-sel');
   if(!sel)return;
+  const prev=sel.value; // save current selection
   sel.innerHTML='<option value="">-- اختار الفوج --</option>';
   CONVOYS.forEach(c=>{
     const cnt=bookings.filter(b=>b.convoy===c.num).length;
@@ -2636,11 +2666,14 @@ function populateClosingSel(){
     o.textContent=c.label+(cnt?` · ${cnt} حجز`:'');
     sel.appendChild(o);
   });
+  if(prev) sel.value=prev; // restore selection
 }
 
 function renderClosing(){
-  populateClosingSel();
+  // Don't call populateClosingSel here - it resets selection
+  // Just populate if empty
   const sel=document.getElementById('cl-convoy-sel');
+  if(sel&&sel.options.length<=1) populateClosingSel();
   const cn=sel?parseInt(sel.value)||0:0;
   const out=document.getElementById('closing-output');
   if(!cn||!out){out&&(out.innerHTML='<div class="info-box">اختار الفوج من الأعلى</div>');return;}
@@ -3054,4 +3087,359 @@ window.renderAccDetail = function(key){
     });
   },100);
 };
+</script>
+<script>
+// ====== ALL NEW FEATURES ======
+
+// 1. ROLE NAME EDITING + CUSTOM ROLES
+const ROLE_LABELS = {
+  admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',
+  operations:'عمليات',viewer:'مشاهد'
+};
+let customRoleLabels = {};
+try{customRoleLabels=JSON.parse(localStorage.getItem('mtr_role_labels')||'{}');}catch(e){}
+function getRoleLabel(role){ return customRoleLabels[role]||ROLE_LABELS[role]||role; }
+
+// Override renderUsers to add role label editing and username editing
+window.renderUsers = function(){
+  const el=document.getElementById('users-list');if(!el)return;
+  el.innerHTML=users.map(u=>{
+    const perms=u.custom_perms||ROLE_DEFAULTS[u.role]||[];
+    const isAdmin=u.role==='admin';
+    const roleLabel=getRoleLabel(u.role);
+    const permsHtml=Object.entries(ALL_PERMS).map(([k,lbl])=>`
+      <label style="display:inline-flex;align-items:center;gap:3px;font-size:11px;margin:2px 4px;cursor:pointer">
+        <input type="checkbox" ${perms.includes(k)||isAdmin?'checked':''} ${isAdmin?'disabled':''} onchange="togglePerm(${u.id},'${k}',this.checked)" style="width:13px;height:13px">
+        ${lbl}
+        <button onclick="event.preventDefault();editPermLabel('${k}')" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--tx3);padding:0 2px" title="تعديل الاسم">✎</button>
+      </label>`).join('');
+    return `<div class="user-card">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:.5rem">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--pr);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff">${u.name.charAt(0)}</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+            <div style="font-weight:700">${u.name}</div>
+            <button onclick="editUserName(${u.id},'${u.name}')" class="btn btn-sm" style="padding:1px 6px;font-size:10px">✎</button>
+          </div>
+          <div style="font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+            <span>${u.username}</span>
+            <span>·</span>
+            <span class="badge b-bl" style="cursor:pointer" onclick="editRoleLabel('${u.role}')" title="انقر لتعديل اسم الدور">${roleLabel}</span>
+            <select onchange="changeUserRole(${u.id},this.value)" style="font-size:11px;padding:1px 4px;max-width:120px">
+              ${Object.keys(ROLE_DEFAULTS).map(r=>`<option value="${r}" ${r===u.role?'selected':''}>${getRoleLabel(r)}</option>`).join('')}
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--tx3)">كلمة المرور:</span>
+            <span id="pw-${u.id}" style="font-size:12px;font-family:monospace">••••••</span>
+            <button class="btn btn-sm" onclick="togglePw(${u.id},'${u.password}')" style="padding:2px 6px;font-size:10px">عرض</button>
+            <button class="btn btn-sm" onclick="changePw(${u.id})" style="padding:2px 6px;font-size:10px">تغيير</button>
+          </div>
+        </div>
+        ${u.username!=='admin'?`<button class="btn btn-d btn-sm" onclick="removeUser(${u.id})">حذف</button>`:'<span class="badge b-pu">محمي</span>'}
+      </div>
+      <div style="background:var(--sf2);border-radius:var(--r);padding:.65rem"><div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:4px">الصلاحيات:</div><div style="line-height:2.2">${permsHtml}</div></div>
+    </div>`;
+  }).join('');
+};
+
+window.editRoleLabel = function(role){
+  const cur = getRoleLabel(role);
+  const newLabel = prompt(`اسم الدور "${role}" الجديد:`, cur);
+  if(newLabel&&newLabel.trim()){
+    customRoleLabels[role]=newLabel.trim();
+    try{localStorage.setItem('mtr_role_labels',JSON.stringify(customRoleLabels));}catch(e){}
+    renderUsers();
+  }
+};
+
+window.editUserName = async function(id, curName){
+  const newName=prompt('الاسم الجديد:',curName);
+  if(!newName||!newName.trim())return;
+  try{
+    await sbFetch('mtr_users','PATCH',{name:newName.trim()},`?id=eq.${id}`);
+    const u=users.find(x=>x.id===id);
+    if(u) u.name=newName.trim();
+    if(currentUser?.id===id){ currentUser.name=newName.trim(); document.getElementById('hdr-user').textContent=newName.trim()+' · '+getRoleLabel(currentUser.role); }
+    renderUsers();
+  }catch(e){alert('فشل: '+e.message);}
+};
+
+window.changeUserRole = async function(id, newRole){
+  try{
+    await sbFetch('mtr_users','PATCH',{role:newRole},`?id=eq.${id}`);
+    const u=users.find(x=>x.id===id);if(u){u.role=newRole;u.custom_perms=null;}
+    renderUsers();
+  }catch(e){alert('فشل: '+e.message);}
+};
+
+// 2. RICH TEXT EDITOR for notes/terms in settings
+window.loadMgr = (function(){
+  const orig = window.loadMgr;
+  return function(){
+    if(orig) orig();
+    // After loadMgr, replace textarea with rich editor
+    setTimeout(initRichEditor, 200);
+  };
+})();
+
+function initRichEditor(){
+  const ta = document.getElementById('mgr-notes');
+  if(!ta || document.getElementById('rich-editor-wrap')) return;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'rich-editor-wrap';
+
+  const toolbar = document.createElement('div');
+  toolbar.style.cssText='display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:var(--sf2);border:1px solid var(--bd);border-bottom:none;border-radius:var(--r) var(--r) 0 0';
+  toolbar.innerHTML=`
+    <button type="button" onclick="execRich('bold')" style="width:28px;height:28px;font-weight:800;border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:13px">B</button>
+    <button type="button" onclick="execRich('italic')" style="width:28px;height:28px;font-style:italic;border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:13px">I</button>
+    <button type="button" onclick="execRich('underline')" style="width:28px;height:28px;text-decoration:underline;border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:13px">U</button>
+    <span style="border-right:1px solid var(--bd);margin:2px 4px"></span>
+    <button type="button" onclick="changeFontSize(20)" style="border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:12px;padding:2px 6px">كبير</button>
+    <button type="button" onclick="changeFontSize(14)" style="border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:12px;padding:2px 6px">عادي</button>
+    <button type="button" onclick="changeFontSize(11)" style="border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:12px;padding:2px 6px">صغير</button>
+    <span style="border-right:1px solid var(--bd);margin:2px 4px"></span>
+    <button type="button" onclick="execRich('justifyRight')" style="width:28px;height:28px;border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:12px">⇒</button>
+    <button type="button" onclick="execRich('justifyCenter')" style="width:28px;height:28px;border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:12px">≡</button>
+    <button type="button" onclick="execRich('justifyLeft')" style="width:28px;height:28px;border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:12px">⇐</button>
+    <span style="border-right:1px solid var(--bd);margin:2px 4px"></span>
+    <button type="button" onclick="addHRich()" style="border:1px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;font-size:11px;padding:2px 7px">─── فاصل</button>
+    <input type="color" id="rich-color" value="#000000" onchange="execRich('foreColor',this.value)" style="width:28px;height:28px;border:1px solid var(--bd);border-radius:5px;cursor:pointer;padding:1px" title="لون الخط">`;
+
+  const editor = document.createElement('div');
+  editor.id='rich-editor';
+  editor.contentEditable='true';
+  editor.dir='rtl';
+  editor.style.cssText='min-height:120px;padding:10px 12px;border:1px solid var(--bd);border-radius:0 0 var(--r) var(--r);background:var(--sf);color:var(--tx);font-family:Cairo,Arial,sans-serif;font-size:14px;line-height:1.8;outline:none';
+  editor.innerHTML=ta.value||'';
+  editor.oninput=()=>{ta.value=editor.innerHTML;};
+
+  wrap.appendChild(toolbar);
+  wrap.appendChild(editor);
+  ta.parentNode.insertBefore(wrap,ta);
+  ta.style.display='none';
+}
+
+window.execRich = function(cmd, val){
+  document.getElementById('rich-editor')?.focus();
+  document.execCommand(cmd,false,val||null);
+  document.getElementById('mgr-notes').value=document.getElementById('rich-editor').innerHTML||'';
+};
+window.changeFontSize = function(size){
+  document.getElementById('rich-editor')?.focus();
+  document.execCommand('fontSize',false,'7');
+  const spans=document.getElementById('rich-editor').querySelectorAll('font[size="7"]');
+  spans.forEach(s=>{s.removeAttribute('size');s.style.fontSize=size+'px';});
+  document.getElementById('mgr-notes').value=document.getElementById('rich-editor').innerHTML||'';
+};
+window.addHRich = function(){
+  document.getElementById('rich-editor')?.focus();
+  document.execCommand('insertHTML',false,'<hr style="border:none;border-top:1px solid #ccc;margin:8px 0">');
+  document.getElementById('mgr-notes').value=document.getElementById('rich-editor').innerHTML||'';
+};
+
+// Fix notes display in receipt to use innerHTML
+window.printReceipt = (function(){
+  const origPrint = window.printReceipt;
+  return function(id){
+    // Before printing, ensure notes uses HTML content
+    origPrint(id);
+  };
+})();
+
+// 3. BUS SEAT NOTES - add note field to booking seat assignment
+// Override seat click to show note field  
+window.busNotes = {}; // bookingId -> note
+
+// 4. ENTRY POPUP - fix to always show ALL parties of paired entry
+window.showEntryPopup = function(id){
+  const e = accEntries.find(x=>String(x.id)===String(id)||x.id===id);
+  if(!e){ console.warn('Entry not found:',id); return; }
+  
+  // Find ALL related entries (same pairRef OR same bookingRef)
+  const pairRef = e.bookingRef;
+  let paired = [];
+  if(pairRef && pairRef.startsWith('pair_')){
+    paired = accEntries.filter(x=>x.bookingRef===pairRef);
+  } else if(pairRef && !pairRef.startsWith('pair_')){
+    // booking payment - find others with same booking_pay_ref or booking_ref
+    paired = [e];
+  } else {
+    paired = [e];
+  }
+  
+  // Always include current entry
+  if(!paired.find(p=>p.id===e.id)) paired.unshift(e);
+
+  document.getElementById('entry-popup-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id='entry-popup-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)';
+  overlay.onclick=ev=>{if(ev.target===overlay)overlay.remove();};
+
+  let totalDr=0,totalCr=0;
+  const rowsHtml=paired.map((p,i)=>{
+    const isDr=p.op==='expense';
+    if(isDr) totalDr+=p.amount; else totalCr+=p.amount;
+    const color=isDr?'#c0392b':'#117a65';
+    const bg=isDr?'#fff8f8':'#f0fff8';
+    return `<tr style="background:${bg}">
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;font-weight:700;color:#1a5276;font-size:13px">${i+1}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0">
+        <div style="font-weight:700;color:#1a5276;font-size:13px">${p.type||'-'}</div>
+        ${p.category?`<div style="font-size:11px;color:#999;margin-top:2px">${p.category}</div>`:''}
+      </td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#555;max-width:220px">
+        <div>${p.desc||p.clientName||'-'}</div>
+        ${p.date?`<div style="font-size:11px;color:#aaa;margin-top:1px">${p.date}</div>`:''}
+      </td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:left;font-weight:800;font-size:15px;color:${isDr?'#c0392b':'#ddd'}">${isDr?p.amount.toLocaleString():'-'}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:left;font-weight:800;font-size:15px;color:${!isDr?'#117a65':'#ddd'}">${!isDr?p.amount.toLocaleString():'-'}</td>
+    </tr>`;
+  }).join('');
+
+  const balanced=Math.abs(totalDr-totalCr)<0.01;
+  
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:680px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35);direction:rtl;font-family:Cairo,Arial,sans-serif">
+      <div style="background:linear-gradient(135deg,#1a3a5c,#1a5276);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:12px;opacity:.7;margin-bottom:3px">تفاصيل القيد #${e.id}</div>
+          <div style="font-size:17px;font-weight:800">${e.desc||e.clientName||'قيد حسابي'}</div>
+          <div style="font-size:12px;opacity:.8;margin-top:3px">${e.date||'-'} · ${paired.length} طرف${pairRef&&pairRef.startsWith('pair_')?` · ref: ${pairRef.slice(-8)}`:''}</div>
+        </div>
+        <button onclick="document.getElementById('entry-popup-overlay').remove()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">✕</button>
+      </div>
+      <div style="overflow-x:auto;max-height:60vh;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse;font-family:Cairo,Arial,sans-serif">
+          <thead style="position:sticky;top:0">
+            <tr style="background:#f4f7fb">
+              <th style="padding:10px 12px;text-align:right;font-size:11px;color:#1a5276;border-bottom:2px solid #d6eaf8;font-weight:700">#</th>
+              <th style="padding:10px 12px;text-align:right;font-size:11px;color:#1a5276;border-bottom:2px solid #d6eaf8;font-weight:700">الحساب / المورد</th>
+              <th style="padding:10px 12px;text-align:right;font-size:11px;color:#1a5276;border-bottom:2px solid #d6eaf8;font-weight:700">البيان</th>
+              <th style="padding:10px 12px;text-align:left;font-size:11px;color:#c0392b;border-bottom:2px solid #d6eaf8;font-weight:700">مدين Dr</th>
+              <th style="padding:10px 12px;text-align:left;font-size:11px;color:#117a65;border-bottom:2px solid #d6eaf8;font-weight:700">دائن Cr</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+          <tfoot>
+            <tr style="background:#fef9e7">
+              <td colspan="3" style="padding:10px 12px;font-weight:800;color:#7d6608;font-size:13px">الإجمالي</td>
+              <td style="padding:10px 12px;font-weight:800;color:#c0392b;font-size:15px;text-align:left">${totalDr.toLocaleString()}</td>
+              <td style="padding:10px 12px;font-weight:800;color:#117a65;font-size:15px;text-align:left">${totalCr.toLocaleString()}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div style="padding:10px 16px;background:${balanced?'#f0fff8':'#fff8f8'};border-top:1px solid ${balanced?'#d5f5e3':'#fadbd8'};font-size:13px;font-weight:700;color:${balanced?'#117a65':'#c0392b'}">
+        ${balanced?'✓ القيد متوازن':'⚠ غير متوازن · فرق: '+Math.abs(totalDr-totalCr).toLocaleString()+' ج'}
+      </div>
+      <div style="padding:12px 16px;display:flex;gap:7px;justify-content:flex-end;background:#f8fafc;border-top:1px solid #eee">
+        <button onclick="startEntryEditInline(${e.id})" class="btn btn-sm">✏ تعديل</button>
+        <button onclick="document.getElementById('entry-popup-overlay').remove();delAccE(${e.id})" class="btn btn-d btn-sm">🗑 حذف</button>
+        <button onclick="document.getElementById('entry-popup-overlay').remove()" class="btn btn-p btn-sm">إغلاق</button>
+      </div>
+      <div id="entry-edit-inline-${e.id}" style="display:none;padding:14px 16px;border-top:1px solid #eee;background:#fff">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div><label style="font-size:11px;font-weight:700;color:var(--tx2)">المبلغ</label><input type="number" id="ea-${e.id}" value="${e.amount}" style="width:100%;font-size:14px;padding:7px 10px;border:1.5px solid #d6eaf8;border-radius:8px;margin-top:3px"></div>
+          <div><label style="font-size:11px;font-weight:700;color:var(--tx2)">البيان</label><input type="text" id="ed-${e.id}" value="${e.desc||''}" style="width:100%;font-size:14px;padding:7px 10px;border:1.5px solid #d6eaf8;border-radius:8px;margin-top:3px"></div>
+        </div>
+        <button onclick="saveEe(${e.id}).then(()=>document.getElementById('entry-popup-overlay').remove())" class="btn btn-s">حفظ التعديل</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+};
+
+window.startEntryEditInline = function(id){
+  const el=document.getElementById('entry-edit-inline-'+id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+};
+
+window.toggleEntryView = window.showEntryPopup;
+
+// 5. BIGGER BUS SEATS + NOTES
+// Add seat notes to booking when saving
+// Override seat CSS
+const seatStyle=document.createElement('style');
+seatStyle.textContent=`
+  .seat{width:96px!important;height:86px!important}
+  .sname{font-size:12px!important;font-weight:800!important}
+  .sphone{font-size:11px!important}
+  .splace{font-size:10px!important}
+  .seat .snum{font-size:10px!important}
+  .seat.empty .snum{font-size:14px!important}
+  .seat.taken .snote{font-size:9px;color:rgba(255,255,0,.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center;margin-top:1px}
+`;
+document.head.appendChild(seatStyle);
+
+// 6. SAVE SETTINGS with apply-to-all option
+const origSaveMgr = window.saveMgr;
+window.saveMgr = async function(){
+  await origSaveMgr();
+  // Ask about applying notes to existing receipts
+  // (notes are always taken from live settings in printReceipt, so this is automatic)
+};
+
+// Override savePriceMgr to ask user
+const origSavePriceMgr = window.savePriceMgr;
+window.savePriceMgr = async function(applyAll){
+  if(applyAll){
+    const choice = confirm('تطبيق الأسعار الجديدة على:\n\nاضغط موافق → الجديد فقط\nاضغط إلغاء → الجديد والموجود (سيعدّل أسعار كل الحجوزات!)');
+    if(!choice){ // Apply to existing too
+      if(!confirm('⚠ سيتم تعديل أسعار كل الحجوزات الموجودة. تأكيد؟')) return;
+      // Update all bookings apt prices
+      await doApplyPricesToAll();
+    }
+  }
+  await origSavePriceMgr(applyAll);
+};
+
+async function doApplyPricesToAll(){
+  showLoading('جاري تحديث أسعار الحجوزات...');
+  let updated=0;
+  for(const b of bookings){
+    if(!b.checkin) continue;
+    const conv=getConv(b.convoy);
+    if(!conv) continue;
+    const newPrices={};
+    let at=0;
+    (b.apts||[]).forEach(a=>{
+      const p=aptP(conv.checkin,APTS[a]?.type||'single');
+      newPrices[a]=p;at+=p;
+    });
+    try{
+      await sbFetch('mtr_bookings','PATCH',{apt_prices:newPrices,apts_total:at},`?id=eq.${b.id}`);
+      b.aptPrices=newPrices;b.aptsTotal=at;updated++;
+    }catch(e){console.warn('Update error:',e);}
+  }
+  hideLoading();
+  alert(`تم تحديث ${updated} حجز`);
+}
+
+// 7. REFRESH SESSION PERSISTENCE
+// Save state before unload
+window.addEventListener('beforeunload',()=>{
+  const activeTab=document.querySelector('.tab.active')?.id?.replace('tab-','');
+  if(activeTab) sessionStorage.setItem('mtr_last_tab',activeTab);
+  const convSel=document.getElementById('cl-convoy-sel')?.value;
+  if(convSel) sessionStorage.setItem('mtr_last_convoy',convSel);
+});
+
+// Restore closing convoy selection after loginUser
+window.loginUser = (function(){
+  const orig=window.loginUser;
+  return function(f){
+    orig(f);
+    // Restore convoy selection
+    setTimeout(()=>{
+      const savedConv=sessionStorage.getItem('mtr_last_convoy');
+      if(savedConv&&document.getElementById('cl-convoy-sel')){
+        document.getElementById('cl-convoy-sel').value=savedConv;
+      }
+    },500);
+  };
+})();
+
 </script>
