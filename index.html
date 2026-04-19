@@ -40,13 +40,88 @@ body.dark .tab{font-size:13px}
 body.dark .btn{font-size:13px}
 body{font-family:'Cairo',sans-serif;direction:rtl;background:var(--bg);color:var(--tx);font-size:17px;line-height:1.7;min-height:100vh}
 body.dark input,body.dark select,body.dark textarea{background:var(--sf);color:var(--tx);border-color:var(--bd2)}
-body.dark .card,body.dark .login-box,body.dark .config-box{background:var(--sf)}
+body.dark .card,body.dark .login-box,body.dark .config-box{background:var(--sf);border-color:var(--bd)}
 body.dark .tabs,body.dark th{background:var(--sf2)}
 body.dark tr:hover td{background:var(--sf2)}
 body.dark .seat.empty{background:var(--sf);border-color:var(--bd2)}
-body.dark .stat{background:var(--sf)}
-body.dark .conv-btn{background:var(--sf);color:var(--tx2)}
-body.dark .conv-btn.active{background:var(--pr);color:#fff}
+body.dark .stat{background:var(--sf);border-color:var(--bd)}
+body.dark .conv-btn{background:var(--sf);color:var(--tx2);border-color:var(--bd2)}
+body.dark .conv-btn.active{background:var(--pr);color:#fff;border-color:var(--pr)}
+body.dark .tsum{background:linear-gradient(135deg,#0d1f2e,#071a14);border-color:var(--bd2)}
+/* Smooth dark/light transition */
+body,input,select,textarea,.card,.stat,.btn,.tab,.badge,.seat,.conv-btn,.aot,.tabs,.hdr{transition:background-color .2s,color .15s,border-color .15s,box-shadow .2s}
+/* Dark mode - enhanced styling */
+body.dark .hdr{background:linear-gradient(90deg,#050e18,#091520);box-shadow:0 2px 20px rgba(0,0,0,.6)}
+body.dark .tabs{background:var(--sf2);border-bottom-color:var(--bd);box-shadow:0 2px 10px rgba(0,0,0,.3)}
+body.dark .tab.active{background:var(--prl);color:var(--pr);border-bottom-color:var(--pr)}
+body.dark .tab:hover{background:var(--prl);color:var(--pr2)}
+body.dark .main{background:var(--bg)}
+body.dark .btn{background:var(--sf2);border-color:var(--bd2);color:var(--tx2)}
+body.dark .btn:hover{background:var(--sf);border-color:var(--pr);color:var(--pr2)}
+body.dark .btn-p{background:var(--pr);color:#fff;border-color:var(--pr)}
+body.dark .btn-p:hover{background:var(--pr2);color:#fff;border-color:var(--pr2)}
+body.dark .btn-s{background:var(--ac);color:#051a12;border-color:var(--ac)}
+body.dark .btn-d{background:var(--dnl);color:var(--dn);border-color:var(--dn)}
+body.dark .btn-d:hover{background:var(--dn);color:#fff}
+body.dark .tbl-wrap{border-color:var(--bd)}
+body.dark table thead tr{background:var(--sf2)}
+body.dark td{color:var(--tx);border-bottom-color:var(--bd)}
+body.dark th{color:var(--pr2);border-bottom-color:var(--bd)}
+body.dark .ctitle{color:var(--pr2)}
+body.dark .ctitle::before{background:var(--pr2)}
+body.dark .info-box{background:var(--prl);border-color:var(--bd2);color:var(--pr2)}
+body.dark .warn-box{background:var(--wnl);border-color:var(--wn);color:var(--wn)}
+body.dark .badge.b-bl{background:var(--prl);color:var(--pr2)}
+body.dark .badge.b-gr{background:var(--acl);color:var(--ac)}
+body.dark .badge.b-rd{background:var(--dnl);color:var(--dn)}
+body.dark .badge.b-wn{background:var(--wnl);color:var(--wn)}
+body.dark .badge.b-gd{background:var(--gdl);color:var(--gd)}
+body.dark .badge.b-gy{background:var(--sf2);color:var(--tx2)}
+body.dark .badge.b-pu{background:var(--pul);color:var(--pu)}
+body.dark .ab{background:var(--sf);border-color:var(--bd2);color:var(--tx2)}
+body.dark .ab.av:hover,.dark .ab.sel{background:var(--prl);color:var(--pr2);border-color:var(--pr)}
+body.dark .ab.bkd{background:var(--dnl);color:var(--dn);border-color:var(--dn)}
+body.dark .sbar{background:var(--sf2);border-color:var(--bd)}
+body.dark .hr{border-top-color:var(--bd)}
+body.dark .log-entry{border-bottom-color:var(--bd)}
+body.dark .user-card{background:var(--sf);border-color:var(--bd)}
+body.dark .acc-tabs{border-color:var(--bd)}
+body.dark .aot{background:var(--sf2);color:var(--tx2);border-left-color:var(--bd)}
+body.dark .aot.active{background:var(--pr);color:#fff}
+body.dark .aot:hover{background:var(--prl);color:var(--pr2)}
+body.dark .pickup-tag{background:var(--sf);border-color:var(--bd2)}
+body.dark .lnk{color:var(--pr2)}
+body.dark .login-wrap,.dark .cfg-wrap{background:linear-gradient(135deg,#03080e,#050f0a)}
+body.dark .login-box{background:var(--sf);border:1px solid var(--bd);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+body.dark .cfg-box{background:var(--sf);border:1px solid var(--bd)}
+body.dark .logo-ph{background:var(--prl);border-color:var(--pr)}
+body.dark .login-title{color:var(--pr2)}
+body.dark .login-sub{color:var(--tx3)}
+body.dark .bus-wrap{background:var(--sf2);border-color:var(--bd)}
+body.dark .bus-driver{background:var(--pr)}
+body.dark .bus-aisle{color:var(--tx3)}
+body.dark input::placeholder,body.dark textarea::placeholder{color:var(--tx3)}
+body.dark select option{background:var(--sf);color:var(--tx)}
+body.dark .stat-label{color:var(--tx3)}
+body.dark .stat.green{border-top-color:var(--ac)}
+body.dark .stat.gold{border-top-color:var(--gd)}
+body.dark .stat.red{border-top-color:var(--dn)}
+body.dark .stat.teal{border-top-color:#1ecc9a}
+body.dark .stat.purple{border-top-color:var(--pu)}
+body.dark .step{background:var(--prl);color:var(--tx2)}
+body.dark .step strong{color:var(--pr2)}
+body.dark .fg label{color:var(--tx2)}
+body.dark .apr{background:var(--sf2);border-color:var(--bd)}
+body.dark .pr-row input,.dark .pr-row select{background:var(--sf);border-color:var(--bd2)}
+body.dark .trow{color:var(--tx2)}
+body.dark .trow span:last-child{color:var(--tx)}
+body.dark .trow.big span{color:var(--pr2)!important}
+body.dark .hdr-sub{color:var(--tx3)}
+body.dark .sync{color:rgba(255,255,255,.6)}
+body.dark .user-pill{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
+body.dark .hbtn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
+body.dark .hbtn:hover{background:rgba(255,255,255,.15)}
+body.dark input:focus,body.dark select:focus,body.dark textarea:focus{border-color:var(--pr2);box-shadow:0 0 0 3px rgba(74,159,212,.15)}
 /* VIEWER MODE - complete read-only */
 body.viewer-mode .btn{pointer-events:none!important;opacity:.35!important;cursor:not-allowed!important}
 body.viewer-mode .btn-p,body.viewer-mode .btn-s,body.viewer-mode .btn-d{display:none!important}
@@ -58,7 +133,72 @@ body.viewer-mode [onclick]{pointer-events:none!important}
 body.viewer-mode .tabs .tab{pointer-events:auto!important;opacity:1!important}
 body.viewer-mode .hbtn{pointer-events:auto!important;opacity:1!important}
 body.viewer-mode .viewer-banner{display:flex!important}
-body.dark .tsum{background:linear-gradient(135deg,var(--sf),var(--sf2))}
+/* Dark mode for dynamically created overlays/popups */
+body.dark #entry-popup-overlay > div,
+body.dark #pay-popup-overlay > div,
+body.dark .modal-inner{
+  background:var(--sf)!important;
+  color:var(--tx)!important;
+  border-color:var(--bd)!important;
+}
+body.dark #entry-popup-overlay table thead tr{background:var(--sf2)!important}
+body.dark #entry-popup-overlay tbody tr{background:transparent!important}
+body.dark #entry-popup-overlay input,
+body.dark #pay-popup-overlay input,
+body.dark #pay-popup-overlay select{
+  background:var(--sf2)!important;
+  color:var(--tx)!important;
+  border-color:var(--bd2)!important;
+}
+body.dark #pay-popup-overlay button[data-method]{
+  background:var(--sf2)!important;
+  color:var(--tx2)!important;
+  border-color:var(--bd2)!important;
+}
+body.dark #pay-popup-overlay button[data-method].active-pm,
+body.dark #pay-popup-overlay button[style*="#1a5276"]{
+  background:var(--pr)!important;
+  color:#fff!important;
+  border-color:var(--pr)!important;
+}
+/* Dark mode scrollbar */
+body.dark ::-webkit-scrollbar{width:6px;height:6px}
+body.dark ::-webkit-scrollbar-track{background:var(--bg)}
+body.dark ::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+body.dark ::-webkit-scrollbar-thumb:hover{background:var(--pr)}
+/* Dark mode treasury card */
+body.dark #treasury-card{border-color:var(--gd)!important;background:var(--sf)!important}
+body.dark #treasury-card > div[style*="background:var(--gdl)"]{
+  background:var(--gdl)!important;
+}
+/* Dark mode seat taken colors remain vivid */
+body.dark .seat.taken{opacity:.95}
+body.dark .seat.empty:hover{border-color:var(--pr);background:var(--prl)}
+/* Dark mode lnk */
+body.dark .lnk{color:var(--pr2)}
+body.dark .lnk:hover{color:var(--ac)}
+/* Dark mode form labels */
+body.dark label{color:var(--tx2)}
+body.dark .fg label{color:var(--tx2)}
+/* Dark mode apr rows */
+body.dark .apr{background:var(--sf2);border-color:var(--bd)}
+body.dark .apr .an{color:var(--pr2)}
+body.dark .apr .ad{color:var(--tx2)}
+/* Dark mode bus legend */
+body.dark .bus-legend{color:var(--tx2)}
+body.dark .pickup-tag span{color:var(--pr2)}
+/* Dark mode stag */
+body.dark .stag{background:var(--pr);color:#fff}
+/* Closing tab dark */
+body.dark #closing-output table thead tr{background:var(--sf2)!important}
+/* Dark mode cfg box steps */
+body.dark .step{background:var(--prl);color:var(--tx2)}
+body.dark .cfg-err{background:var(--dnl);color:var(--dn);border-color:var(--dn)}
+body.dark .cfg-ok{background:var(--acl);color:var(--ac);border-color:var(--ac)}
+/* Print always light */
+@media print{
+  body.dark,body.dark *{background:white!important;color:#000!important;border-color:#ccc!important}
+}
 .lod{position:fixed;inset:0;background:rgba(26,82,118,.9);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:#fff}
 .lod.show{display:flex}
 .spin{width:44px;height:44px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;margin-bottom:1rem}
@@ -76,24 +216,24 @@ body.dark .tsum{background:linear-gradient(135deg,var(--sf),var(--sf2))}
 .login-wrap.show{display:flex}
 .login-box{background:#fff;border-radius:20px;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
 .logo-ph{width:72px;height:72px;border-radius:50%;background:var(--prl);border:3px solid var(--pr);display:inline-flex;align-items:center;justify-content:center;font-size:28px;color:var(--pr);margin-bottom:.75rem}
-.login-title{font-size:24px;font-weight:900;color:var(--pr);margin-bottom:.25rem;text-align:center}
+.login-title{font-size:20px;font-weight:800;color:var(--pr);margin-bottom:.25rem;text-align:center}
 .login-sub{font-size:12px;color:var(--tx3);margin-bottom:1.25rem;text-align:center}
 .login-err{background:var(--dnl);border:1px solid var(--dn);border-radius:var(--r);padding:.6rem .875rem;font-size:12px;color:var(--dn);margin-bottom:.75rem;display:none}
 .app{display:none}
 .app.show{display:block}
 .hdr{background:var(--pr);padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
 .hdr-l{display:flex;align-items:center;gap:10px}
-.hdr-logo{width:100px;height:100px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.4)}
+.hdr-logo{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.4)}
 .hdr-logo-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:15px}
-.hdr-title{color:#fff;font-size:20px;font-weight:900}
-.hdr-sub{color:#a9cce3;font-size:14px}
+.hdr-title{color:#fff;font-size:15px;font-weight:800}
+.hdr-sub{color:#a9cce3;font-size:10px}
 .hdr-r{display:flex;align-items:center;gap:6px}
 .sync{font-size:10px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:4px}
 .sdot{width:6px;height:6px;border-radius:50%;background:#2ecc71}
 .sdot.s{background:#f39c12;animation:p .8s ease-in-out infinite}
 .sdot.e{background:#e74c3c}
 @keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
-.user-pill{background:rgba(255,255,255,.15);color:#fff;font-size:13px;padding:3px 9px;border-radius:20px;border:2px solid rgba(255,255,255,.2)}
+.user-pill{background:rgba(255,255,255,.15);color:#fff;font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid rgba(255,255,255,.2)}
 .hbtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif;font-weight:600}
 .hbtn:hover{background:rgba(255,255,255,.22)}
 .tabs{background:var(--sf);border-bottom:2px solid var(--bd);padding:0 .875rem;display:flex;overflow-x:auto;position:sticky;top:56px;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.05)}
@@ -146,7 +286,7 @@ tr:hover td{background:#f5f8fc}
 .stat.red{border-top-color:var(--dn)}
 .stat.teal{border-top-color:#1abc9c}
 .stat.purple{border-top-color:var(--pu)}
-.stat-label{font-size:14px;color:var(--tx3);font-weight:600;margin-bottom:2px}
+.stat-label{font-size:10px;color:var(--tx3);font-weight:600;margin-bottom:2px}
 .stat-val{font-size:17px;font-weight:700}
 .apt-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:4px 0}
 .ab{padding:6px 2px;border:1.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);cursor:pointer;font-size:11px;font-weight:700;text-align:center;line-height:1.4;color:var(--tx2);font-family:'Cairo',sans-serif;transition:all .15s}
@@ -175,7 +315,7 @@ tr:hover td{background:#f5f8fc}
 .lnk{cursor:pointer;color:var(--pr);font-weight:700}
 .lnk:hover{text-decoration:underline}
 .conv-sel-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.65rem}
-.conv-btn{padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sf);cursor:pointer;font-size:15px;font-weight:700;font-family:'Cairo',sans-serif;color:var(--tx2);white-space:nowrap;transition:all .15s;text-align:center;line-height:1.4}
+.conv-btn{padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sf);cursor:pointer;font-size:11px;font-weight:700;font-family:'Cairo',sans-serif;color:var(--tx2);white-space:nowrap;transition:all .15s;text-align:center;line-height:1.4}
 .conv-btn:hover{border-color:var(--pr);color:var(--pr)}
 .conv-btn.active{background:var(--pr);color:#fff;border-color:var(--pr)}
 .bus-wrap{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rl);padding:1rem;overflow-x:auto}
@@ -193,9 +333,9 @@ tr:hover td{background:#f5f8fc}
 .snum{font-size:13px;font-weight:700;margin-bottom:2px}
 .seat.empty .snum{color:var(--bd2);font-size:22px}
 .seat.taken .snum{color:rgba(255,255,255,.7)}
-.sname{font-size:17px;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
-.sphone{font-size:15px;color:rgba(255,255,255,.9)}
-.splace{font-size:14px;color:rgba(255,255,255,.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
+.sname{font-size:15px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
+.sphone{font-size:13px;color:rgba(255,255,255,.9)}
+.splace{font-size:12px;color:rgba(255,255,255,.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
 .bus-legend{display:flex;gap:8px;justify-content:center;margin-top:.65rem;font-size:11px;flex-wrap:wrap;color:var(--tx2)}
 .pickup-summary{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.65rem}
 .pickup-tag{background:var(--sf);border:1px solid var(--bd2);border-radius:var(--r);padding:4px 9px;font-size:12px}
@@ -262,15 +402,15 @@ tr:hover td{background:#f5f8fc}
 <div class="login-box">
   <div style="text-align:center;margin-bottom:1rem">
     <div id="login-logo-ph" class="logo-ph">🏖</div>
-    <img id="login-logo-img" style="display:none;width:85px;height:85px;border-radius:50%;object-fit:cover">
+    <img id="login-logo-img" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover">
   </div>
   <div class="login-title" id="login-title">نظام حجوزات مطروح 2026</div>
-  <div class="login-sub">Please LogIn To Continue</div>
-  <div class="login-err" id="login-err">Username or Password is Not Correct...</div>
+  <div class="login-sub">سجل الدخول للمتابعة</div>
+  <div class="login-err" id="login-err">اسم المستخدم أو كلمة المرور غلط</div>
   <div class="fg"><label>اسم المستخدم</label><input type="text" id="login-user" placeholder="username"></div>
   <div class="fg"><label>كلمة المرور</label><input type="password" id="login-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-  <button class="btn btn-p" style="width:100%;margin-top:.5rem" onclick="doLogin()">LogIn</button>
-</div> 
+  <button class="btn btn-p" style="width:100%;margin-top:.5rem" onclick="doLogin()">دخول</button>
+</div>
 </div>
 
 <!-- APP -->
@@ -279,15 +419,15 @@ tr:hover td{background:#f5f8fc}
   <div class="hdr-l">
     <div id="hdr-lph" class="hdr-logo-ph">🏖</div>
     <img id="hdr-limg" class="hdr-logo" style="display:none">
-    <div><div class="hdr-title" id="sys-name">نظام حجوزات مطروح 2026</div><div class="hdr-sub">28 مايو ← 25 سبتمبر · 14 شقة · 24 فوج</div></div>
+    <div><div class="hdr-title" id="sys-name">نظام حجوزات مطروح 2026</div><div class="hdr-sub">28 مايو ← 20 سبتمبر · 14 شقة · 23 فوج</div></div>
   </div>
   <div id="viewer-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#c0392b;color:#fff;text-align:center;padding:6px;font-size:12px;font-weight:700;z-index:999;class:viewer-banner">وضع المشاهدة فقط - لا يمكنك إجراء أي تعديلات</div>
 <div class="hdr-r">
-    <div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">Online</span></div>
+    <div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">متصل</span></div>
     <div class="user-pill" id="hdr-user">—</div>
     <button class="hbtn" onclick="toggleDark()" id="dark-btn">🌙</button>
     <button class="hbtn" onclick="toggleLang()" id="lang-btn">EN</button>
-    <button class="hbtn" onclick="doLogout()">Log Out</button>
+    <button class="hbtn" onclick="doLogout()">خروج</button>
   </div>
 </div>
 <div class="tabs" id="tabs-bar">
@@ -489,7 +629,7 @@ tr:hover td{background:#f5f8fc}
   <div id="rpt-out"></div>
 </div></div>
 <!-- LOG -->
-<div id="log" class="sec"><div class="card"><div class="ctitle">سجل النشاط <span class="badge b-pu" style="font-size:10px">[GM] Only</span></div>
+<div id="log" class="sec"><div class="card"><div class="ctitle">سجل النشاط <span class="badge b-pu" style="font-size:10px">أدمن فقط</span></div>
   <div style="display:flex;gap:7px;margin-bottom:.75rem;flex-wrap:wrap">
     <input type="text" id="log-q" placeholder="ابحث في السجل..." style="max-width:220px" oninput="renderLog()">
     <select id="log-tf" onchange="renderLog()" style="max-width:130px"><option value="">كل الأنواع</option><option value="add">إضافة</option><option value="del">حذف</option><option value="edit">تعديل</option><option value="login">دخول</option></select>
@@ -593,7 +733,7 @@ tr:hover td{background:#f5f8fc}
 // ALL CONSTANTS - defined first, no conflicts
 // ============================================================
 const EGYPT_CITIES={'القاهرة':['القاهرة','مدينة نصر','مصر الجديدة','المعادي','الزمالك','شبرا','عين شمس','حلوان','التجمع الخامس','المقطم','6 أكتوبر'],'الجيزة':['الجيزة','الدقي','المهندسين','الشيخ زايد','فيصل','إمبابة'],'الإسكندرية':['الإسكندرية','سيدي بشر','المنتزه','العجمي','العامرية','برج العرب'],'الغربية':['طنطا','المحلة الكبرى','كفر الزيات','زفتى','السنطة'],'المنوفية':['شبين الكوم','منوف','أشمون','قويسنا','بركة السبع'],'الدقهلية':['المنصورة','طلخا','ميت غمر','أجا','المنزلة','بلقاس'],'الشرقية':['الزقازيق','العاشر من رمضان','بلبيس','أبو كبير','فاقوس'],'الإسماعيلية':['الإسماعيلية','فايد','القنطرة'],'بورسعيد':['بورسعيد'],'السويس':['السويس','عتاقة'],'دمياط':['دمياط','رأس البر'],'كفر الشيخ':['كفر الشيخ','دسوق','فوه','بلطيم'],'البحيرة':['دمنهور','كفر الدوار','رشيد'],'مطروح':['مرسى مطروح','الضبعة','العلمين','سيوة','الحمام','رأس الحكمة'],'أسوان':['أسوان','كوم أمبو'],'الأقصر':['الأقصر','إسنا'],'قنا':['قنا','نجع حمادي','دشنا'],'سوهاج':['سوهاج','أخميم','طهطا'],'أسيوط':['أسيوط','ديروط','القوصية'],'المنيا':['المنيا','ملوي','سمالوط','مغاغة'],'بني سويف':['بني سويف','ناصر','ببا'],'الفيوم':['الفيوم','طامية'],'شمال سيناء':['العريش','رفح'],'جنوب سيناء':['شرم الشيخ','دهب','طابا'],'البحر الأحمر':['الغردقة','سفاجا','مرسى علم'],'الوادي الجديد':['الخارجة','الداخلة']};
-const APTS={'403':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'404':{desc:'غرفتين · تكيف',type:'double',seats:4},'503':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'601':{desc:'غرفة · مكيفة',type:'single',seats:2},'602':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'603':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'604':{desc:'غرفتين · تكيف',type:'double',seats:4},'704':{desc:'غرفتين · تكييف غرف',type:'double',seats:4},'801':{desc:'غرفة · مكيفة',type:'single',seats:2},'802':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'803':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'804':{desc:'غرفتين · تكييف غرف',type:'double',seats:4},'902':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'904':{desc:'غرفتين · ترى البحر',type:'double',seats:4}};
+const APTS={'403':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'404':{desc:'غرفتين · تكيف',type:'double',seats:4},'503':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'601':{desc:'غرفة · مكيفة',type:'single',seats:2},'602':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'603':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'604':{desc:'غرفتين · تكيف',type:'double',seats:4},'704':{desc:'غرفتين · مراوح',type:'double',seats:4},'801':{desc:'غرفة · مكيفة',type:'single',seats:2},'802':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'803':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'804':{desc:'غرفتين · مراوح',type:'double',seats:4},'902':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'904':{desc:'غرفتين · ترى البحر',type:'double',seats:4}};
 const APT_LIST=Object.keys(APTS);
 // DEFAULT PRICE MAP - overridden by settings
 const DEFAULT_PRICE_MAP={'2026-05-28':{single:8500,double:9900},'2026-06-02':{single:3700,double:6800},'2026-06-07':{single:3700,double:6800},'2026-06-12':{single:3900,double:7800},'2026-06-17':{single:3900,double:7800},'2026-06-22':{single:8500,double:9900},'2026-06-27':{single:8500,double:9900},'2026-07-02':{single:5400,double:8800},'2026-07-07':{single:8500,double:9900},'2026-07-12':{single:8500,double:9900},'2026-07-17':{single:9400,double:12800},'2026-07-22':{single:9400,double:12800},'2026-07-27':{single:9400,double:12800},'2026-08-01':{single:9400,double:12800},'2026-08-06':{single:9400,double:12800},'2026-08-11':{single:9400,double:12800},'2026-08-16':{single:9400,double:12800},'2026-08-21':{single:9400,double:12800},'2026-08-26':{single:9400,double:12800},'2026-08-31':{single:9400,double:12800},'2026-09-05':{single:9400,double:12800},'2026-09-10':{single:9400,double:12800},'2026-09-15':{single:9400,double:12800},
@@ -615,7 +755,7 @@ function getAllRoles(){return{...ROLE_DEFAULTS,...customRoles};}
 function saveCustomRoles(){try{localStorage.setItem('mtr_custom_roles',JSON.stringify(customRoles));}catch(e){}}
 function getRoleLabel(role){
   if(customRoleLabels[role])return customRoleLabels[role];
-  var defaults={admin:'[GM]',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'};
+  var defaults={admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'};
   return defaults[role]||role;
 }
 const TAB_PERMS={reports:null,log:'view_log',users:'manage_users',mgr:'settings',prices:'manage_prices',design:'view_design'};
@@ -633,7 +773,7 @@ let currentUser=null,selApts=[],activeBusConv=null,dragInfo=null,poolDragInfo=nu
 // ============================================================
 const SB_URL_KEY='mtr_sb_url',SB_KEY_KEY='mtr_sb_key';
 function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'}}
-function setSyncing(v){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot'+(v?' s':'');if(t)t.textContent=v?'مزامنة...':'Online'}
+function setSyncing(v){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot'+(v?' s':'');if(t)t.textContent=v?'مزامنة...':'متصل'}
 function setSyncErr(){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot e';if(t)t.textContent='خطأ'}
 
 async function sbFetch(table,method='GET',body=null,query=''){
@@ -780,7 +920,7 @@ async function doLogin(){
   const f=users.find(x=>x.username===u&&x.password===p);
   if(!f){document.getElementById('login-err').style.display='block';return;}
   document.getElementById('login-err').style.display='none';
-  await addLog('تسجيل دخول','login',`${f.name} · دور: ${{admin:'[GM]',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]||f.role}`);
+  await addLog('تسجيل دخول','login',`${f.name} · دور: ${{admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]||f.role}`);
   loginUser(f);
 }
 function loginUser(f){
@@ -789,7 +929,7 @@ function loginUser(f){
   // Read lastTab BEFORE applyPerms (applyPerms no longer calls showTab)
   const lastTab=localStorage.getItem('mtr_last_tab')||'dash';
   hideAll();show('app');
-  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'[GM]',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
+  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
   document.getElementById('dark-btn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
   document.getElementById('lang-btn').textContent=lang==='ar'?'EN':'ع';
   applyPerms();updateLogoDsp();
@@ -800,7 +940,7 @@ function loginUser(f){
   setTimeout(()=>{ showTab(lastTab); },350);
 }
 async function doLogout(){
-  await addLog('تسجيل Log Out','login',currentUser?.name||'');
+  await addLog('تسجيل خروج','login',currentUser?.name||'');
   currentUser=null;sessionStorage.removeItem('mtr_sess');
   hideAll();show('login-pg');
   document.getElementById('login-user').value='';document.getElementById('login-pass').value='';
@@ -1489,9 +1629,9 @@ function printBusLayout(cn){
     const o=occ[sn];
     const col=o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#f0f4f8';
     const textCol=o?'#fff':'#aaa';
-    return `<td style="border:1px solid #ccc;width:70px;height:65px;text-align:center;vertical-align:middle;background:${col};color:${textCol};font-size:11px;padding:3px;font-weight:700">
-      <div style="font-size:10px;opacity:.7">${sn}</div>
-      ${o?`<div style="font-size:11px;font-weight:700;overflow:hidden">${o.name.split(' ').slice(0,3).join(' ')}</div><div style="font-size:9px;opacity:.85">${o.phone?o.phone.slice(-4):''}</div><div style="font-size:9px;opacity:.85;overflow:hidden">${o.pickup.slice(0,8)}</div>`:'<div style="font-size:10px">فارغ</div>'}
+    return `<td style="border:1px solid #ccc;width:56px;height:52px;text-align:center;vertical-align:middle;background:${col};color:${textCol};font-size:10px;padding:2px;font-weight:700">
+      <div style="font-size:9px;opacity:.7">${sn}</div>
+      ${o?`<div style="font-size:10px;font-weight:700;overflow:hidden;line-height:1.2">${o.name.split(' ').slice(0,3).join(' ')}</div><div style="font-size:8px;opacity:.85">${o.phone?o.phone.slice(-4):''}</div><div style="font-size:8px;opacity:.85;overflow:hidden">${o.pickup.slice(0,6)}</div>`:'<div style="font-size:9px;color:#aaa">فارغ</div>'}
     </td>`;
   }
   let rows='',sc=1;
@@ -1510,18 +1650,23 @@ function printBusLayout(cn){
   const setts=(typeof settings!=='undefined'?settings:{})||{};
   const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>قائمة الباص - ${conv.label}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>*{box-sizing:border-box}body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;padding:15px;font-size:13px}h2{font-size:18px;font-weight:800;color:#1a5276;margin-bottom:5px}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{@page{margin:8mm;size:A4 landscape}body{padding:0}}</style>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;padding:8px;font-size:11px}
+h2{font-size:16px;font-weight:800;color:#1a5276;margin-bottom:3px}
+table{border-collapse:collapse}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+@media print{
+  @page{margin:6mm;size:A4 landscape}
+  body{padding:0;font-size:10px}
+}
+</style>
 </head><body>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #d6eaf8">
-  <div><h2>${setts.name||'مصيف مطروح 2026'}</h2><div style="color:#4a6278;font-size:12px">قائمة مقاعد الباص · ${conv.label} · دخول ${conv.checkin} 9-11 ص · Log Out ${conv.checkout} 5-7 ص</div></div>
-  <div style="text-align:left;font-size:11px;color:#888">${new Date().toLocaleDateString('ar-EG')}</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #d6eaf8">
+  <div><h2>${setts.name||'مصيف مطروح 2026'}</h2><div style="color:#4a6278;font-size:11px">قائمة مقاعد الباص · ${conv.label} · دخول ${conv.checkin} 9-11 ص · خروج ${conv.checkout} 5-7 ص</div></div>
+  <div style="text-align:left;font-size:10px;color:#888">${new Date().toLocaleDateString('ar-EG')}</div>
 </div>
-<div style="display:flex;gap:15px">
-  <div>
-    <table style="border-collapse:collapse;direction:ltr"><thead><tr><td style="text-align:center;background:#1a5276;color:#fff;padding:5px 10px;font-weight:700;border-radius:4px 4px 0 0;font-size:12px" colspan="5">سائق</td></tr></thead><tbody>${rows}</tbody></table>
-  </div>
-  <div style="flex:1"><div style="font-size:13px;font-weight:700;color:#1a5276;margin-bottom:8px">المقاعد حسب مكان الركوب</div>${pickupList}</div>
-</div>
+<table style="border-collapse:collapse;direction:ltr;margin:0 auto"><thead><tr><td style="text-align:center;background:#1a5276;color:#fff;padding:4px 10px;font-weight:700;font-size:11px" colspan="5">سائق</td></tr></thead><tbody>${rows}</tbody></table>
 <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
   const blob=new Blob([h],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),15000);
@@ -1561,7 +1706,7 @@ function renderBusLayout(cn){
     if(o){const col=cColor(o.bookingId,cn);return `<div class="seat taken" style="background:${col}" draggable="true" ondragstart="dragInfo={cn:${cn},sn:${sn}};poolDragInfo=null;event.dataTransfer.effectAllowed='move';setTimeout(()=>event.target.classList.add('dragging'),0)" ondragend="event.target.classList.remove('dragging')" ondragover="event.preventDefault()" ondragenter="event.currentTarget.classList.add('drag-over')" ondragleave="event.currentTarget.classList.remove('drag-over')" ondrop="event.currentTarget.classList.remove('drag-over');busDrop(event,${cn},${sn})" ondblclick="clearSeat(${cn},${sn})" title="${o.name} · ${o.pickup}"><span class="snum">${sn}</span><span class="sname">${o.name}</span><span class="sphone">${o.phone}</span><span class="splace">${o.pickup}</span></div>`;}
     return `<div class="seat empty" ondragover="event.preventDefault()" ondragenter="event.currentTarget.classList.add('drag-over')" ondragleave="event.currentTarget.classList.remove('drag-over')" ondrop="event.currentTarget.classList.remove('drag-over');busDrop(event,${cn},${sn})"><span class="snum">${sn}</span></div>`;
   }
-  let busHtml=`<div class="bus-wrap"><div class="bus-top">${conv.label} · دخول ${conv.checkin} 9-11 ص · Log Out ${conv.checkout} 5-7 ص</div><div class="bus-driver">سائق</div>`;
+  let busHtml=`<div class="bus-wrap"><div class="bus-top">${conv.label} · دخول ${conv.checkin} 9-11 ص · خروج ${conv.checkout} 5-7 ص</div><div class="bus-driver">سائق</div>`;
   let sc=1;for(let r=0;r<12;r++){busHtml+=`<div class="bus-row">`;for(let c=0;c<4;c++){if(c===2)busHtml+=`<div class="bus-aisle">│</div>`;busHtml+=ms(sc++);}busHtml+=`</div>`;}
   busHtml+=`<div class="bus-row"><div class="seat" style="opacity:0;pointer-events:none"></div>${ms(49)}<div class="bus-aisle">│</div><div class="seat" style="opacity:0;pointer-events:none"></div></div>`;
   busHtml+=`<div class="bus-legend">${bks.map((b,i)=>`<span><span class="ldot" style="background:${SEAT_COLORS[i%SEAT_COLORS.length]}"></span>${b.name.split(' ').slice(0,2).join(' ')} · ${b.pickup||'-'}</span>`).join('')}</div>`;
@@ -1995,7 +2140,7 @@ function renderLog(){
   });
   const typeColors={add:'#117a65',del:'#c0392b',edit:'#d68910',login:'#1a5276'};
   const typeIcons={add:'➕',del:'🗑',edit:'✏️',login:'🔑'};
-  const typeLabels={add:'إضافة',del:'حذف',edit:'تعديل',login:'دخول/Log Out'};
+  const typeLabels={add:'إضافة',del:'حذف',edit:'تعديل',login:'دخول/خروج'};
   // Populate user filter
   const userSel=document.getElementById('log-user-f');
   if(userSel&&userSel.options.length<=1){
@@ -2276,7 +2421,12 @@ function removeCat(t,i){
 function toggleDark(){
   const d=document.body.classList.toggle('dark');
   localStorage.setItem('mtr_dark',d?'1':'0');
-  document.getElementById('dark-btn').textContent=d?'☀️':'🌙';
+  const btn=document.getElementById('dark-btn');
+  if(btn){btn.textContent=d?'☀️':'🌙';btn.title=d?'تفعيل الوضع الفاتح':'تفعيل الوضع الداكن';}
+  // Update meta theme color
+  let meta=document.querySelector('meta[name="theme-color"]');
+  if(!meta){meta=document.createElement('meta');meta.name='theme-color';document.head.appendChild(meta);}
+  meta.content=d?'#050e18':'#1a5276';
 }
 const EN_LABELS={dash:'Dashboard',add:'New Booking',clients:'Clients',bus:'Bus',accs:'Accounts',sched:'Schedule',reports:'Reports',log:'Activity Log',users:'Users',mgr:'Settings'};
 const AR_LABELS={dash:'الرئيسية',add:'حجز جديد',clients:'العملاء',bus:'الباص',accs:'الحسابات',sched:'جدول الأفواج',reports:'التقارير',log:'سجل النشاط',users:'المستخدمين',mgr:'الإعدادات'};
@@ -2320,6 +2470,11 @@ function editBooking(id){
     <div class="fg"><label>مكان الركوب</label><select id="edit-pickup" style="max-width:300px">${
       Object.entries(EGYPT_CITIES).map(([g,cs])=>`<optgroup label="${g}">${cs.map(c=>`<option ${c===b.pickup?'selected':''}>${c}</option>`).join('')}</optgroup>`).join('')
     }</select></div>
+    </div>
+    <div class="fg" style="margin-top:.5rem"><label>المسؤول / مسؤول المبيعات</label>
+      <select id="edit-sales-rep" style="max-width:280px">
+        ${users.map(u=>`<option value="${u.name}" ${u.name===b.createdBy?'selected':''}>${u.name} (${u.username})</option>`).join('')}
+      </select>
     </div>
     <div class="fg" style="margin-top:.75rem"><label>الشقق المحجوزة <small style="font-weight:400;color:var(--tx3)">(اضغط لإضافة/إزالة)</small></label>
       <div id="edit-apt-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:5px 0">
@@ -2428,6 +2583,7 @@ async function saveEditBooking(id){
   const discReason=document.getElementById('edit-disc-reason')?.value||b.discReason||'';
   const adultsVal=parseInt(document.getElementById('edit-adults')?.value)||0;
   const childrenVal=parseInt(document.getElementById('edit-children')?.value)||0;
+  const newCreatedBy=document.getElementById('edit-sales-rep')?.value||b.createdBy||currentUser?.name||'—';
 
   const sda=sd*600;
   const intT=intS*intP;
@@ -2463,7 +2619,8 @@ async function saveEditBooking(id){
     disc, total, remaining, notes,
     adults:adultsVal, children:childrenVal,
     seat_assign:newSA,
-    disc_reason:discReason
+    disc_reason:discReason,
+    created_by:newCreatedBy
   };
 
   try{
@@ -2478,7 +2635,8 @@ async function saveEditBooking(id){
       seatPrice:sp, seatDiscount:sd, seatDiscAmt:sda,
       intSeats:intS, intSeatPrice:intP, intTotal:intT,
       transferFee:tfee, disc, discReason, total, remaining, notes,
-      adults:adultsVal, children:childrenVal, seatAssign:newSA
+      adults:adultsVal, children:childrenVal, seatAssign:newSA,
+      createdBy:newCreatedBy
     });
     delete editSelApts[id];
     // Build detailed change log
@@ -2495,6 +2653,7 @@ async function saveEditBooking(id){
     if((b.seatDiscount||0)!==sd) changes.push(`خصم كراسي: ${b.seatDiscount||0} ← ${sd}`);
     if((b.disc||0)!==disc) changes.push(`خصم عام: ${b.disc||0} ← ${disc} ج`);
     if((b.intSeats||0)!==intS) changes.push(`كراسي داخلية: ${b.intSeats||0} ← ${intS}`);
+    if(b.createdBy!==newCreatedBy) changes.push(`المسؤول: "${b.createdBy||'-'}" ← "${newCreatedBy}"`);
     const logDetail=changes.length>0?changes.join(' | '):`لا تغييرات جوهرية · إجمالي: ${total.toLocaleString()} ج`;
     await addLog(`تعديل حجز: ${name} - فوج ${newConvNum}`,'edit',logDetail);
     closeEditModal();
@@ -2581,7 +2740,56 @@ function printReceipt(id){
   const logo=m.logo?`<img src="${m.logo}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.9);margin-bottom:12px" onerror="this.style.display='none'">`:'';
   const rH=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>إيصال - ${b.name}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}body{font-family:'Cairo',Arial,sans-serif;padding:16px;direction:rtl;color:#1a2535;font-size:14px;line-height:1.75;background:#f8fafc;display:flex;justify-content:center;align-items:flex-start}.page{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);width:680px;flex-shrink:0}.hdr{background:linear-gradient(135deg,#1a3a5c,#1a5276,#117a65);color:#fff;padding:24px 28px;text-align:center}.hdr .co{font-size:17px;font-weight:700;opacity:.95;margin-bottom:4px;letter-spacing:.5px}.hdr h1{font-size:26px;font-weight:800;margin-bottom:5px}.hdr .sub{font-size:14px;opacity:.9;margin-top:4px}.hdr .lic{font-size:13px;opacity:.85;margin-top:6px;border:1px solid rgba(255,255,255,.4);display:inline-block;padding:3px 14px;border-radius:20px;font-weight:600}.body{padding:24px 28px}.sec{margin-bottom:18px}.st{font-size:12px;font-weight:800;color:#1a5276;border-bottom:2.5px solid #d6eaf8;padding-bottom:5px;margin-bottom:10px;display:flex;align-items:center;gap:7px}.st::before{content:'';display:inline-block;width:3px;height:16px;background:#1a5276;border-radius:2px}.row{display:flex;justify-content:space-between;padding:5px 8px;font-size:14px;border-bottom:1px solid #f0f4f8;border-radius:4px}.row:nth-child(even){background:#f8fafc}.row .l{color:#4a6278}table{width:100%;border-collapse:collapse;font-size:13px}thead tr{background:#1a5276}th{padding:10px 11px;text-align:right;font-weight:700;color:#fff;font-size:12px}td{padding:8px 11px;border-bottom:1px solid #eaf2fb;text-align:right}tr:nth-child(even) td{background:#f8fafc}.tot{background:linear-gradient(135deg,#f0f4f8,#e8f4fd);padding:16px;border-radius:10px;border:1.5px solid #d6eaf8;margin-top:10px}.tr{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}.tr.disc{color:#c0392b}.tr.big{font-size:18px;font-weight:800;border-top:2px solid #aed6f1;margin-top:8px;padding-top:10px;color:#1a5276}.tr.grn{color:#117a65;font-weight:700;font-size:14px}.tr.red{color:#c0392b;font-weight:700;font-size:14px}.terms{background:#f0f7ff;border:1.5px solid #c5d8ea;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:13px;line-height:2;color:#2c3e50;white-space:pre-line;font-weight:600}.terms-t{font-weight:800;color:#1a5276;margin-bottom:6px;font-size:12px;display:block}.sig{display:flex;justify-content:space-between;padding-top:14px;border-top:1px dashed #aed6f1;gap:30px;margin-top:16px}.sig-box{text-align:center;font-size:12px;color:#888;flex:1}.sig-dots{border-bottom:2px dotted #aaa;height:50px;margin:0 auto 8px;width:100%}.sig-name{font-size:13px;font-weight:700;color:#1a5276;margin-top:3px}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{@page{margin:8mm;size:A4}body{padding:0;background:white;display:block}.page{box-shadow:none;border-radius:0;width:100%}}
+<style>*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:'Cairo',Arial,sans-serif;padding:12px;direction:rtl;color:#1a2535;font-size:13px;line-height:1.65;background:#f8fafc;display:flex;justify-content:center;align-items:flex-start}
+.page{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);width:100%;max-width:680px;flex-shrink:0}
+.hdr{background:linear-gradient(135deg,#1a3a5c,#1a5276,#117a65);color:#fff;padding:18px 24px;text-align:center}
+.hdr .co{font-size:15px;font-weight:700;opacity:.95;margin-bottom:3px;letter-spacing:.5px}
+.hdr h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.hdr .sub{font-size:13px;opacity:.9;margin-top:3px}
+.hdr .lic{font-size:12px;opacity:.85;margin-top:5px;border:1px solid rgba(255,255,255,.4);display:inline-block;padding:2px 12px;border-radius:20px;font-weight:600}
+.body{padding:16px 20px}
+.sec{margin-bottom:14px}
+.st{font-size:11px;font-weight:800;color:#1a5276;border-bottom:2px solid #d6eaf8;padding-bottom:4px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.st::before{content:'';display:inline-block;width:3px;height:14px;background:#1a5276;border-radius:2px}
+.row{display:flex;justify-content:space-between;padding:4px 7px;font-size:13px;border-bottom:1px solid #f0f4f8;border-radius:3px}
+.row:nth-child(even){background:#f8fafc}
+.row .l{color:#4a6278}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:#1a5276}
+th{padding:8px 10px;text-align:right;font-weight:700;color:#fff;font-size:11px}
+td{padding:6px 10px;border-bottom:1px solid #eaf2fb;text-align:right}
+tr:nth-child(even) td{background:#f8fafc}
+.tot{background:linear-gradient(135deg,#f0f4f8,#e8f4fd);padding:12px;border-radius:8px;border:1.5px solid #d6eaf8;margin-top:8px}
+.tr{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}
+.tr.disc{color:#c0392b}
+.tr.big{font-size:17px;font-weight:800;border-top:2px solid #aed6f1;margin-top:6px;padding-top:8px;color:#1a5276}
+.tr.grn{color:#117a65;font-weight:700;font-size:13px}
+.tr.red{color:#c0392b;font-weight:700;font-size:13px}
+.terms{background:#f0f7ff;border:1.5px solid #c5d8ea;border-radius:7px;padding:10px 14px;margin-bottom:12px;font-size:12px;line-height:1.9;color:#2c3e50;font-weight:600}
+.terms-t{font-weight:800;color:#1a5276;margin-bottom:5px;font-size:11px;display:block}
+.sig{display:flex;justify-content:space-between;padding-top:12px;border-top:1px dashed #aed6f1;gap:24px;margin-top:12px}
+.sig-box{text-align:center;font-size:11px;color:#888;flex:1}
+.sig-dots{border-bottom:2px dotted #aaa;height:44px;margin:0 auto 6px;width:100%}
+.sig-name{font-size:12px;font-weight:700;color:#1a5276;margin-top:2px}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+@media print{
+  @page{margin:6mm;size:A4}
+  html,body{padding:0;background:white;display:block;font-size:11px}
+  .page{box-shadow:none;border-radius:0;width:100%;max-width:100%}
+  .hdr{padding:12px 18px}
+  .hdr h1{font-size:18px}
+  .body{padding:10px 14px}
+  .row{font-size:11px;padding:3px 6px}
+  .tr{font-size:11px}
+  .tr.big{font-size:14px}
+  table{font-size:11px}
+  th{padding:6px 8px;font-size:10px}
+  td{padding:4px 8px}
+  .sec{margin-bottom:10px}
+  .sig-dots{height:36px}
+}
 table{table-layout:fixed;word-wrap:break-word}</style></head><body>
 <div class="page">
 <div class="hdr">${logo}${m.company?`<div class="co">${m.company}</div>`:''}<h1>${m.name||'إيصال حجز'}</h1>${m.contact?`<div class="sub">${m.contact}</div>`:''}${m.license?`<div class="lic">رقم الترخيص: ${m.license}</div>`:''}<div class="sub" style="margin-top:6px;opacity:.7">رقم: #${String(b.id).slice(-6)} · ${b.created||''}</div></div>
@@ -3109,7 +3317,7 @@ function renderClosing(){
   out.innerHTML=`
     <div style="background:linear-gradient(135deg,#1a5276,#117a65);border-radius:14px;padding:1rem 1.5rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <div><div style="font-size:18px;font-weight:800;color:#fff">تقفيلة فوج ${conv.label}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">دخول ${conv.checkin} · Log Out ${conv.checkout} · ${rows.length} عميل</div></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">دخول ${conv.checkin} · خروج ${conv.checkout} · ${rows.length} عميل</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:.5rem .875rem;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.7)">الإجمالي</div><div style="font-size:16px;font-weight:800;color:#fff">${n(T.total)} ج</div></div>
         <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:.5rem .875rem;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.7)">المحصل</div><div style="font-size:16px;font-weight:800;color:#2ecc71">${n(T.paid)} ج</div></div>
@@ -3278,10 +3486,21 @@ window.addPayTo = async function(id){
   overlay.id='pay-popup-overlay';
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)';
   overlay.onclick=ev=>{if(ev.target===overlay)overlay.remove();};
-
+  const isDark=document.body.classList.contains('dark');
+  const cardBg=isDark?'var(--sf)':'#fff';
+  const bodyBg=isDark?'var(--sf2)':'#f8fafc';
+  const borderC=isDark?'var(--bd)':'#eee';
+  const labelC=isDark?'var(--tx2)':'#4a6278';
+  const inputBg=isDark?'var(--sf)':'#fff';
+  const inputBorder=isDark?'var(--bd2)':'#d6eaf8';
+  const inputC=isDark?'var(--tx)':'#1a5276';
+  const subC=isDark?'var(--tx3)':'#888';
+  const cancelBg=isDark?'var(--sf2)':'#fff';
+  const cancelBorder=isDark?'var(--bd2)':'#ddd';
+  const cancelC=isDark?'var(--tx)':'#333';
   const today=new Date().toISOString().split('T')[0];
   overlay.innerHTML=`
-    <div style="background:#fff;border-radius:16px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3);direction:rtl;font-family:Cairo,Arial,sans-serif">
+    <div style="background:${cardBg};border-radius:16px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4);direction:rtl;font-family:Cairo,Arial,sans-serif">
       <!-- Header -->
       <div style="background:linear-gradient(135deg,#117a65,#1abc9c);color:#fff;padding:16px 20px">
         <div style="font-size:12px;opacity:.8;margin-bottom:3px">إضافة دفعة جديدة</div>
@@ -3338,10 +3557,13 @@ window.addPayTo = async function(id){
 };
 
 window.selectPayMethod = function(btn, method){
+  const isDark=document.body.classList.contains('dark');
   document.querySelectorAll('#pay-method-btns button').forEach(b=>{
-    b.style.background='#fff';b.style.color='#4a6278';b.style.borderColor='#d6eaf8';
+    b.style.background=isDark?'var(--sf2)':'#fff';
+    b.style.color=isDark?'var(--tx2)':'#4a6278';
+    b.style.borderColor=isDark?'var(--bd2)':'#d6eaf8';
   });
-  btn.style.background='#1a5276';btn.style.color='#fff';btn.style.borderColor='#1a5276';
+  btn.style.background='var(--pr)';btn.style.color='#fff';btn.style.borderColor='var(--pr)';
   document.getElementById('pay-popup-method').value=method;
 };
 
@@ -3460,7 +3682,7 @@ window.renderAccDetail = function(key){
 
 // 1. ROLE NAME EDITING + CUSTOM ROLES
 const ROLE_LABELS = {
-  admin:'[GM]',bookings:'حجوزات',accounts:'حسابات',
+  admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',
   operations:'عمليات',viewer:'مشاهد'
 };
 // NOTE: customRoleLabels already defined above — just extend it, don't redefine
@@ -3668,7 +3890,7 @@ window.showEntryPopup = async function(id){
       </td>
       <td style="padding:9px 10px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#555;max-width:240px">
         <div style="font-weight:600;color:#333">${p.desc||p.clientName||'-'}</div>
-        ${linkedBk?`<div style="font-size:11px;color:#555;margin-top:2px;line-height:1.7">دخول: ${linkedBk.checkin||'-'}<br>Log Out: ${linkedBk.checkout||'-'}<br>الشقق: ${(linkedBk.apts||[]).join('، ')||'-'}</div>`:''}
+        ${linkedBk?`<div style="font-size:11px;color:#555;margin-top:2px;line-height:1.7">دخول: ${linkedBk.checkin||'-'}<br>خروج: ${linkedBk.checkout||'-'}<br>الشقق: ${(linkedBk.apts||[]).join('، ')||'-'}</div>`:''}
         ${p.date&&!linkedBk?`<div style="font-size:11px;color:#aaa;margin-top:1px">${p.date}</div>`:''}
       </td>
       <td style="padding:9px 10px;border-bottom:1px solid #f0f0f0;text-align:left;font-weight:800;font-size:15px;color:${isDr?'#c0392b':'#ccc'}">${isDr?p.amount.toLocaleString():'-'}</td>
@@ -4036,7 +4258,7 @@ window.renderDesignPreview = function(){
     const p=conv?PRICE_MAP[conv.checkin]||{single:9400,double:12800}:{single:9400,double:12800};
     priceRowsHtml=`<div style="text-align:center;padding:15px">
       <div style="font-size:${parseInt(fontSize)*1.5}px;font-weight:800;color:${textColor}">${conv?conv.label:'اختر الفوج'}</div>
-      <div style="font-size:${fontSize}px;color:${textColor};opacity:.8;margin:8px 0">دخول ${conv?.checkin||'--'} · Log Out ${conv?.checkout||'--'}</div>
+      <div style="font-size:${fontSize}px;color:${textColor};opacity:.8;margin:8px 0">دخول ${conv?.checkin||'--'} · خروج ${conv?.checkout||'--'}</div>
       <div style="display:flex;justify-content:center;gap:20px;margin-top:10px">
         <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 20px">
           <div style="font-size:${parseInt(fontSize)-2}px;color:${textColor};opacity:.8">غرفة</div>
