@@ -489,7 +489,7 @@ tr:hover td{background:#f5f8fc}
   <div id="rpt-out"></div>
 </div></div>
 <!-- LOG -->
-<div id="log" class="sec"><div class="card"><div class="ctitle">سجل النشاط <span class="badge b-pu" style="font-size:10px">أدمن فقط</span></div>
+<div id="log" class="sec"><div class="card"><div class="ctitle">سجل النشاط <span class="badge b-pu" style="font-size:10px">[GM] Only</span></div>
   <div style="display:flex;gap:7px;margin-bottom:.75rem;flex-wrap:wrap">
     <input type="text" id="log-q" placeholder="ابحث في السجل..." style="max-width:220px" oninput="renderLog()">
     <select id="log-tf" onchange="renderLog()" style="max-width:130px"><option value="">كل الأنواع</option><option value="add">إضافة</option><option value="del">حذف</option><option value="edit">تعديل</option><option value="login">دخول</option></select>
@@ -615,7 +615,7 @@ function getAllRoles(){return{...ROLE_DEFAULTS,...customRoles};}
 function saveCustomRoles(){try{localStorage.setItem('mtr_custom_roles',JSON.stringify(customRoles));}catch(e){}}
 function getRoleLabel(role){
   if(customRoleLabels[role])return customRoleLabels[role];
-  var defaults={admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'};
+  var defaults={admin:'[GM]',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'};
   return defaults[role]||role;
 }
 const TAB_PERMS={reports:null,log:'view_log',users:'manage_users',mgr:'settings',prices:'manage_prices',design:'view_design'};
@@ -780,7 +780,7 @@ async function doLogin(){
   const f=users.find(x=>x.username===u&&x.password===p);
   if(!f){document.getElementById('login-err').style.display='block';return;}
   document.getElementById('login-err').style.display='none';
-  await addLog('تسجيل دخول','login',`${f.name} · دور: ${{admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]||f.role}`);
+  await addLog('تسجيل دخول','login',`${f.name} · دور: ${{admin:'[GM]',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]||f.role}`);
   loginUser(f);
 }
 function loginUser(f){
@@ -789,7 +789,7 @@ function loginUser(f){
   // Read lastTab BEFORE applyPerms (applyPerms no longer calls showTab)
   const lastTab=localStorage.getItem('mtr_last_tab')||'dash';
   hideAll();show('app');
-  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'أدمن',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
+  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'[GM]',bookings:'حجوزات',accounts:'حسابات',operations:'عمليات',viewer:'مشاهد'}[f.role]:f.role);
   document.getElementById('dark-btn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
   document.getElementById('lang-btn').textContent=lang==='ar'?'EN':'ع';
   applyPerms();updateLogoDsp();
