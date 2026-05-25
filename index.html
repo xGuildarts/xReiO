@@ -294,8 +294,8 @@ textarea{resize:vertical;min-height:60px}
 .b-gy{background:var(--sf2);color:var(--tx2)}
 .b-pu{background:var(--pul);color:var(--pu)}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th{text-align:right;padding:10px 11px;border-bottom:2px solid var(--prl);color:var(--pr);font-weight:700;font-size:13px;background:var(--sf2);white-space:nowrap}
-td{padding:9px 11px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle}
+th{text-align:right;padding:10px 13px;border-bottom:2px solid var(--prl);color:var(--pr);font-weight:700;font-size:14px;background:var(--sf2);white-space:nowrap}
+td{padding:10px 13px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f5f8fc}
 .tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd)}
@@ -340,20 +340,20 @@ tr:hover td{background:#f5f8fc}
 .bus-wrap{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rl);padding:1rem;overflow-x:auto}
 .bus-top{text-align:center;margin-bottom:.65rem;font-size:13px;font-weight:700;color:var(--pr)}
 .bus-driver{width:54px;height:32px;background:var(--pr);color:#fff;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin:0 auto .45rem}
-.bus-row{display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:5px}
-.bus-aisle{width:16px;flex-shrink:0;text-align:center;font-size:9px;color:var(--tx3)}
-.seat{width:250px;height:180px;border-radius:var(--r);border:2px solid var(--bd2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:var(--sf);padding:6px;transition:all .15s;flex-shrink:0;user-select:none}
+.bus-row{display:flex;gap:5px;align-items:stretch;justify-content:center;margin-bottom:5px}
+.bus-aisle{width:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--tx3)}
+.seat{width:250px;min-height:180px;border-radius:var(--r);border:2px solid var(--bd2);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:pointer;background:var(--sf);padding:10px 8px;transition:all .15s;flex-shrink:0;user-select:none}
 .seat.empty{border-style:dashed}
 .seat.empty:hover{border-color:var(--pr);background:var(--prl)}
 .seat.taken{cursor:grab;border-color:transparent}
 .seat.taken:hover{opacity:.85}
 .seat.taken.drag-over{outline:3px solid rgba(255,255,255,.8);outline-offset:-3px}
 .seat.dragging{opacity:.3}
-.snum{font-size:16px;font-weight:700;margin-bottom:2px}
-.seat.empty .snum{color:var(--bd2);font-size:26px}
+.snum{font-size:18px;font-weight:700;margin-bottom:4px}
+.seat.empty .snum{color:var(--bd2);font-size:28px}
 .seat.taken .snum{color:rgba(255,255,255,.7)}
-.sname{font-size:18px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
-.sphone{font-size:18px;color:rgba(255,255,255,.9)}
+.sname{font-size:19px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
+.sphone{font-size:16px;color:rgba(255,255,255,.9)}
 .splace{font-size:16px;color:rgba(255,255,255,.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
 .bus-legend{display:flex;gap:8px;justify-content:center;margin-top:.65rem;font-size:11px;flex-wrap:wrap;color:var(--tx2)}
 .pickup-summary{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.65rem}
@@ -387,9 +387,15 @@ tr:hover td{background:#f5f8fc}
   table{width:100%!important;font-size:12px!important}
   .tbl-wrap{overflow:visible!important}
   .stat{break-inside:avoid}
-  .seat{width:80px!important;height:70px!important}
+  .seat{width:130px!important;min-height:115px!important;font-size:12px!important}
+  .sname{font-size:14px!important}
+  .sphone{font-size:12px!important}
+  .splace{font-size:11px!important}
+  .snum{font-size:12px!important}
+  .seat.empty .snum{font-size:25px!important}
   .bus-wrap{overflow:visible!important}
-  .bus-row{flex-wrap:wrap!important}
+  .bus-row{flex-wrap:nowrap!important}
+  .bus-aisle{width:16px!important}
 }
 </style>
 </head>
@@ -424,12 +430,12 @@ tr:hover td{background:#f5f8fc}
     <div id="login-logo-ph" class="logo-ph">🏖</div>
     <img id="login-logo-img" style="display:none;width:72px;height:72px;border-radius:50%;object-fit:cover">
   </div>
-  <div class="login-title" id="login-title">Adriaska Tourss Matrouh 2026</div>
+  <div class="login-title" id="login-title">Adriaska Tours</div>
   <div class="login-sub">سجل الدخول للمتابعة</div>
   <div class="login-err" id="login-err">اسم المستخدم أو كلمة المرور غلط</div>
   <div class="fg"><label>اسم المستخدم</label><input type="text" id="login-user" placeholder="username"></div>
   <div class="fg"><label>كلمة المرور</label><input type="password" id="login-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-  <button class="btn btn-p" style="width:100%;margin-top:.5rem" onclick="doLogin()">Log IN</button>
+  <button class="btn btn-p" style="width:100%;margin-top:.5rem" onclick="doLogin()">Log In</button>
 </div>
 </div>
 
@@ -439,11 +445,11 @@ tr:hover td{background:#f5f8fc}
   <div class="hdr-l">
     <div id="hdr-lph" class="hdr-logo-ph">🏖</div>
     <img id="hdr-limg" class="hdr-logo" style="display:none">
-    <div><div class="hdr-title" id="sys-name">نظام حجوزات مطروح 2026</div><div class="hdr-sub">28 مايو ← 20 سبتمبر · 14 شقة · 23 فوج</div></div>
+    <div><div class="hdr-title" id="sys-name">Adriaska Tours Tanta</div><div class="hdr-sub">xReiOgami[GM]</div></div>
   </div>
   <div id="viewer-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#c0392b;color:#fff;text-align:center;padding:6px;font-size:12px;font-weight:700;z-index:999;class:viewer-banner">وضع المشاهدة فقط - لا يمكنك إجراء أي تعديلات</div>
 <div class="hdr-r">
-    <div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">Online</span></div>
+    <div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">Connected</span></div>
     <div class="user-pill" id="hdr-user">—</div>
     <button class="hbtn" onclick="toggleDark()" id="dark-btn">🌙</button>
     <button class="hbtn" onclick="toggleLang()" id="lang-btn">EN</button>
@@ -579,10 +585,10 @@ tr:hover td{background:#f5f8fc}
       <select id="cl-status" onchange="renderClients()" style="max-width:130px"><option value="">كل الحالات</option><option value="done">مكتمل</option><option value="pending">باقي</option></select>
       <select id="cl-party-f" onchange="renderClients()" style="max-width:130px"><option value="">الكل</option><option value="client">عملاء</option><option value="supplier">موردين</option></select>
     </div>
-    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>باص</th><th>داخلي</th><th>مكان الركوب</th><th>المسؤول</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th><th></th></tr></thead><tbody id="cl-tbl"></tbody></table></div></div>
+    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>كراسي الباص</th><th>داخلي</th><th>أفراد</th><th>أطفال</th><th>مكان الركوب</th><th>المسؤول</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th><th></th></tr></thead><tbody id="cl-tbl"></tbody></table></div></div>
   </div>
   <div id="cl-det" style="display:none">
-    <button class="btn" style="margin-bottom:.65rem" onclick="showClList()">← رجوع</button>
+    <button class="btn" style="margin-bottom:.65rem" onclick="showClList()">← Back</button>
     <div id="cl-content"></div>
   </div>
 </div>
@@ -692,7 +698,7 @@ tr:hover td{background:#f5f8fc}
   <!-- PANEL: manage hotels -->
   <div id="hpanel-manage" style="display:none">
     <!-- Preset Hotels Seeder -->
-    <div class="card" style="background:var(--acl);border-color:var(--ac);margin-bottom:.75rem">
+    <!--<div class="card" style="background:var(--acl);border-color:var(--ac);margin-bottom:.75rem">
       <div class="ctitle" style="color:var(--ac)">🏨 إضافة فنادق جاهزة دفعة واحدة</div>
       <div style="font-size:12px;color:var(--tx2);margin-bottom:.65rem">اضغط على الوجهة لإضافة كل فنادقها المعروفة دفعة واحدة — مش هيتضاف اللي موجود بالفعل</div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
@@ -934,38 +940,38 @@ tr:hover td{background:#f5f8fc}
   <!-- TABS for users section -->
   <div class="card" style="margin-bottom:.75rem;padding:.5rem .75rem">
     <div style="display:flex;gap:4px;flex-wrap:wrap">
-      <button class="btn" id="utab-users" onclick="switchUsersTab('users')" style="background:var(--pr);color:#fff;border-color:var(--pr)">👥 Users</button>
-      <button class="btn" id="utab-roles" onclick="switchUsersTab('roles')">🔑 Roles & Permissions</button>
+      <button class="btn" id="utab-users" onclick="switchUsersTab('users')" style="background:var(--pr);color:#fff;border-color:var(--pr)">👥 المستخدمين</button>
+      <button class="btn" id="utab-roles" onclick="switchUsersTab('roles')">🔑 الأدوار والصلاحيات</button>
     </div>
   </div>
   <!-- Users list panel -->
   <div id="upanel-users">
     <div class="card">
-      <div class="ctitle">Users</div>
+      <div class="ctitle">المستخدمين</div>
       <div id="users-list"></div>
       <div class="hr"></div>
-      <div class="ctitle" style="font-size:13px">➕ Add New User</div>
+      <div class="ctitle" style="font-size:13px">➕ إضافة مستخدم جديد</div>
       <div class="g3">
-        <div class="fg"><label>User Name <span class="req">*</span></label><input type="text" id="nu-user" placeholder="username (بالإنجليزية)"></div>
-        <div class="fg"><label>Password <span class="req">*</span></label><input type="text" id="nu-pass" placeholder="كلمة المرور"></div>
-        <div class="fg"><label>Full Name <span class="req">*</span></label><input type="text" id="nu-name" placeholder="الاسم بالعربي"></div>
+        <div class="fg"><label>اسم المستخدم <span class="req">*</span></label><input type="text" id="nu-user" placeholder="username (بالإنجليزية)"></div>
+        <div class="fg"><label>كلمة المرور <span class="req">*</span></label><input type="text" id="nu-pass" placeholder="كلمة المرور"></div>
+        <div class="fg"><label>الاسم الكامل <span class="req">*</span></label><input type="text" id="nu-name" placeholder="الاسم بالعربي"></div>
       </div>
-      <div class="fg" style="max-width:280px"><label>Role</label><select id="nu-role"></select></div>
-      <button class="btn btn-p" onclick="addUser()">➕ Add Role</button>
+      <div class="fg" style="max-width:280px"><label>الدور</label><select id="nu-role"></select></div>
+      <button class="btn btn-p" onclick="addUser()">➕ إضافة</button>
     </div>
   </div>
   <!-- Roles panel -->
   <div id="upanel-roles" style="display:none">
     <div class="card">
-      <div class="ctitle">🔑 Roles & Permissions</div>
+      <div class="ctitle">🔑 الأدوار والصلاحيات</div>
       <div class="info-box" style="font-size:12px">يمكنك إنشاء أدوار مخصصة وتحديد صلاحياتها بحرية. الأدوار الأساسية (admin, bookings, accounts, operations, viewer) ثابتة ولكن يمكن تعديل اسمها.</div>
       <div id="roles-list"></div>
       <div class="hr"></div>
-      <div class="ctitle" style="font-size:13px">➕ Add Roles  </div>
+      <div class="ctitle" style="font-size:13px">➕ إضافة دور جديد</div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:flex-end">
-        <div class="fg" style="margin-bottom:0;flex:1;min-width:160px"><label>Role Name  (عربي للعرض)</label><input type="text" id="nr-label" placeholder="مثال: مشرف الباص"></div>
-        <div class="fg" style="margin-bottom:0;flex:1;min-width:140px"><label>Role Expression (انجليزي)</label><input type="text" id="nr-id" placeholder="مثال: bus_supervisor"></div>
-        <button class="btn btn-p" onclick="addCustomRole()" style="white-space:nowrap">➕ Add Role</button>
+        <div class="fg" style="margin-bottom:0;flex:1;min-width:160px"><label>اسم الدور (عربي للعرض)</label><input type="text" id="nr-label" placeholder="مثال: مشرف الباص"></div>
+        <div class="fg" style="margin-bottom:0;flex:1;min-width:140px"><label>معرف الدور (انجليزي)</label><input type="text" id="nr-id" placeholder="مثال: bus_supervisor"></div>
+        <button class="btn btn-p" onclick="addCustomRole()" style="white-space:nowrap">➕ إضافة دور</button>
       </div>
     </div>
   </div>
@@ -1060,7 +1066,7 @@ tr:hover td{background:#f5f8fc}
 // ALL CONSTANTS - defined first, no conflicts
 // ============================================================
 const EGYPT_CITIES={'القاهرة':['القاهرة','مدينة نصر','مصر الجديدة','المعادي','الزمالك','شبرا','عين شمس','حلوان','التجمع الخامس','المقطم','6 أكتوبر'],'الجيزة':['الجيزة','الدقي','المهندسين','الشيخ زايد','فيصل','إمبابة'],'الإسكندرية':['الإسكندرية','سيدي بشر','المنتزه','العجمي','العامرية','برج العرب'],'الغربية':['طنطا','المحلة الكبرى','كفر الزيات','زفتى','السنطة'],'المنوفية':['شبين الكوم','منوف','أشمون','قويسنا','بركة السبع'],'الدقهلية':['المنصورة','طلخا','ميت غمر','أجا','المنزلة','بلقاس'],'الشرقية':['الزقازيق','العاشر من رمضان','بلبيس','أبو كبير','فاقوس'],'الإسماعيلية':['الإسماعيلية','فايد','القنطرة'],'بورسعيد':['بورسعيد'],'السويس':['السويس','عتاقة'],'دمياط':['دمياط','رأس البر'],'كفر الشيخ':['كفر الشيخ','دسوق','فوه','بلطيم'],'البحيرة':['دمنهور','كفر الدوار','رشيد'],'مطروح':['مرسى مطروح','الضبعة','العلمين','سيوة','الحمام','رأس الحكمة'],'أسوان':['أسوان','كوم أمبو'],'الأقصر':['الأقصر','إسنا'],'قنا':['قنا','نجع حمادي','دشنا'],'سوهاج':['سوهاج','أخميم','طهطا'],'أسيوط':['أسيوط','ديروط','القوصية'],'المنيا':['المنيا','ملوي','سمالوط','مغاغة'],'بني سويف':['بني سويف','ناصر','ببا'],'الفيوم':['الفيوم','طامية'],'شمال سيناء':['العريش','رفح'],'جنوب سيناء':['شرم الشيخ','دهب','طابا'],'البحر الأحمر':['الغردقة','سفاجا','مرسى علم'],'الوادي الجديد':['الخارجة','الداخلة']};
-const APTS={'403':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'404':{desc:'غرفتين · تكيف',type:'double',seats:4},'503':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'601':{desc:'غرفة · مكيفة',type:'single',seats:2},'602':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'603':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'604':{desc:'غرفتين · تكيف',type:'double',seats:4},'704':{desc:'غرفتين · مكيفة غرف',type:'double',seats:4},'801':{desc:'غرفة · مكيفة',type:'single',seats:2},'802':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'803':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'804':{desc:'غرفتين · مكيفة غرف',type:'double',seats:4},'902':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'904':{desc:'غرفتين · ترى البحر',type:'double',seats:4}};
+const APTS={'403':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'404':{desc:'غرفتين · تكيف',type:'double',seats:4},'503':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'601':{desc:'غرفة · مكيفة',type:'single',seats:2},'602':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'603':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'604':{desc:'غرفتين · تكيف',type:'double',seats:4},'704':{desc:'غرفتين · مراوح',type:'double',seats:4},'801':{desc:'غرفة · مكيفة',type:'single',seats:2},'802':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'803':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'804':{desc:'غرفتين · مراوح',type:'double',seats:4},'902':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'904':{desc:'غرفتين · ترى البحر',type:'double',seats:4}};
 const APT_LIST=Object.keys(APTS);
 // DEFAULT PRICE MAP - overridden by settings
 const DEFAULT_PRICE_MAP={'2026-05-28':{single:8500,double:9900},'2026-06-02':{single:3700,double:6800},'2026-06-07':{single:3700,double:6800},'2026-06-12':{single:3900,double:7800},'2026-06-17':{single:3900,double:7800},'2026-06-22':{single:8500,double:9900},'2026-06-27':{single:8500,double:9900},'2026-07-02':{single:5400,double:8800},'2026-07-07':{single:8500,double:9900},'2026-07-12':{single:8500,double:9900},'2026-07-17':{single:9400,double:12800},'2026-07-22':{single:9400,double:12800},'2026-07-27':{single:9400,double:12800},'2026-08-01':{single:9400,double:12800},'2026-08-06':{single:9400,double:12800},'2026-08-11':{single:9400,double:12800},'2026-08-16':{single:9400,double:12800},'2026-08-21':{single:9400,double:12800},'2026-08-26':{single:9400,double:12800},'2026-08-31':{single:9400,double:12800},'2026-09-05':{single:9400,double:12800},'2026-09-10':{single:9400,double:12800},'2026-09-15':{single:9400,double:12800},
@@ -1224,7 +1230,7 @@ function saveCustomRoles(){
 }
 function getRoleLabel(role){
   if(customRoleLabels[role])return customRoleLabels[role];
-  var defaults={admin:'GM',bookings:'Sales',accounts:'Actuntant',operations:'Operations',viewer:'Viewer'};
+  var defaults={admin:'GM',bookings:'Bookings',accounts:'Acountant',operations:'Operations',viewer:'Viewer'};
   return defaults[role]||role;
 }
 function renderBypassUsers(){
@@ -1233,7 +1239,7 @@ function renderBypassUsers(){
   const allUsers=typeof users!=='undefined'?users:[];
   const bypassUsers=allUsers.filter(u=>u.role==='admin'||(u.custom_perms||[]).includes('bypass_lock'));
   if(!bypassUsers.length){el.innerHTML='<span style="font-size:12px;color:var(--tx3)">لا يوجد مستخدمين بهذه الصلاحية — أضفها من تاب المستخدمين</span>';return;}
-  el.innerHTML=bypassUsers.map(u=>`<div style="padding:7px 14px;border-radius:8px;background:var(--acl);border:1px solid var(--ac);font-size:12px;font-weight:700;color:var(--ac)">👤 ${u.name} <span style="font-weight:400;color:var(--tx2);font-size:11px">(${u.role==='admin'?'أدمن':u.role})</span></div>`).join('');
+  el.innerHTML=bypassUsers.map(u=>`<div style="padding:7px 14px;border-radius:8px;background:var(--acl);border:1px solid var(--ac);font-size:12px;font-weight:700;color:var(--ac)">👤 ${u.name} <span style="font-weight:400;color:var(--tx2);font-size:11px">(${u.role==='admin'?'GM':u.role})</span></div>`).join('');
 }
 
 function _lockTableHTML(){
@@ -1453,9 +1459,17 @@ let settings={name:'مصيف مطروح 2026',company:'',contact:'',license:'',l
 let currentUser=null,selApts=[],activeBusConv=null,activeBusIdx=0,dragInfo=null,poolDragInfo=null,activeAccTab='accounts|'+PM_TYPES[0],lang='ar';
 // Bus names & multi-bus per convoy: {convoyNum: ['الباص الأول', 'الباص الثاني']}
 let BUS_NAMES={};
-function saveBusNames(){try{localStorage.setItem('mtr_bus_names',JSON.stringify(BUS_NAMES));}catch(e){}if(typeof sbFetch==='function'){sbFetch('mtr_settings','PATCH',{bus_names:JSON.stringify(BUS_NAMES)},'?id=eq.1').catch(()=>{});}}
-function loadBusNames(settingsRow){if(settingsRow?.bus_names){try{const p=JSON.parse(settingsRow.bus_names);if(p&&typeof p==='object')BUS_NAMES={...p};}catch(e){}}else{try{const s=localStorage.getItem('mtr_bus_names');if(s)BUS_NAMES=JSON.parse(s);}catch(e){}}}
-function getBusNames(cn){return BUS_NAMES[cn]||['الباص الأول'];}
+function saveBusNames(){
+  // Normalize all keys to strings before saving
+  const normalized={};Object.entries(BUS_NAMES).forEach(([k,v])=>{normalized[String(k)]=v;});
+  try{localStorage.setItem('mtr_bus_names',JSON.stringify(normalized));}catch(e){}
+  if(typeof sbFetch==='function'){sbFetch('mtr_settings','PATCH',{bus_names:JSON.stringify(normalized)},'?id=eq.1').catch(()=>{});}
+}
+function loadBusNames(settingsRow){
+  if(settingsRow?.bus_names){
+    try{const p=JSON.parse(settingsRow.bus_names);if(p&&typeof p==='object'){const normalized={};Object.entries(p).forEach(([k,v])=>{normalized[String(k)]=v;});BUS_NAMES={...normalized};}}catch(e){}
+  }else{try{const s=localStorage.getItem('mtr_bus_names');if(s){const p=JSON.parse(s);const normalized={};Object.entries(p).forEach(([k,v])=>{normalized[String(k)]=v;});BUS_NAMES=normalized;}}catch(e){}}}
+function getBusNames(cn){return BUS_NAMES[String(cn)]||['الباص الأول'];}
 function getBusCount(cn){return getBusNames(cn).length;}
 
 // ============================================================
@@ -1464,7 +1478,7 @@ function getBusCount(cn){return getBusNames(cn).length;}
 const SB_URL_KEY='mtr_sb_url',SB_KEY_KEY='mtr_sb_key';
 function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'}}
 function setSyncing(v){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot'+(v?' s':'');if(t)t.textContent=v?'Connecting...':'Connected'}
-function setSyncErr(){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot e';if(t)t.textContent='Error'}
+function setSyncErr(){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot e';if(t)t.textContent='خطأ'}
 
 async function sbFetch(table,method='GET',body=null,query=''){
   setSyncing(true);
@@ -1623,7 +1637,7 @@ async function doLogin(){
   const f=users.find(x=>x.username===u&&x.password===p);
   if(!f){document.getElementById('login-err').style.display='block';return;}
   document.getElementById('login-err').style.display='none';
-  await addLog('تسجيل دخول','login',`${f.name} · دور: ${{admin:'GM',bookings:'Sales',accounts:'Actountant',operations:'Operations',viewer:'Viewer'}[f.role]||f.role}`);
+  await addLog('تسجيل دخول','login',`${f.name} · دور: ${{admin:'GM',bookings:'Bookings',accounts:'Acountant',operations:'Oerations',viewer:'Viewer'}[f.role]||f.role}`);
   loginUser(f);
 }
 function loginUser(f){
@@ -1632,7 +1646,7 @@ function loginUser(f){
   // Read lastTab BEFORE applyPerms (applyPerms no longer calls showTab)
   const lastTab=localStorage.getItem('mtr_last_tab')||'dash';
   hideAll();show('app');
-  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'GM',bookings:'Sales',accounts:'Actountant',operations:'Operations',viewer:'Viewer'}[f.role]:f.role);
+  document.getElementById('hdr-user').textContent=f.name+' · '+(ROLE_DEFAULTS[f.role]?{admin:'GM',bookings:'Bookings',accounts:'Acountant',operations:'Oerations',viewer:'Viewer'}[f.role]:f.role);
   document.getElementById('dark-btn').textContent=document.body.classList.contains('dark')?'☀️':'🌙';
   document.getElementById('lang-btn').textContent=lang==='ar'?'EN':'AR';
   applyPerms();updateLogoDsp();
@@ -1643,7 +1657,7 @@ function loginUser(f){
   setTimeout(()=>{ showTab(lastTab); },350);
 }
 async function doLogout(){
-  await addLog('Log Out','login',currentUser?.name||'');
+  await addLog('تسجيل خروج','login',currentUser?.name||'');
   currentUser=null;sessionStorage.removeItem('mtr_sess');
   hideAll();show('login-pg');
   document.getElementById('login-user').value='';document.getElementById('login-pass').value='';
@@ -2012,7 +2026,7 @@ function renderDash(){
   const tb=document.getElementById('dash-tbl');
   if(!bookings.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--tx3);padding:2rem">لا توجد حجوزات</td></tr>';return;}
   tb.innerHTML=bookings.slice(0,15).map(b=>`<tr>
-    <td class="lnk" onclick="viewClient(${b.id})">${b.name}${b.partyType==='supplier'?'<span class="badge b-pu" style="margin-right:4px;font-size:9px">مورد</span>':''}${b.convoy2?'<span class="badge" style="background:var(--wnl);color:var(--wn);border:1px solid var(--wn);margin-right:3px;font-size:9px">⚠ فوجين</span>':''}</td>
+    <td class="lnk" onclick="viewClient(${b.id})">${b.name}${b.partyType==='supplier'?'<span class="badge b-pu" style="margin-right:4px;font-size:9px">مورد</span>':''}${b.convoy2?'<span class="badge" style="background:var(--wnl);color:var(--wn);border:1px solid var(--wn);margin-right:3px;font-size:15px">⚠ فوجين</span>':''}</td>
     <td style="font-size:11px">${b.phone||'-'}</td>
     <td>${(b.apts||[]).map(a=>`<span class="badge b-bl" style="margin:1px">${a}</span>`).join('')}${(b.apts2||[]).length?'<span style="color:var(--wn);font-size:9px;margin:0 2px">+</span>'+(b.apts2||[]).map(a=>`<span class="badge b-wn" style="margin:1px;font-size:10px">${a}</span>`).join(''):''}</td>
     <td><span class="badge b-gy" style="font-size:10px">${b.checkin}</span></td>
@@ -2213,18 +2227,19 @@ function addPayRow(){
 }
 async function saveBooking(){
   const pt=document.getElementById('f-party').value;
-  let name='',phone='',pickup='';
+  let name='',phone='',phone2='',pickup='';
   if(pt==='supplier'){
     const ss=document.getElementById('f-sup-sel');
     if(!ss.value){alert('اختار المورد');return;}
     const opt=ss.options[ss.selectedIndex];
     name=opt.dataset.name||opt.text;phone=document.getElementById('f-phone').value;
+    phone2=(document.getElementById('f-phone2')?.value||'').trim();
   }else{
     name=document.getElementById('f-name').value.trim();
     if(!name){document.getElementById('f-name').classList.add('err');return;}
     document.getElementById('f-name').classList.remove('err');
     phone=document.getElementById('f-phone').value.trim();
-  const phone2=(document.getElementById('f-phone2')?.value||'').trim();
+    phone2=(document.getElementById('f-phone2')?.value||'').trim();
   }
   const cnv=document.getElementById('f-convoy').value;
   if(!cnv){document.getElementById('f-convoy').classList.add('err');return;}
@@ -2334,13 +2349,16 @@ function renderClients(){
   });
   const tb=document.getElementById('cl-tbl');
   if(!f.length){tb.innerHTML='<tr><td colspan="13" style="text-align:center;color:var(--tx3);padding:2rem">لا توجد نتائج</td></tr>';return;}
-  tb.innerHTML=f.map(b=>`<tr>
+  tb.innerHTML=f.map(b=>{
+    return `<tr>
     <td class="lnk" onclick="viewClient(${b.id})">${b.name}${b.partyType==='supplier'?'<span class="badge b-pu" style="margin-right:3px;font-size:9px">مورد</span>':''}${b.convoy2?'<span class="badge" style="background:var(--wnl);color:var(--wn);border:1px solid var(--wn);margin-right:3px;font-size:9px">⚠ فوجين</span>':''}</td>
     <td style="font-size:11px">${b.phone||'-'}</td>
     <td>${(b.apts||[]).map(a=>`<span class="badge b-bl" style="margin:1px">${a}</span>`).join('')}${(b.apts2||[]).length?'<span style="color:var(--wn);font-size:9px;margin:0 2px">+</span>'+(b.apts2||[]).map(a=>`<span class="badge b-wn" style="margin:1px;font-size:10px">${a}</span>`).join(''):''}</td>
     <td><span class="badge b-gy" style="font-size:10px">${b.checkin}</span></td>
-    <td><span class="badge b-bl">${effSeatsTotal(b)}</span></td>
-    <td><span class="badge b-pu">${b.intSeats||0}</span></td>
+    <td style="text-align:center"><span class="badge b-gr" style="font-size:11px">${effSeats(b)}</span></td>
+    <td style="text-align:center"><span class="badge b-pu">${b.intSeats||0}</span></td>
+    <td style="text-align:center;font-weight:700;color:var(--pr)">${b.adults||0}</td>
+    <td style="text-align:center;font-weight:700;color:var(--ac)">${b.children||0}</td>
     <td style="font-size:11px;color:var(--ac)">${b.pickup||'-'}</td>
     <td><span class="badge b-gy" style="font-size:10px">${b.createdBy||'—'}</span></td>
     <td style="font-weight:700">${b.total.toLocaleString()} ج</td>
@@ -2348,7 +2366,7 @@ function renderClients(){
     <td style="color:var(--dn);font-weight:700">${b.remaining.toLocaleString()} ج</td>
     <td>${b.remaining<=0?'<span class="badge b-gr">مكتمل</span>':'<span class="badge b-wn">باقي</span>'}</td>
     <td><button class="btn btn-p btn-sm" onclick="printReceipt(${b.id})">إيصال</button><button class="btn btn-s btn-sm" onclick="printVoucher(${b.id},'receipt')">📥 استلام</button><button class="btn btn-d btn-sm" onclick="printVoucher(${b.id},'payment')">💸 صرف</button></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
 }
 function viewClient(id){
   const b=bookings.find(x=>x.id===id);if(!b)return;
@@ -2485,30 +2503,62 @@ function renderBusNameManager(cn){
   </div>`;
 }
 
+// ── Bus modal helpers ──────────────────────────────────────────
+function openBusModal(title, defaultVal, onOk){
+  const m=document.getElementById('bus-modal');
+  const inp=document.getElementById('bus-modal-input');
+  const okBtn=document.getElementById('bus-modal-ok');
+  document.getElementById('bus-modal-title').textContent=title;
+  inp.value=defaultVal||'';
+  m.style.display='flex';
+  inp.focus();inp.select();
+  // Remove old listeners
+  const newOk=okBtn.cloneNode(true);
+  okBtn.parentNode.replaceChild(newOk,okBtn);
+  function doOk(){
+    const v=document.getElementById('bus-modal-input').value.trim();
+    if(!v)return;
+    closeBusModal();
+    onOk(v);
+  }
+  document.getElementById('bus-modal-ok').addEventListener('click',doOk);
+  document.getElementById('bus-modal-input').onkeydown=e=>{if(e.key==='Enter')doOk();if(e.key==='Escape')closeBusModal();};
+}
+function closeBusModal(){
+  document.getElementById('bus-modal').style.display='none';
+}
+
 function addBusToConvoy(cn){
-  const name=prompt('اسم الباص الجديد:','الباص '+(getBusCount(cn)+1));
-  if(!name||!name.trim())return;
-  if(!BUS_NAMES[cn])BUS_NAMES[cn]=[...getBusNames(cn)];
-  BUS_NAMES[cn].push(name.trim());
-  saveBusNames();activeBusIdx=BUS_NAMES[cn].length-1;
-  renderBusNameManager(cn);renderBusLayout(cn,activeBusIdx);
+  openBusModal('اسم الباص الجديد', 'الباص '+(getBusCount(cn)+1), function(name){
+    const k=String(cn);
+    if(!BUS_NAMES[k])BUS_NAMES[k]=[...getBusNames(cn)];
+    BUS_NAMES[k].push(name);
+    saveBusNames();
+    activeBusIdx=BUS_NAMES[k].length-1;
+    renderBusNameManager(cn);
+    renderBusLayout(cn,activeBusIdx);
+  });
 }
 
 function renameBus(cn,idx){
   const names=getBusNames(cn);
-  const newName=prompt('اسم الباص:',names[idx]||'الباص '+(idx+1));
-  if(!newName||!newName.trim())return;
-  if(!BUS_NAMES[cn])BUS_NAMES[cn]=[...names];
-  BUS_NAMES[cn][idx]=newName.trim();
-  saveBusNames();renderBusNameManager(cn);renderBusLayout(cn,idx);
+  openBusModal('تعديل اسم الباص', names[idx]||'الباص '+(idx+1), function(newName){
+    const k=String(cn);
+    if(!BUS_NAMES[k])BUS_NAMES[k]=[...names];
+    BUS_NAMES[k][idx]=newName;
+    saveBusNames();
+    renderBusNameManager(cn);
+    renderBusLayout(cn,idx);
+  });
 }
 
 function removeBus(cn,idx){
   const names=getBusNames(cn);
   if(names.length<=1){alert('لا يمكن حذف الباص الوحيد');return;}
   if(!confirm('حذف الباص "'+names[idx]+'"؟'))return;
-  if(!BUS_NAMES[cn])BUS_NAMES[cn]=[...names];
-  BUS_NAMES[cn].splice(idx,1);
+  const k=String(cn);
+  if(!BUS_NAMES[k])BUS_NAMES[k]=[...names];
+  BUS_NAMES[k].splice(idx,1);
   saveBusNames();activeBusIdx=Math.max(0,idx-1);
   renderBusNameManager(cn);renderBusLayout(cn,activeBusIdx);
 }
@@ -2518,59 +2568,219 @@ function printBusLayout(cn,busIdx){
   const busName=getBusNames(cn)[busIdx]||'الباص '+(busIdx+1);
   const allBks=activeBookings().filter(b=>b.convoy===cn&&effSeats(b)>0);
   const bks=allBks.filter(b=>(b.busIdx===undefined?0:b.busIdx)===busIdx);
+  const returnClients=activeBookings().filter(b=>b.convoy2===cn&&effSeats(b)>0);
   const occ={};
-  bks.forEach(b=>{(b.seatAssign||[]).forEach((sa,idx)=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||''};});});
-  // Group by pickup
+  bks.forEach(b=>{(b.seatAssign||[]).forEach((sa,idx)=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',seatNote:b.seatNote||'',isDouble:b.convoy2!=null};});});
+  const occ2={};
+  returnClients.forEach(b=>{(b.seatAssign2||[]).forEach((sa,idx)=>{if(sa.seatNum)occ2[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',fromConvoy:b.convoy};});});
   const byPickup={};
   bks.forEach(b=>{const p=b.pickup||'غير محدد';if(!byPickup[p])byPickup[p]=[];
-    (b.seatAssign||[]).forEach(sa=>{byPickup[p].push({seatNum:sa.seatNum||'—',name:b.name,phone:b.phone||''});});
+    (b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)byPickup[p].push({seatNum:sa.seatNum,name:b.name,phone:b.phone||'',seatNote:b.seatNote||''});});
   });
   const COLORS=['#1a5276','#117a65','#7d3c98','#c0392b','#d68910','#1abc9c','#e67e22','#2980b9','#8e44ad','#27ae60'];
-  function seatCell(sn){
-    const o=occ[sn];
-    const col=o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#f0f4f8';
-    const textCol=o?'#fff':'#aaa';
-    return `<td style="border:1.5px solid #ccc;width:80px;height:72px;text-align:center;vertical-align:middle;background:${col};color:${textCol};font-size:11px;padding:3px;font-weight:700;border-radius:4px">
-      <div style="font-size:10px;opacity:.75;font-weight:800">${sn}</div>
-      ${o?`<div style="font-size:11px;font-weight:800;overflow:hidden;line-height:1.3;margin-top:1px">${o.name.split(' ').slice(0,2).join(' ')}</div><div style="font-size:10px;opacity:.9;margin-top:1px">${o.phone?'📱'+o.phone.slice(-4):''}</div><div style="font-size:10px;opacity:.9;overflow:hidden;margin-top:1px">${o.pickup.slice(0,8)}</div>`:'<div style="font-size:10px;color:#bbb;margin-top:6px">فارغ</div>'}
-    </td>`;
+
+  // بناء خلية المقعد — RTL: الكراسي من اليمين للشمال: يمين شمال | ممر | يمين شمال
+  // ترتيب الصف: [كرسي أيمن صف يمين] [كرسي أيسر صف يمين] | ممر | [كرسي أيمن صف شمال] [كرسي أيسر صف شمال]
+  // في الباص: صفوف اليمين = 1,3 (أو홀) وصفوف الشمال = 2,4 (أو زوجي) حسب الترتيب الفعلي
+  // الترتيب الصح في الباص الحقيقي بالعربي (RTL): 2 1 | ممر | 4 3
+  function makeSeatDiv(sn){
+    if(!sn) return `<div style="width:130px;flex-shrink:0"></div>`;
+    const isRet=!!occ2[sn];
+    const o=isRet?occ2[sn]:occ[sn];
+    const col=isRet?'#7d3c98':(o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#eef2f7');
+    const txtCol=o?'#fff':'#aaa';
+    const brd=o?(isRet?'3px solid #f9e79f':'2px solid '+col):'2px dashed #ccd4de';
+    return `<div style="width:130px;min-height:115px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:10px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif">
+      <div style="font-size:13px;font-weight:900;opacity:${o?.8:.5};margin-bottom:3px">${sn}</div>
+      ${o?`<div style="font-size:14px;font-weight:900;line-height:1.4;word-break:break-word">${o.name.split(' ').slice(0,3).join(' ')}</div>
+      <div style="font-size:12px;opacity:.9;margin-top:4px">${o.phone||''}</div>
+      <div style="font-size:12px;opacity:.9;margin-top:3px">${(o.pickup||'').slice(0,12)}</div>
+      ${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:10px;font-weight:900;padding:1px 6px;margin-top:4px">↩ عودة</div>':
+        (o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:10px;font-weight:900;padding:1px 6px;margin-top:4px">⚠ فوجين</div>':'')}`
+      :`<div style="font-size:12px;color:#c0c8d4;margin-top:14px">فارغ</div>`}
+    </div>`;
   }
-  let rows='',sc=1;
-  for(let r=0;r<12;r++){
-    rows+=`<tr>`;
-    for(let c=0;c<4;c++){if(c===2)rows+=`<td style="width:20px;text-align:center;color:#aaa;font-size:12px">│</td>`;rows+=seatCell(sc++);}
-    rows+=`</tr>`;
+  // ممر المحور
+  const AISLE=`<div style="width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:16px;font-weight:300">│</div>`;
+  // فاصل الباب
+  const DOOR_ROW=`<div style="width:28px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fffbeb;border:2.5px dashed #d97706;border-radius:8px;min-height:90px;padding:4px;color:#d97706;font-family:'Cairo',sans-serif;font-size:11px;font-weight:900;gap:2px"><span style="font-size:20px">🚪</span><span>باب</span></div>`;
+  // بناء صفوف الباص — RTL: الصف [c2, c1 | ممر | c4, c3]
+  // في الباص الكراسي: يمين (نافذة+ممر) | ممر سير | شمال (ممر+نافذة)
+  // بالعربي من اليمين: كرسي نافذة يمين | كرسي ممر يمين | ممر | كرسي ممر شمال | كرسي نافذة شمال
+  // الأرقام: صف 1: 1(نافذة ي) 2(ممر ي) | 3(ممر ش) 4(نافذة ش)  -- بالعربي: 2 1 | 3 4
+  function buildRow(seats, aisleEl){
+    // seats = [رقم_اليمين_نافذة, رقم_اليمين_ممر, رقم_الشمال_ممر, رقم_الشمال_نافذة]
+    // في RTL نعرض: نافذة_يمين ممر_يمين | ممر | ممر_شمال نافذة_شمال
+    const [a,b,c,d]=seats;
+    return `<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:5px;justify-content:center">
+      ${makeSeatDiv(a)}${makeSeatDiv(b)}${aisleEl||AISLE}${makeSeatDiv(c)}${makeSeatDiv(d)}
+    </div>`;
   }
-  rows+=`<tr><td></td>${seatCell(49)}<td style="width:20px;text-align:center;color:#aaa">│</td><td></td></tr>`;
-  // Pickup list
-  const pickupList=Object.entries(byPickup).map(([place,seats])=>`
-    <div style="margin-bottom:.5rem;padding:.5rem;background:#f0f4f8;border-radius:6px">
-      <div style="font-weight:700;color:#117a65;margin-bottom:3px">${place} (${seats.length} مقعد)</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px">${seats.map(s=>`<span style="background:#fff;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:11px">${s.seatNum} - ${s.name.split(' ').slice(0,3).join(' ')}</span>`).join('')}</div>
+  let busRowsHtml='';
+  let sc=1;
+
+  // صفوف 1-5 (كراسي 1-20)
+  for(let r=0;r<5;r++){
+    const s=[sc,sc+1,sc+2,sc+3]; sc+=4;
+    busRowsHtml+=buildRow([s[1],s[0],s[2],s[3]]);
+  }
+
+  // فاصل
+  busRowsHtml+=`<div style="border-top:2px dashed #cbd5e1;margin:5px 0"></div>`;
+
+  // صف 6: حمام (merge) | شمال = sc, sc+1
+  const WC_CELL=`<div style="width:500px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#e8f4fd;border:2.5px solid #5dade2;border-radius:10px;min-height:130px;padding:10px;gap:6px;font-family:'Cairo',sans-serif"><span style="font-size:36px">🚻</span><span style="font-size:15px;font-weight:900;color:#1a5276">حمام</span></div>`;
+  busRowsHtml+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:5px;justify-content:center">${WC_CELL}${AISLE}${makeSeatDiv(sc)}${makeSeatDiv(sc+1)}</div>`;
+  sc+=2;
+
+  // صف 7: باب (merge) | شمال = sc, sc+1
+  const DOOR_CELL=`<div style="width:500px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fffbeb;border:2.5px dashed #d97706;border-radius:10px;min-height:130px;padding:10px;gap:6px;font-family:'Cairo',sans-serif"><span style="font-size:36px">🚪</span><span style="font-size:15px;font-weight:900;color:#b7770d">باب</span></div>`;
+  busRowsHtml+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:5px;justify-content:center">${DOOR_CELL}${AISLE}${makeSeatDiv(sc)}${makeSeatDiv(sc+1)}</div>`;
+  sc+=2;
+
+  // فاصل
+  busRowsHtml+=`<div style="border-top:2px dashed #cbd5e1;margin:5px 0"></div>`;
+
+  // صفوف 8-12 (كراسي 25-44)
+  for(let r=0;r<5;r++){
+    const s=[sc,sc+1,sc+2,sc+3]; sc+=4;
+    busRowsHtml+=buildRow([s[1],s[0],s[2],s[3]]);
+  }
+  // الكنبة الخلفية: 45-49
+  busRowsHtml+=`<div style="border-top:3px dashed #cbd5e1;margin-top:8px;padding-top:10px">
+    <div style="text-align:center;font-size:14px;font-weight:900;color:#475569;margin-bottom:8px;font-family:'Cairo',sans-serif">🛋 الكنبة الخلفية 🛋</div>
+    <div style="display:flex;gap:5px;justify-content:center;flex-wrap:nowrap">
+      ${[45,46,47,48,49].map(s=>makeSeatDiv(s)).join('')}
+    </div>
+  </div>`;
+
+  // قائمة الركاب حسب التجمع
+  const pickupList=Object.entries(byPickup).sort((a,b)=>a[0].localeCompare(b[0])).map(([place,seats])=>`
+    <div style="margin-bottom:.6rem;padding:.6rem .875rem;background:#f0f4f8;border-radius:8px;border-right:4px solid #117a65;font-family:'Cairo',sans-serif">
+      <div style="font-weight:800;color:#117a65;font-size:14px;margin-bottom:5px">📍 ${place} — ${seats.length} مقعد</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${seats.map(s=>`<span style="background:#fff;border:1px solid #bcd8f0;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700">
+        <span style="color:#1a5276;font-weight:900">${s.seatNum}</span> — ${s.name.split(' ').slice(0,3).join(' ')}${s.phone?' · 📱'+s.phone:''}${s.seatNote?' · 📝'+s.seatNote:''}</span>`).join('')}
+      </div>
     </div>`).join('');
+  const returnList=returnClients.length?`
+    <div style="margin-top:.75rem;padding:.6rem .875rem;background:#f4ecf7;border-radius:8px;border-right:4px solid #7d3c98;font-family:'Cairo',sans-serif">
+      <div style="font-weight:800;color:#7d3c98;font-size:14px;margin-bottom:5px">↩ راجعين مع هذا الباص (فوجين)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${returnClients.map(b=>{
+        const seats2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).join(' , ');
+        return `<span style="background:#fff;border:1px solid #dcc8f0;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700"><span style="color:#7d3c98;font-weight:900">${seats2||'—'}</span> — ${b.name}${b.phone?' · 📱'+b.phone:''}</span>`;
+      }).join('')}</div>
+    </div>`:'' ;
+  const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
   const setts=(typeof settings!=='undefined'?settings:{})||{};
-  const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>قائمة الباص - ${conv.label}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
+<title>قائمة الباص — ${busName} — ${conv.label}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;padding:8px;font-size:11px}
-h2{font-size:16px;font-weight:800;color:#1a5276;margin-bottom:3px}
-table{border-collapse:collapse}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;padding:12px;background:#fff;font-size:13px}
 *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 @media print{
   @page{margin:6mm;size:A4 landscape}
-  body{padding:0;font-size:10px}
+  body{padding:0;font-size:12px}
+  .no-print{display:none!important}
+  .print-page{page-break-after:always;page-break-inside:avoid}
+  .print-page:last-child{page-break-after:avoid}
 }
 </style>
 </head><body>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #d6eaf8">
-  <div><h2>${setts.name||'مصيف مطروح 2026'}</h2><div style="color:#4a6278;font-size:11px">🚌 ${busName} · ${conv.label} · دخول ${conv.checkin} 9-11 ص · خروج ${conv.checkout} 5-7 ص</div></div>
-  <div style="text-align:left;font-size:10px;color:#888">${new Date().toLocaleDateString('ar-EG')}</div>
+<!-- صفحة 1: الهيدر + خريطة الباص -->
+<div class="print-page">
+<!-- هيدر -->
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;padding-bottom:10px;border-bottom:3px solid #d6eaf8">
+  <div>
+    <div style="font-size:24px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
+    <div style="font-size:15px;font-weight:700;color:#117a65;margin-top:4px">🚌 ${busName} &nbsp;·&nbsp; ${conv.label}</div>
+    <div style="font-size:13px;color:#4a6278;margin-top:3px">📅 دخول: ${conv.checkin} (9-11 ص) &nbsp;|&nbsp; خروج: ${conv.checkout} (5-7 ص)</div>
+  </div>
+  <div style="text-align:left;font-size:13px;color:#555;min-width:130px;line-height:1.8">
+    <div style="font-weight:800;color:#1a5276;font-size:15px">المحجوز: ${totalOcc} / 49 مقعد</div>
+    <div>${new Date().toLocaleDateString('ar-EG')} — ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
+  </div>
 </div>
-<table style="border-collapse:collapse;direction:ltr;margin:0 auto"><thead><tr><td style="text-align:center;background:#1a5276;color:#fff;padding:4px 10px;font-weight:700;font-size:11px" colspan="5">سائق</td></tr></thead><tbody>${rows}</tbody></table>
-<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
+<!-- رسمة الباص -->
+<div style="margin:0 auto 16px;max-width:1000px">
+  <div style="font-size:15px;font-weight:900;color:#1a5276;text-align:center;margin-bottom:10px">🚌 خريطة مقاعد الباص</div>
+  <div style="background:#f8fafc;border:2px solid #d6eaf8;border-radius:12px;padding:14px">
+    <!-- سائق -->
+    <div style="background:#1a5276;color:#fff;text-align:center;padding:8px;border-radius:8px;font-size:15px;font-weight:900;margin-bottom:10px;font-family:'Cairo',sans-serif">🚗 سائق</div>
+    <!-- صفوف الكراسي -->
+    ${busRowsHtml}
+  </div>
+</div>
+<!-- مفتاح الألوان -->
+<div style="margin-bottom:14px;padding:8px 12px;background:#f8fafc;border-radius:8px;border:1px solid #dce6f0">
+  <div style="font-size:13px;font-weight:800;color:#1a5276;margin-bottom:6px">🎨 دليل الألوان</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">
+    ${bks.map((b,i)=>`<span style="display:inline-flex;align-items:center;gap:5px;background:${COLORS[i%COLORS.length]};color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">${b.name.split(' ').slice(0,3).join(' ')} · ${b.pickup||'—'}${b.convoy2?' ⚠فوجين':''}</span>`).join('')}
+    ${returnClients.map(b=>`<span style="display:inline-flex;align-items:center;gap:5px;background:#7d3c98;border:2px solid #f9e79f;color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">↩ ${b.name.split(' ').slice(0,3).join(' ')} · عودة</span>`).join('')}
+  </div>
+</div>
+</div><!-- نهاية صفحة 1 -->
+
+<!-- صفحة 2: قائمة الركاب حسب التجمع -->
+<div class="print-page">
+<!-- قائمة الركاب -->
+<div style="border-top:2px solid #d6eaf8;padding-top:12px;margin-bottom:14px">
+  <div style="font-size:16px;font-weight:900;color:#1a5276;margin-bottom:8px">📋 الركاب حسب نقطة التجمع</div>
+  ${pickupList||'<div style="color:#999;font-size:13px">لا يوجد مقاعد محجوزة</div>'}
+  ${returnList}
+</div>
+</div><!-- نهاية صفحة 2 -->
+
+<!-- صفحة 3: جدول تفصيلي -->
+<div class="print-page">
+<!-- جدول تفصيلي -->
+<div>
+  <div style="font-size:16px;font-weight:900;color:#1a5276;margin-bottom:8px">📊 جدول الركاب التفصيلي</div>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;font-family:'Cairo',sans-serif">
+    <thead>
+      <tr style="background:#1a5276;color:#fff">
+        <th style="padding:9px 12px;text-align:right">#</th>
+        <th style="padding:9px 12px;text-align:right">الاسم</th>
+        <th style="padding:9px 12px;text-align:right">📱 الهاتف</th>
+        <th style="padding:9px 12px;text-align:right">📍 التجمع</th>
+        <th style="padding:9px 12px;text-align:right">🪑 المقاعد</th>
+        <th style="padding:9px 12px;text-align:right">ملاحظات</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${bks.map((b,i)=>{
+        const seats=(b.seatAssign||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join(' ، ');
+        return `<tr style="background:${i%2===0?'#f8fafc':'#fff'};border-bottom:1px solid #e2e8f0">
+          <td style="padding:8px 12px;font-weight:800;color:#1a5276">${i+1}</td>
+          <td style="padding:8px 12px;font-weight:700;font-size:14px">${b.name}${b.convoy2?' <span style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:9px;font-weight:900;padding:1px 6px">فوجين</span>':''}</td>
+          <td style="padding:8px 12px;font-size:13px">${b.phone||'—'}</td>
+          <td style="padding:8px 12px">${b.pickup||'—'}</td>
+          <td style="padding:8px 12px;font-weight:800;color:#117a65;font-size:14px">${seats||'لم يُحدد'}</td>
+          <td style="padding:8px 12px;font-size:12px;color:#555">${b.seatNote||'—'}</td>
+        </tr>`;
+      }).join('')}
+      ${returnClients.map((b,i)=>{
+        const seats2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join(' ، ');
+        return `<tr style="background:#f9f0ff;border-bottom:1px solid #e2e8f0">
+          <td style="padding:8px 12px;font-weight:800;color:#7d3c98">↩</td>
+          <td style="padding:8px 12px;font-weight:700;font-size:14px;color:#7d3c98">${b.name} <span style="background:#7d3c98;color:#fff;border-radius:3px;font-size:9px;font-weight:900;padding:1px 6px">عودة</span></td>
+          <td style="padding:8px 12px;font-size:13px">${b.phone||'—'}</td>
+          <td style="padding:8px 12px">${b.pickup||'—'}</td>
+          <td style="padding:8px 12px;font-weight:800;color:#7d3c98;font-size:14px">${seats2||'لم يُحدد'}</td>
+          <td style="padding:8px 12px;font-size:12px;color:#555">${b.seatNote||'—'}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+</div>
+</div><!-- نهاية صفحة 3 -->
+<script>window.onload=()=>setTimeout(()=>window.print(),600)<\/script>
 </body></html>`;
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),15000);
+  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  window.open(url,'_blank');
+  setTimeout(()=>URL.revokeObjectURL(url),20000);
 }
 function renderBusLayout(cn,busIdx){
   busIdx=busIdx||0;
@@ -2697,7 +2907,7 @@ function renderBusLayout(cn,busIdx){
           +'</div>';
       }).join('')}
       </div>
-      <div style="font-size:10px;color:var(--pu);margin-top:.5rem;opacity:.8">↕ اسحب لتخصيص مقعد عودة</div>
+      <div style="font-size:15px;color:var(--pu);margin-top:.5rem;opacity:.8">↕ اسحب لتخصيص مقعد عودة</div>
     </div>`;
   }
 
@@ -2706,7 +2916,7 @@ function renderBusLayout(cn,busIdx){
     if(occ2[sn]){
       const o2=occ2[sn];
       const conv1=getConv(o2.fromConvoy);
-      return `<div class="seat taken" style="background:#7d3c98;border:3px solid #f9e79f" title="${o2.name} · راجع من فوج ${o2.fromConvoy} · ${o2.pickup}"><span class="snum" style="color:rgba(255,255,255,.7)">${sn}</span><span class="sname">${o2.name}</span><span class="sphone" style="font-size:16px">↩ راجع من فوج ${conv1?conv1.label:o2.fromConvoy}</span><span style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:16px;font-weight:900;padding:1px 4px;margin-top:1px">فوجين</span></div>`;
+      return `<div class="seat taken" style="background:#7d3c98;border:3px solid #f9e79f;cursor:pointer" ondblclick="clearSeat2(${cn},${sn})" title="${o2.name} · راجع من فوج ${o2.fromConvoy} · ${o2.pickup} · دبل كليك للإلغاء"><span class="snum" style="color:rgba(255,255,255,.7)">${sn}</span><span class="sname">${o2.name}</span><span class="sphone" style="font-size:18px">↩ راجع من فوج ${conv1?conv1.label:o2.fromConvoy}</span><span style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:8px;font-weight:900;padding:1px 4px;margin-top:1px">فوجين</span></div>`;
     }
     const o=occ[sn];
     if(o){
@@ -2717,13 +2927,64 @@ function renderBusLayout(cn,busIdx){
     }
     return `<div class="seat empty" ondragover="event.preventDefault()" ondragenter="event.currentTarget.classList.add('drag-over')" ondragleave="event.currentTarget.classList.remove('drag-over')" ondrop="event.currentTarget.classList.remove('drag-over');busDrop(event,${cn},${sn})"><span class="snum">${sn}</span></div>`;
   }
-  let busHtml=`<div class="bus-wrap"><div class="bus-top">🚌 ${busName} · ${conv.label} · دخول ${conv.checkin} 9-11 ص · خروج ${conv.checkout} 5-7 ص</div><div class="bus-driver">سائق</div>`;
-  let sc=1;for(let r=0;r<12;r++){busHtml+=`<div class="bus-row">`;for(let c=0;c<4;c++){if(c===2)busHtml+=`<div class="bus-aisle">│</div>`;busHtml+=ms(sc++);}busHtml+=`</div>`;}
-  busHtml+=`<div class="bus-row"><div class="seat" style="opacity:0;pointer-events:none"></div>${ms(49)}<div class="bus-aisle">│</div><div class="seat" style="opacity:0;pointer-events:none"></div></div>`;
+  let busHtml=`<div class="bus-wrap" style="overflow:visible"><div class="bus-top">🚌 ${busName} · ${conv.label} · دخول ${conv.checkin} 9-11 ص · خروج ${conv.checkout} 5-7 ص</div><div class="bus-driver">سائق</div>`;
+
+  // دالة بناء صف: [يمين_نافذة, يمين_ممر | فاصل | شمال_ممر, شمال_نافذة]
+  // في RTL: الكراسي من اليمين للشمال = مقعد أيمن (نافذة) ← مقعد أيسر (ممر) | ممر | مقعد أيمن (ممر) → مقعد أيسر (نافذة)
+  function busRow(seats, aisleInner){
+    // seats=[a,b,c,d] حيث a,b يمين الباص و c,d شماله
+    // عرض RTL: b a | ممر | c d  (أي: ممر_يمين, نافذة_يمين | ممر | ممر_شمال, نافذة_شمال)
+    const [a,b,c,d]=seats;
+    const aisle=aisleInner||`<div class="bus-aisle">│</div>`;
+    return `<div class="bus-row">${ms(b)}${ms(a)}${aisle}${ms(c)}${ms(d)}</div>`;
+  }
+
+  let sc=1;
+  // صفوف 1-5 (كراسي 1-20) — عادي
+  for(let r=0;r<5;r++){
+    busHtml+=busRow([sc,sc+1,sc+2,sc+3]);
+    sc+=4;
+  }
+
+  // فاصل بصري قبل المنطقة الخاصة
+  busHtml+=`<div style="border-top:2px dashed var(--bd2);margin:4px 0"></div>`;
+
+  // صف 6: يمين = حمام (merge كرسيين)، شمال = 21، 22
+  const WC_MERGED=`<div style="width:500px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--prl);border:2.5px solid var(--pr2);border-radius:10px;min-height:135px;padding:8px;gap:4px;font-family:'Cairo',sans-serif">
+    <span style="font-size:32px">🚻</span>
+    <span style="font-size:14px;font-weight:800;color:var(--pr)">WC</span>
+  </div>`;
+  const AISLE_THIN=`<div class="bus-aisle">│</div>`;
+  busHtml+=`<div class="bus-row">${WC_MERGED}${AISLE_THIN}${ms(sc)}${ms(sc+1)}</div>`;
+  sc+=2;
+
+  // صف 7: يمين = باب (merge كرسيين)، شمال = 23، 24
+  const DOOR_MERGED=`<div style="width:500px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--wnl);border:2.5px dashed var(--wn);border-radius:10px;min-height:135px;padding:8px;gap:4px;font-family:'Cairo',sans-serif">
+    <span style="font-size:32px">🚪</span>
+    <span style="font-size:14px;font-weight:800;color:var(--wn)">Door</span>
+  </div>`;
+  busHtml+=`<div class="bus-row">${DOOR_MERGED}${AISLE_THIN}${ms(sc)}${ms(sc+1)}</div>`;
+  sc+=2;
+
+  // فاصل بصري بعد المنطقة الخاصة
+  busHtml+=`<div style="border-top:2px dashed var(--bd2);margin:4px 0"></div>`;
+
+  // صفوف 8-12 (كراسي 25-44) — عادي
+  for(let r=0;r<5;r++){
+    busHtml+=busRow([sc,sc+1,sc+2,sc+3]);
+    sc+=4;
+  }
+
+  // صف 13: الكنبة الخلفية 45-49
+  busHtml+=`<div style="margin-top:10px;border-top:3px dashed var(--bd2);padding-top:8px">`;
+  busHtml+=`<div style="text-align:center;font-size:14px;color:var(--tx2);margin-bottom:8px;font-weight:800;letter-spacing:1px">🛋&nbsp; الكنبة الخلفية &nbsp;🛋</div>`;
+  busHtml+=`<div style="display:flex;gap:5px;justify-content:center;align-items:stretch;flex-wrap:nowrap">`;
+  busHtml+=ms(45)+ms(46)+ms(47)+ms(48)+ms(49);
+  busHtml+=`</div></div>`;
   busHtml+=`<div class="bus-legend">${bks.map((b,i)=>`<span><span class="ldot" style="background:${SEAT_COLORS[i%SEAT_COLORS.length]}"></span>${b.name.split(' ').slice(0,2).join(' ')} · ${b.pickup||'-'}${b.convoy2?' ⚠فوجين':''}</span>`).join('')}</div>`;
   // Add return clients to legend
   if(returnClients.length){busHtml+=`<div class="bus-legend" style="margin-top:4px">${returnClients.map(b=>`<span style="color:var(--pu)"><span class="ldot" style="background:var(--pu)"></span>${b.name.split(' ').slice(0,2).join(' ')} ↩راجع · ${b.pickup||'-'}</span>`).join('')}</div>`;}
-  busHtml+=`<div style="font-size:11px;text-align:center;color:var(--tx3);margin-top:.5rem">اسحب من البركة → مقعد · اسحب مقعد → نقل · دبل كليك → إلغاء</div></div>`;
+  busHtml+=`<div style="font-size:11px;text-align:center;color:var(--tx3);margin-top:.5rem">اسحب من البركة → مقعد · اسحب مقعد → نقل · دبل كليك على أي مقعد → إلغاء التخصيص (يشمل كراسي العودة 🟣)</div></div>`;
   document.getElementById('bus-layout').innerHTML=poolHtml+busHtml;
   // Add print button after render
   const printBusBtn=document.createElement('button');
@@ -2779,6 +3040,14 @@ async function clearSeat(cn,sn){
   const b=bookings.find(bb=>bb.convoy===cn&&(bb.seatAssign||[]).some(s=>s.seatNum===sn));if(!b)return;
   b.seatAssign.forEach((sa,i)=>{if(sa.seatNum===sn)b.seatAssign[i].seatNum=null;});
   await sbFetch('mtr_bookings','PATCH',{seat_assign:b.seatAssign},`?id=eq.${b.id}`);
+  renderBusLayout(activeBusConv,activeBusIdx);renderBusTab();
+}
+
+async function clearSeat2(cn,sn){
+  if(!confirm('إلغاء تخصيص كرسي العودة؟'))return;
+  const b=bookings.find(bb=>bb.convoy2===cn&&(bb.seatAssign2||[]).some(s=>s.seatNum===sn));if(!b)return;
+  b.seatAssign2.forEach((sa,i)=>{if(sa.seatNum===sn)b.seatAssign2[i].seatNum=null;});
+  await sbFetch('mtr_bookings','PATCH',{seat_assign2:b.seatAssign2},`?id=eq.${b.id}`);
   renderBusLayout(activeBusConv,activeBusIdx);renderBusTab();
 }
 
@@ -3263,8 +3532,8 @@ function genReport(){
   const allBks=bookings,allAcc=accEntries;
   function bkTable(bks){
     if(!bks.length)return '<div style="text-align:center;color:var(--tx3);padding:2rem">لا توجد بيانات</div>';
-    return `<table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>مكان الركوب</th><th>المسؤول</th><th>باص</th><th>داخلي</th><th>أفراد</th><th>أطفال</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>
-    ${bks.map(b=>`<tr><td style="font-weight:700">${b.name}</td><td>${b.phone||'-'}</td><td>${(b.apts||[]).join('، ')}${(b.apts2||[]).length?' / '+b.apts2.join('، ')+'(ف2)':''}</td><td style="font-size:11px">${b.checkin}</td><td>${b.pickup||'-'}</td><td>${b.createdBy||'-'}</td><td>${effSeatsTotal(b)}</td><td>${b.intSeats||0}</td><td>${b.adults||0}</td><td>${b.children||0}</td><td style="font-weight:700">${b.total.toLocaleString()} ج</td><td style="color:var(--ac)">${b.paid.toLocaleString()} ج</td><td style="color:${b.remaining>0?'var(--dn)':'var(--ac)'}">${b.remaining.toLocaleString()} ج</td><td>${b.remaining<=0?'مكتمل':'باقي'}</td></tr>`).join('')}
+    return `<table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>مكان الركوب</th><th>المسؤول</th><th>كراسي الباص</th><th>داخلي</th><th>أفراد</th><th>أطفال</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>
+    ${bks.map(b=>`<tr><td style="font-weight:700">${b.name}</td><td>${b.phone||'-'}</td><td>${(b.apts||[]).join('، ')}${(b.apts2||[]).length?' / '+b.apts2.join('، ')+'(ف2)':''}</td><td style="font-size:11px">${b.checkin}</td><td>${b.pickup||'-'}</td><td>${b.createdBy||'-'}</td><td style="text-align:center;font-weight:700;color:var(--ac)">${effSeats(b)}</td><td style="text-align:center;font-weight:700;color:var(--pu)">${b.intSeats||0}</td><td style="text-align:center;font-weight:700;color:var(--pr)">${b.adults||0}</td><td style="text-align:center;font-weight:700;color:var(--ac)">${b.children||0}</td><td style="font-weight:700">${b.total.toLocaleString()} ج</td><td style="color:var(--ac)">${b.paid.toLocaleString()} ج</td><td style="color:${b.remaining>0?'var(--dn)':'var(--ac)'}">${b.remaining.toLocaleString()} ج</td><td>${b.remaining<=0?'مكتمل':'باقي'}</td></tr>`).join('')}
     </tbody></table>`;
   }
   function accTable(ents,mode){
@@ -3297,8 +3566,8 @@ function genReport(){
       title=`فوج: ${conv?conv.label:''}`;
       total=bks1.reduce((s,b)=>s+b.total,0); // المالي من العملاء الأساسيين فقط
       count=rows.length;
-      html=`<table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>مكان الركوب</th><th>المسؤول</th><th>كراسي</th><th>أفراد</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>
-      ${rows.map(b=>`<tr style="${b._isReturn?'background:var(--pul)':''}"><td style="font-weight:700">${b.name}${b._isReturn?'<span class="badge b-pu" style="font-size:9px;margin-right:3px">↩ عودة</span>':''}</td><td>${b.phone||'-'}</td><td>${(b._displayApts||[]).join('، ')||'-'}</td><td style="font-size:11px">${b._displayCheckin||b.checkin}</td><td>${b.pickup||'-'}</td><td>${b.createdBy||'-'}</td><td>${effSeats(b)}</td><td>${(b.adults||0)+(b.children||0)}</td><td style="font-weight:700">${b._isReturn?'-':b.total.toLocaleString()+' ج'}</td><td style="color:var(--ac)">${b._isReturn?'-':b.paid.toLocaleString()+' ج'}</td><td style="color:${b.remaining>0?'var(--dn)':'var(--ac)'}">${b._isReturn?'-':b.remaining.toLocaleString()+' ج'}</td><td>${b._isReturn?'<span class="badge b-pu">عودة</span>':b.remaining<=0?'مكتمل':'باقي'}</td></tr>`).join('')}
+      html=`<table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>مكان الركوب</th><th>المسؤول</th><th>كراسي الباص</th><th>داخلي</th><th>أفراد</th><th>أطفال</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>
+      ${rows.map(b=>`<tr style="${b._isReturn?'background:var(--pul)':''}"><td style="font-weight:700">${b.name}${b._isReturn?'<span class="badge b-pu" style="font-size:9px;margin-right:3px">↩ عودة</span>':''}</td><td>${b.phone||'-'}</td><td>${(b._displayApts||[]).join('، ')||'-'}</td><td style="font-size:11px">${b._displayCheckin||b.checkin}</td><td>${b.pickup||'-'}</td><td>${b.createdBy||'-'}</td><td style="text-align:center;font-weight:700;color:var(--ac)">${effSeats(b)}</td><td style="text-align:center;font-weight:700;color:var(--pu)">${b.intSeats||0}</td><td style="text-align:center;font-weight:700;color:var(--pr)">${b.adults||0}</td><td style="text-align:center;font-weight:700;color:var(--ac)">${b.children||0}</td><td style="font-weight:700">${b._isReturn?'-':b.total.toLocaleString()+' ج'}</td><td style="color:var(--ac)">${b._isReturn?'-':b.paid.toLocaleString()+' ج'}</td><td style="color:${b.remaining>0?'var(--dn)':'var(--ac)'}">${b._isReturn?'-':b.remaining.toLocaleString()+' ج'}</td><td>${b._isReturn?'<span class="badge b-pu">عودة</span>':b.remaining<=0?'مكتمل':'باقي'}</td></tr>`).join('')}
       </tbody></table>`;
     }
   }
@@ -4271,6 +4540,17 @@ ${notesHtml?`<div class="terms"><span class="terms-t">الشروط والملا�
 </script>
 
 <!-- EDIT BOOKING MODAL -->
+<div id="bus-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
+  <div style="background:var(--sf);border-radius:var(--rl);max-width:360px;width:90%;padding:1.5rem;box-shadow:0 8px 32px rgba(0,0,0,.25)">
+    <div class="ctitle" id="bus-modal-title" style="margin-bottom:1rem;font-size:1rem"></div>
+    <input id="bus-modal-input" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--bd2);border-radius:10px;font-size:15px;font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx1);box-sizing:border-box;margin-bottom:1rem" placeholder="اسم الباص" />
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn btn-s" id="bus-modal-ok" style="font-size:13px;padding:7px 18px">حفظ</button>
+      <button class="btn" onclick="closeBusModal()" style="font-size:13px;padding:7px 14px;background:var(--bg2);color:var(--tx2)">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;overflow-y:auto;padding:1rem">
   <div style="background:var(--sf);border-radius:var(--rl);max-width:700px;margin:2rem auto;padding:1.5rem">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
@@ -5946,7 +6226,7 @@ document.addEventListener('DOMContentLoaded', function(){
     card.className='card';
     card.style.marginBottom='.875rem';
     card.innerHTML=`
-      <div class="ctitle"> Roles Management (Roles)</div>
+      <div class="ctitle">إدارة الأدوار (Roles)</div>
       <div id="roles-list" style="margin-bottom:.875rem"></div>
       <div class="card" style="background:var(--prl)">
         <div style="font-size:13px;font-weight:700;color:var(--pr);margin-bottom:.65rem">إضافة دور جديد</div>
