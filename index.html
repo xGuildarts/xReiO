@@ -1415,7 +1415,7 @@ async function doVoucherAction(bookingId, type, action){
 </div>
 <div class="body-box">
   <div class="row"><span class="l">اسم العميل</span><span class="v">${b.name}</span></div>
-  <div class="row"><span class="l">رقم الهاتف</span><span class="v">${b.phone||'—'}</span></div>
+  <div class="row"><span class="l">رقم الهاتف</span><span class="v">${b.phone||'—'}${b.phone2?' / '+b.phone2:''}</span></div>
   <div class="row"><span class="l">الفوج / موعد الرحلة</span><span class="v">${conv?conv.label:('فوج '+b.convoy)}</span></div>
   <div class="row"><span class="l">تاريخ الدخول</span><span class="v">${b.checkin||'—'}</span></div>
   <div class="row"><span class="l">الشقق</span><span class="v">${(b.apts||[]).join('، ')||'—'}</span></div>
@@ -1581,9 +1581,9 @@ async function initApp(){
 }
 
 // Mappers
-function mB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',pickup:r.pickup||'',convoy:r.convoy,convoy2:r.convoy2||null,checkin:r.checkin||'',checkout:r.checkout||'',apts:r.apts||[],aptPrices:r.apt_prices||{},aptsTotal:r.apts_total||0,apts2:r.apts2||[],aptPrices2:r.apt_prices2||{},seats:r.seats||0,extraSeats:r.extra_seats||0,seatDiscount:r.seat_discount||0,seatPrice:r.seat_price||0,seatDiscAmt:r.seat_disc_amt||0,intSeats:r.int_seats||0,intSeatPrice:r.int_seat_price||0,intTotal:r.int_total||0,transferFee:r.transfer_fee||0,transferFeeNote:r.transfer_fee_note||'',disc:r.disc||0,total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],notes:r.notes||'',seatNote:r.seat_note||'',seatAssign:r.seat_assign||[],seatAssign2:r.seat_assign2||[],mgrSnap:r.mgr_snap||{},createdBy:r.created_by||'',partyType:r.party_type||'client',supplierId:r.supplier_id||null,discReason:r.disc_reason||'',adults:r.adults||0,children:r.children||0,status:r.status||'active',lastEditBy:r.last_edit_by||'',lastEditAt:r.last_edit_at||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):'',busIdx:r.bus_idx||0}}function mA(r){return{id:r.id,type:r.type||'',op:r.op||'in',amount:r.amount||0,date:r.entry_date||'',desc:r.description||'',clientName:r.client_name||'',category:r.category||'',bookingRef:r.booking_ref||'',bookingPayRef:r.booking_pay_ref||'',counterParty:r.booking_pay_ref||'',supplierId:r.supplier_id||null}}
+function mB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',phone2:r.phone2||'',pickup:r.pickup||'',convoy:r.convoy,convoy2:r.convoy2||null,checkin:r.checkin||'',checkout:r.checkout||'',apts:r.apts||[],aptPrices:r.apt_prices||{},aptsTotal:r.apts_total||0,apts2:r.apts2||[],aptPrices2:r.apt_prices2||{},seats:r.seats||0,extraSeats:r.extra_seats||0,seatDiscount:r.seat_discount||0,seatPrice:r.seat_price||0,seatDiscAmt:r.seat_disc_amt||0,intSeats:r.int_seats||0,intSeatPrice:r.int_seat_price||0,intTotal:r.int_total||0,transferFee:r.transfer_fee||0,transferFeeNote:r.transfer_fee_note||'',disc:r.disc||0,total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],notes:r.notes||'',seatNote:r.seat_note||'',seatAssign:r.seat_assign||[],seatAssign2:r.seat_assign2||[],mgrSnap:r.mgr_snap||{},createdBy:r.created_by||'',partyType:r.party_type||'client',supplierId:r.supplier_id||null,discReason:r.disc_reason||'',adults:r.adults||0,children:r.children||0,status:r.status||'active',lastEditBy:r.last_edit_by||'',lastEditAt:r.last_edit_at||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):'',busIdx:r.bus_idx||0}}function mA(r){return{id:r.id,type:r.type||'',op:r.op||'in',amount:r.amount||0,date:r.entry_date||'',desc:r.description||'',clientName:r.client_name||'',category:r.category||'',bookingRef:r.booking_ref||'',bookingPayRef:r.booking_pay_ref||'',counterParty:r.booking_pay_ref||'',supplierId:r.supplier_id||null}}
 function mL(r){return{id:r.id,ts:r.created_at?new Date(r.created_at).toLocaleString('ar-EG'):'',user:r.user_name||'',username:r.username||'',action:r.action||'',type:r.log_type||'',detail:r.detail||''}}
-function mHB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',dest:r.destination||'',hotelId:r.hotel_id||null,hotelName:r.hotel_name||'',checkin:r.checkin||'',checkout:r.checkout||'',nights:r.nights||0,roomType:r.room_type||'single',rooms:r.rooms||1,pricePerNight:r.price_per_night||0,adults:r.adults||0,children:r.children||0,disc:r.disc||0,discReason:r.disc_reason||'',total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],status:r.status||'pending',notes:r.notes||'',salesRep:r.sales_rep||'',createdBy:r.created_by||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):''}}
+function mHB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',phone2:r.phone2||'',dest:r.destination||'',hotelId:r.hotel_id||null,hotelName:r.hotel_name||'',checkin:r.checkin||'',checkout:r.checkout||'',nights:r.nights||0,roomType:r.room_type||'single',rooms:r.rooms||1,pricePerNight:r.price_per_night||0,adults:r.adults||0,children:r.children||0,disc:r.disc||0,discReason:r.disc_reason||'',total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],status:r.status||'pending',notes:r.notes||'',salesRep:r.sales_rep||'',createdBy:r.created_by||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):''}}
 function mS(r){
   // Load price map from settings - always prefer DB over defaults
   if(r.price_map&&r.price_map.length>2){
@@ -2688,7 +2688,7 @@ function renderBusLayout(cn,busIdx){
         const totalNeeded=effSeats(b);
         const hasAllSeats=assignedCount>=totalNeeded&&totalNeeded>0;
         const seatLabel=totalNeeded>1?(assignedCount+'/'+totalNeeded+' مقاعد'):(assignedCount>0?'✓ له مقعد':'بدون مقعد');
-        return '<div draggable="true" ondragstart="poolDragInfo={bookingId:'+b.id+',assignIdx:'+assignedCount+',isReturn2:true};dragInfo=null;event.dataTransfer.effectAllowed=\'move\'" style="background:var(--pu);color:#fff;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;cursor:grab;text-align:center;min-width:80px;border:2px solid #f9e79f;box-shadow:0 2px 6px rgba(0,0,0,.3)">'
+        return '<div draggable="true" ondragstart="poolDragInfo={bookingId:'+b.id+',assignIdx:'+assignedCount+',isReturn2:true};dragInfo=null;event.dataTransfer.effectAllowed=&apos;move&apos;" style="background:var(--pu);color:#fff;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:700;cursor:grab;text-align:center;min-width:80px;border:2px solid #f9e79f;box-shadow:0 2px 6px rgba(0,0,0,.3)">'
           +'<div style="font-size:12px">'+b.name.split(' ').slice(0,2).join(' ')+'</div>'
           +'<div style="font-size:9px;opacity:.9;margin-top:1px">من فوج '+(conv1?conv1.label:b.convoy)+'</div>'
           +'<div style="font-size:9px;opacity:.9">'+(b.phone?'📱 '+b.phone.slice(-4):'')+'</div>'
@@ -3678,6 +3678,7 @@ function editBooking(id){
     <div class="g2" style="margin-bottom:.75rem">
       <div class="fg"><label>اسم العميل</label><input type="text" id="edit-name" value="${b.name}"></div>
       <div class="fg"><label>الهاتف</label><input type="tel" id="edit-phone" value="${b.phone||''}"></div>
+      <div class="fg"><label>رقم آخر</label><input type="tel" id="edit-phone2" value="${b.phone2||''}" placeholder="اختياري" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,11)"></div>
     </div>
     <div class="g2">
     <div class="fg"><label>الفوج</label><select id="edit-convoy">${
@@ -3829,6 +3830,7 @@ async function saveEditBooking(id){
 
   const name=document.getElementById('edit-name')?.value.trim()||b.name;
   const phone=document.getElementById('edit-phone')?.value||b.phone;
+  const phone2=(document.getElementById('edit-phone2')?.value??b.phone2??'').trim();
   const pickup=document.getElementById('edit-pickup')?.value||b.pickup;
   const convSel=document.getElementById('edit-convoy');
   const newConvNum=convSel?parseInt(convSel.value)||b.convoy:b.convoy;
@@ -3909,7 +3911,7 @@ async function saveEditBooking(id){
   const newBusIdx=parseInt(document.getElementById('edit-bus-sel')?.value)||0;
   const newConvoy2=parseInt(document.getElementById('edit-convoy2')?.value)||null;
   const payload={
-    name, phone, pickup,
+    name, phone, phone2, pickup,
     convoy:newConvNum,
     checkin:newConv?.checkin||b.checkin,
     checkout:newConv?.checkout||b.checkout,
@@ -3948,7 +3950,7 @@ async function saveEditBooking(id){
     // bus_idx في PATCH منفصل عشان لو العمود مش موجود في schema cache متأثرش على الحفظ الأساسي
     try{await sbFetch('mtr_bookings','PATCH',{bus_idx:newBusIdx,convoy2:newConvoy2},`?id=eq.${id}`);}catch(_){}
     Object.assign(b,{
-      name,phone,pickup,
+      name,phone,phone2,pickup,
       convoy:newConvNum,
       checkin:newConv?.checkin||b.checkin,
       checkout:newConv?.checkout||b.checkout,
@@ -4226,7 +4228,7 @@ table{table-layout:fixed;word-wrap:break-word}</style></head><body>
 <div class="body">
 <div class="sec"><div class="st">بيانات العميل</div>
   <div class="row"><span class="l">الاسم</span><strong style="font-size:15px">${b.name}</strong></div>
-  <div class="row"><span class="l">الهاتف</span><span>${b.phone||'-'}</span></div>
+  <div class="row"><span class="l">الهاتف</span><span>${b.phone||'-'}${b.phone2?' / '+b.phone2:''}</span></div>
   ${b.pickup?`<div class="row"><span class="l">مكان الركوب</span><span style="font-weight:700;color:#117a65">${b.pickup}</span></div>`:''}
   ${((b.adults||0)>0||(b.children||0)>0)?('<div class="row"><span class="l">عدد الأفراد</span><span style="font-weight:700">'+(b.adults||0)+' كبار'+((b.children||0)>0?' · '+(b.children||0)+' أطفال':'')+'</span></div>'):''}
   <div class="row"><span class="l">تاريخ الدخول</span><span>${b.checkin||'-'} · 9-11 صباحاً</span></div>
@@ -7246,7 +7248,7 @@ tr:nth-child(even) td{background:#f8fafc}
 <div class="body">
 <div class="sec"><div class="st">بيانات العميل</div>
   <div class="row"><span class="l">الاسم</span><strong style="font-size:15px">${b.name}</strong></div>
-  <div class="row"><span class="l">الهاتف</span><span>${b.phone||'-'}</span></div>
+  <div class="row"><span class="l">الهاتف</span><span>${b.phone||'-'}${b.phone2?' / '+b.phone2:''}</span></div>
   ${(b.adults||0)>0||(b.children||0)>0?`<div class="row"><span class="l">الأفراد</span><span>${b.adults||0} كبار${(b.children||0)>0?' · '+(b.children||0)+' أطفال':''}</span></div>`:''}
   ${b.salesRep?`<div class="row"><span class="l">مسؤول المبيعات</span><span>${b.salesRep}</span></div>`:''}
 </div>
