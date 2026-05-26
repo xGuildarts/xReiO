@@ -1019,6 +1019,7 @@ tr:hover td{background:#f5f8fc}
 
 <!-- CLOSING TAB SECTION -->
 <div id="closing" class="sec">
+  <div class="card" style="margin-bottom:.75rem">
     <div class="ctitle">🧾 تقفيلة الفوج</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <select id="cl-convoy-sel" style="max-width:240px;font-weight:700">
@@ -1029,15 +1030,6 @@ tr:hover td{background:#f5f8fc}
       <button class="btn btn-s btn-sm" onclick="exportClosingExcel()">📥 Excel</button>
       <button class="btn btn-d btn-sm" onclick="exportClosingPDF()">📄 PDF</button>
     </div>
-  </div>
-  <div class="card" style="margin-top:.75rem;background:var(--acl);border-color:var(--ac)">
-    <div class="ctitle" style="color:var(--ac)">📥 استيراد ملف تقفيلة</div>
-    <div style="font-size:12px;color:var(--tx2);margin-bottom:.65rem">يمكنك رفع ملف Excel (.xlsx/.xls) أو PDF لأرشفته مع التقفيلة</div>
-    <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
-      <input type="file" id="closing-import-file" accept=".xlsx,.xls,.pdf" style="flex:1;font-size:12px">
-      <button class="btn btn-s btn-sm" onclick="closingImportFile()">📤 رفع الملف</button>
-    </div>
-    <div id="closing-imported-list" style="margin-top:.5rem;font-size:12px"></div>
   </div>
   <div id="closing-output"></div>
 </div>
@@ -1148,14 +1140,19 @@ function loadExtraApts(){
 }
 function saveExtraApts(obj){
   const str=JSON.stringify(obj);
-  // حفظ في localStorage
+  // حفظ في localStorage دايماً
   try{localStorage.setItem('mtr_extra_apts',str);}catch(e){}
-  // حفظ في Supabase — جوه bus_names كـ __extra_apts key (مش محتاج كولم جديد)
+  // حفظ في Supabase — نجيب bus_names الحالية ونضيف جواها __extra_apts
   if(typeof sbFetch==='function'){
-    const normalized={};
-    Object.entries(BUS_NAMES).forEach(([k,v])=>{normalized[String(k)]=v;});
-    normalized['__extra_apts']=obj; // نخبي الشقق الإضافية هنا
-    sbFetch('mtr_settings','PATCH',{bus_names:JSON.stringify(normalized)},'?id=eq.1').catch(e=>console.warn('extra_apts save:',e));
+    sbFetch('mtr_settings','GET',null,'?id=eq.1&select=bus_names').then(rows=>{
+      let current={};
+      try{if(rows&&rows[0]&&rows[0].bus_names)current=JSON.parse(rows[0].bus_names);}catch(e){}
+      // احتفظ بأسماء الباصات الموجودة، فقط حدّث الشقق الإضافية
+      const merged={...current,...BUS_NAMES};
+      Object.entries(BUS_NAMES).forEach(([k,v])=>{merged[String(k)]=v;});
+      merged['__extra_apts']=obj;
+      return sbFetch('mtr_settings','PATCH',{bus_names:JSON.stringify(merged)},'?id=eq.1');
+    }).catch(e=>console.warn('extra_apts save:',e));
   }
   rebuildAPTS();
 }
@@ -3877,22 +3874,22 @@ function addExtraApt(){
   const num=(numEl.value||'').trim();
   const desc=(descEl.value||'').trim();
   const type=typeEl.value||'double';
-  if(!num){mtrPopup('تنبيه','⚠️ اكتب رقم الشقة','warn');return;}
-  if(APTS[num]&&!APTS[num]._extra){mtrPopup('تنبيه',`⚠️ الشقة ${num} موجودة بالفعل في القائمة الأساسية`,'warn');return;}
+  if(!num){mtrPopup({icon:'⚠️',title:'تنبيه',msg:'اكتب رقم الشقة',btns:[{label:'حسناً',cls:'primary',val:true}]});return;}
+  if(APTS[num]&&!APTS[num]._extra){mtrPopup({icon:'⚠️',title:'تنبيه',msg:`الشقة <b>${num}</b> موجودة بالفعل في القائمة الأساسية`,btns:[{label:'حسناً',cls:'primary',val:true}]});return;}
   const extra=loadExtraApts();
   extra[num]={desc:desc||'شقة إضافية',type,seats:type==='single'?2:4};
   saveExtraApts(extra);
   renderExtraAptsList();
   numEl.value='';descEl.value='';
-  mtrPopup('تم',`✅ تمت إضافة الشقة ${num} وحفظها`,'ok');
+  mtrPopup({icon:'✅',title:'تم',msg:`تمت إضافة الشقة <b>${num}</b> وحفظها`,btns:[{label:'حسناً',cls:'success',val:true}]});
 }
-function deleteExtraApt(num){
-  mtrPopup('تأكيد',`هل تحذف الشقة ${num} من الشقق الإضافية؟\nالحجوزات الحالية عليها لن تتأثر.`,'confirm',()=>{
-    const extra=loadExtraApts();
-    delete extra[num];
-    saveExtraApts(extra);
-    renderExtraAptsList();
-  });
+async function deleteExtraApt(num){
+  const ok=await mtrPopup({icon:'🗑️',title:'حذف شقة',msg:`هل تحذف الشقة <b>${num}</b> من الشقق الإضافية؟<br><small style="color:var(--tx3)">الحجوزات الحالية عليها لن تتأثر.</small>`,btns:[{label:'حذف',cls:'danger',val:true},{label:'إلغاء',cls:'secondary',val:false}]});
+  if(!ok)return;
+  const extra=loadExtraApts();
+  delete extra[num];
+  saveExtraApts(extra);
+  renderExtraAptsList();
 }
 function renderExtraAptsList(){
   const el=document.getElementById('extra-apts-list');
