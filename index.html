@@ -1029,6 +1029,18 @@ tr:hover td{background:#f5f8fc}
 
 <div id="prices" class="sec">
   <div class="info-box">إعدادات الأسعار والحسابات - يحتاج صلاحية خاصة</div>
+  <div class="card"><div class="ctitle">🏠 إدارة الشقق</div>
+    <div class="info-box" style="font-size:12px">أضف أو احذف شققاً من القائمة. رقم الشقة يظهر في نماذج الحجز. النوع يحدد عدد الكراسي (غرفة=2، غرفتين=4).</div>
+    <div id="apt-list-mgr"></div>
+    <div style="display:flex;gap:6px;margin-top:.65rem;flex-wrap:wrap;align-items:flex-end">
+      <div class="fg" style="margin:0;flex:0 0 110px"><label style="font-size:11px">رقم الشقة</label><input type="text" id="new-apt-num" placeholder="مثال: 905" style="text-align:center"></div>
+      <div class="fg" style="margin:0;flex:1;min-width:150px"><label style="font-size:11px">وصف الشقة</label><input type="text" id="new-apt-desc" placeholder="مثال: غرفتين · ترى البحر"></div>
+      <div class="fg" style="margin:0;flex:0 0 120px"><label style="font-size:11px">النوع</label>
+        <select id="new-apt-type"><option value="double">غرفتين (4 أفراد)</option><option value="single">غرفة (2 أفراد)</option></select>
+      </div>
+      <button class="btn btn-p" onclick="addCustomApt()" style="align-self:flex-end;white-space:nowrap">+ إضافة شقة</button>
+    </div>
+  </div>
   <div class="card"><div class="ctitle">إدارة أسعار الشقق</div>
     <div class="info-box" style="font-size:12px">السعر الإجمالي = سعر الشقة + (عدد الكراسي × سعر الكرسي)</div>
     <div id="price-mgr-2"></div>
@@ -1646,6 +1658,22 @@ function mS(r){
   }
   loadLocks(r);
   loadBusNames(r);
+  if(r.custom_apts){
+    try{
+      const ca=JSON.parse(r.custom_apts);
+      if(ca&&typeof ca==='object'){
+        Object.assign(APTS,ca);
+        if(typeof CUSTOM_APTS!=='undefined')Object.assign(CUSTOM_APTS,ca);
+        const nl=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));APT_LIST.length=0;nl.forEach(k=>APT_LIST.push(k));
+        try{localStorage.setItem('mtr_custom_apts',JSON.stringify(ca));}catch(e){}
+      }
+    }catch(e){console.warn('custom_apts parse:',e);}
+  } else {
+    try{
+      const cached=localStorage.getItem('mtr_custom_apts');
+      if(cached){const ca=JSON.parse(cached);if(ca&&typeof ca==='object'){Object.assign(APTS,ca);if(typeof CUSTOM_APTS!=='undefined')Object.assign(CUSTOM_APTS,ca);const nl=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));APT_LIST.length=0;nl.forEach(k=>APT_LIST.push(k));}}
+    }catch(e){}
+  }
   if(r.custom_roles){
     try{
       const cr=JSON.parse(r.custom_roles);
@@ -3863,6 +3891,72 @@ function updatePmTot(pfx,ci){
   if(elS)elS.textContent=(s+ss*sp).toLocaleString();
   if(elD)elD.textContent=(d+ds*sp).toLocaleString();
 }
+// ============================================================
+// APARTMENT MANAGEMENT (Add/Remove)
+// ============================================================
+let CUSTOM_APTS = {};
+
+function renderAptListMgr(){
+  const el=document.getElementById('apt-list-mgr');if(!el)return;
+  const list=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  if(!list.length){el.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:.5rem 0">لا توجد شقق</div>';return;}
+  const rows=list.map(a=>{
+    const info=APTS[a];
+    const isCustom=!!CUSTOM_APTS[a];
+    const bg=isCustom?'var(--acl)':'var(--sf2)';
+    const border=isCustom?'var(--ac)':'var(--bd2)';
+    const clr=isCustom?'var(--ac)':'var(--pr)';
+    const delBtn=isCustom?`<button onclick="removeCustomApt('${a}')" style="background:var(--dn);color:#fff;border:none;border-radius:4px;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:1;flex-shrink:0;padding:0">×</button>`:'';
+    return `<div style="display:flex;align-items:center;gap:4px;background:${bg};border:1.5px solid ${border};border-radius:8px;padding:4px 8px 4px 6px;font-size:12px">`
+      +`<span style="font-weight:700;color:${clr}">${a}</span>`
+      +`<span style="color:var(--tx2);font-size:11px">${info.desc||''} · ${info.type==='single'?'غرفة':'غرفتين'}</span>`
+      +delBtn+`</div>`;
+  }).join('');
+  const orig=list.filter(a=>!CUSTOM_APTS[a]).length;
+  const added=Object.keys(CUSTOM_APTS).length;
+  el.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.65rem">${rows}</div>`
+    +`<div style="font-size:11px;color:var(--tx3)">أصلية: ${orig} · <span style="color:var(--ac)">مضافة: ${added}</span> (الأخضر = مضاف يدوياً)</div>`;
+}
+
+function addCustomApt(){
+  const numEl=document.getElementById('new-apt-num');
+  const descEl=document.getElementById('new-apt-desc');
+  const typeEl=document.getElementById('new-apt-type');
+  const num=(numEl?.value||'').trim();
+  const desc=(descEl?.value||'').trim();
+  const type=typeEl?.value||'double';
+  if(!num){alert('أدخل رقم الشقة');numEl?.focus();return;}
+  if(APTS[num]){alert('الشقة '+num+' موجودة بالفعل');return;}
+  const seats=type==='single'?2:4;
+  const finalDesc=desc||(type==='single'?'غرفة':'غرفتين');
+  APTS[num]={desc:finalDesc,type,seats};
+  CUSTOM_APTS[num]={desc:finalDesc,type,seats};
+  const nl=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  APT_LIST.length=0;nl.forEach(k=>APT_LIST.push(k));
+  if(numEl)numEl.value='';
+  if(descEl)descEl.value='';
+  saveCustomApts();
+  renderAptListMgr();
+  alert('✓ تمت إضافة الشقة '+num);
+}
+
+function removeCustomApt(num){
+  if(!confirm('حذف الشقة '+num+'؟ (ستُزال من قوائم الحجز الجديدة فقط)'))return;
+  delete APTS[num];
+  delete CUSTOM_APTS[num];
+  const nl=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  APT_LIST.length=0;nl.forEach(k=>APT_LIST.push(k));
+  saveCustomApts();
+  renderAptListMgr();
+}
+
+async function saveCustomApts(){
+  const str=JSON.stringify(CUSTOM_APTS);
+  try{localStorage.setItem('mtr_custom_apts',str);}catch(e){}
+  try{await sbFetch('mtr_settings','PATCH',{custom_apts:str},'?id=eq.1');}catch(e){console.warn('saveCustomApts:',e);}
+}
+
+
 async function savePriceMgr(applyAll){
   // Smart prefix detection: try both prefixes and use whichever has rendered inputs
   const pfxB='pmB_', pfxA='pmA_';
@@ -6998,6 +7092,7 @@ window.showTab=function(t){
     const ps=document.getElementById('prices');if(ps)ps.classList.add('active');
     // Use renderPriceMgrInPrices which renders with correct pmB_ prefix
     if(typeof renderPriceMgrInPrices==='function') renderPriceMgrInPrices();
+    if(typeof renderAptListMgr==='function') renderAptListMgr();
     if(typeof renderCatsMgrInto2==='function') renderCatsMgrInto2();
     else if(typeof renderCatsMgr==='function'){
       const cm2=document.getElementById('cats-mgr-2');
