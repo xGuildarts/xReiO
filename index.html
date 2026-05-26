@@ -472,6 +472,7 @@ tr:hover td{background:#f5f8fc}
   <button class="tab" id="tab-prices" onclick="showTab('prices')">إعدادات الأسعار</button>
   <button class="tab h" id="tab-locks" onclick="showTab('locks')">🔒 تقفيل الأفواج</button>
   <button class="tab" id="tab-closing" onclick="showTab('closing')">🧾 تقفيلة الفوج</button>
+  <button class="tab h" id="tab-design" onclick="showTab('design')">🎨 تصميم</button>
 </div>
 <div class="main" id="main-area">
 <!-- DASH -->
@@ -510,6 +511,17 @@ tr:hover td{background:#f5f8fc}
     </div>
   </div>
   <div class="fg" style="max-width:220px"><label>الباص</label><select id="f-bus-sel"><option value="0">الباص الأول</option></select></div>
+
+  <!-- نقل فقط toggle -->
+  <div style="margin-bottom:6px">
+    <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:8px 14px;background:var(--wnl);border:1.5px solid var(--wn);border-radius:8px;font-weight:700;color:var(--wn)">
+      <input type="checkbox" id="f-transport-only" onchange="toggleTransportOnly()" style="width:16px;height:16px;cursor:pointer">
+      🚌 نقل فقط بدون شقة
+    </label>
+    <span style="font-size:11px;color:var(--tx2);margin-right:8px">فعّل لو العميل حاجز كراسي فقط بدون شقة</span>
+  </div>
+
+  <div id="apt-section-wrap">
   <div class="fg"><label>اختار الشقق</label>
     <div id="apt-grid" class="apt-grid"></div>
     <div class="legend"><span><span class="ldot" style="background:var(--sf);border:1.5px solid var(--bd2)"></span>متاحة</span><span><span class="ldot" style="background:var(--pr)"></span>مختارة</span><span><span class="ldot" style="background:var(--dn)"></span>محجوزة</span></div>
@@ -518,6 +530,7 @@ tr:hover td{background:#f5f8fc}
   <div id="apt-p-sec" style="display:none">
     <div class="fg"><label>أسعار الشقق (من الإعدادات - غير قابلة للتعديل)</label><div id="apt-p-rows"></div></div>
   </div>
+  </div><!-- end apt-section-wrap -->
   <div class="fg" style="max-width:280px">
     <label>مسؤول المبيعات</label>
     <select id="f-sales-rep">
@@ -1001,9 +1014,11 @@ tr:hover td{background:#f5f8fc}
     <div id="bypass-users-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
   </div>
 </div>
+<!-- DESIGN TAB SECTION -->
+<div id="design" class="sec"></div>
+
 <!-- CLOSING TAB SECTION -->
 <div id="closing" class="sec">
-  <div class="card" style="margin-bottom:.75rem">
     <div class="ctitle">🧾 تقفيلة الفوج</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <select id="cl-convoy-sel" style="max-width:240px;font-weight:700">
@@ -1029,18 +1044,6 @@ tr:hover td{background:#f5f8fc}
 
 <div id="prices" class="sec">
   <div class="info-box">إعدادات الأسعار والحسابات - يحتاج صلاحية خاصة</div>
-  <div class="card"><div class="ctitle">🏠 إدارة الشقق</div>
-    <div class="info-box" style="font-size:12px">أضف أو احذف شققاً من القائمة. رقم الشقة يظهر في نماذج الحجز. النوع يحدد عدد الكراسي (غرفة=2، غرفتين=4).</div>
-    <div id="apt-list-mgr"></div>
-    <div style="display:flex;gap:6px;margin-top:.65rem;flex-wrap:wrap;align-items:flex-end">
-      <div class="fg" style="margin:0;flex:0 0 110px"><label style="font-size:11px">رقم الشقة</label><input type="text" id="new-apt-num" placeholder="مثال: 905" style="text-align:center"></div>
-      <div class="fg" style="margin:0;flex:1;min-width:150px"><label style="font-size:11px">وصف الشقة</label><input type="text" id="new-apt-desc" placeholder="مثال: غرفتين · ترى البحر"></div>
-      <div class="fg" style="margin:0;flex:0 0 120px"><label style="font-size:11px">النوع</label>
-        <select id="new-apt-type"><option value="double">غرفتين (4 أفراد)</option><option value="single">غرفة (2 أفراد)</option></select>
-      </div>
-      <button class="btn btn-p" onclick="addCustomApt()" style="align-self:flex-end;white-space:nowrap">+ إضافة شقة</button>
-    </div>
-  </div>
   <div class="card"><div class="ctitle">إدارة أسعار الشقق</div>
     <div class="info-box" style="font-size:12px">السعر الإجمالي = سعر الشقة + (عدد الكراسي × سعر الكرسي)</div>
     <div id="price-mgr-2"></div>
@@ -1086,6 +1089,35 @@ tr:hover td{background:#f5f8fc}
   <div class="card" style="background:var(--prl);border-color:var(--pr)">
     <div style="font-size:12px;color:var(--pr)">💡 إدارة الأسعار وفئات الحسابات موجودة في تبويب <strong>الأسعار</strong></div>
   </div>
+
+  <!-- ====== شقق إضافية ====== -->
+  <div class="card">
+    <div class="ctitle">🏠 شقق إضافية</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">أضف شقق خارج الشقق الأساسية — هتظهر في الحجوزات فوراً</div>
+
+    <!-- فورم إضافة شقة -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;padding:10px;background:var(--sf2);border-radius:8px;border:1px dashed var(--bd2)">
+      <div class="fg" style="flex:0 0 110px;margin:0">
+        <label>رقم الشقة</label>
+        <input type="text" id="ea-num" placeholder="مثال: 505" maxlength="10" style="font-weight:800;font-size:15px;text-align:center">
+      </div>
+      <div class="fg" style="flex:1;min-width:160px;margin:0">
+        <label>وصف الشقة</label>
+        <input type="text" id="ea-desc" placeholder="مثال: غرفتين · ترى البحر">
+      </div>
+      <div class="fg" style="flex:0 0 130px;margin:0">
+        <label>النوع</label>
+        <select id="ea-type">
+          <option value="double">غرفتين (4 أشخاص)</option>
+          <option value="single">غرفة (2 شخص)</option>
+        </select>
+      </div>
+      <button class="btn btn-p" onclick="addExtraApt()" style="align-self:flex-end;white-space:nowrap">➕ إضافة شقة</button>
+    </div>
+
+    <!-- قائمة الشقق الإضافية -->
+    <div id="extra-apts-list"></div>
+  </div>
 </div>
 </div></div><!-- end main/app -->
 
@@ -1107,7 +1139,41 @@ tr:hover td{background:#f5f8fc}
 // ============================================================
 const EGYPT_CITIES={'القاهرة':['القاهرة','مدينة نصر','مصر الجديدة','المعادي','الزمالك','شبرا','عين شمس','حلوان','التجمع الخامس','المقطم','6 أكتوبر'],'الجيزة':['الجيزة','الدقي','المهندسين','الشيخ زايد','فيصل','إمبابة'],'الإسكندرية':['الإسكندرية','سيدي بشر','المنتزه','العجمي','العامرية','برج العرب'],'الغربية':['طنطا','المحلة الكبرى','كفر الزيات','زفتى','السنطة'],'المنوفية':['شبين الكوم','منوف','أشمون','قويسنا','بركة السبع'],'الدقهلية':['المنصورة','طلخا','ميت غمر','أجا','المنزلة','بلقاس'],'الشرقية':['الزقازيق','العاشر من رمضان','بلبيس','أبو كبير','فاقوس'],'الإسماعيلية':['الإسماعيلية','فايد','القنطرة'],'بورسعيد':['بورسعيد'],'السويس':['السويس','عتاقة'],'دمياط':['دمياط','رأس البر'],'كفر الشيخ':['كفر الشيخ','دسوق','فوه','بلطيم'],'البحيرة':['دمنهور','كفر الدوار','رشيد'],'مطروح':['مرسى مطروح','الضبعة','العلمين','سيوة','الحمام','رأس الحكمة'],'أسوان':['أسوان','كوم أمبو'],'الأقصر':['الأقصر','إسنا'],'قنا':['قنا','نجع حمادي','دشنا'],'سوهاج':['سوهاج','أخميم','طهطا'],'أسيوط':['أسيوط','ديروط','القوصية'],'المنيا':['المنيا','ملوي','سمالوط','مغاغة'],'بني سويف':['بني سويف','ناصر','ببا'],'الفيوم':['الفيوم','طامية'],'شمال سيناء':['العريش','رفح'],'جنوب سيناء':['شرم الشيخ','دهب','طابا'],'البحر الأحمر':['الغردقة','سفاجا','مرسى علم'],'الوادي الجديد':['الخارجة','الداخلة']};
 const APTS={'403':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'404':{desc:'غرفتين · تكيف',type:'double',seats:4},'503':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'601':{desc:'غرفة · مكيفة',type:'single',seats:2},'602':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'603':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'604':{desc:'غرفتين · تكيف',type:'double',seats:4},'704':{desc:'غرفتين · مراوح',type:'double',seats:4},'801':{desc:'غرفة · مكيفة',type:'single',seats:2},'802':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'803':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'804':{desc:'غرفتين · مراوح',type:'double',seats:4},'902':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'904':{desc:'غرفتين · ترى البحر',type:'double',seats:4}};
-const APT_LIST=Object.keys(APTS);
+
+// ====== شقق إضافية (Extra Apartments) ======
+// بيتحملوا من localStorage ويتدمجوا مع APTS
+function loadExtraApts(){
+  // بنحمل من localStorage أولاً (بيتحدث من mS)
+  try{return JSON.parse(localStorage.getItem('mtr_extra_apts')||'{}');}catch(e){return {};}
+}
+function saveExtraApts(obj){
+  const str=JSON.stringify(obj);
+  // حفظ في localStorage
+  try{localStorage.setItem('mtr_extra_apts',str);}catch(e){}
+  // حفظ في Supabase — جوه bus_names كـ __extra_apts key (مش محتاج كولم جديد)
+  if(typeof sbFetch==='function'){
+    const normalized={};
+    Object.entries(BUS_NAMES).forEach(([k,v])=>{normalized[String(k)]=v;});
+    normalized['__extra_apts']=obj; // نخبي الشقق الإضافية هنا
+    sbFetch('mtr_settings','PATCH',{bus_names:JSON.stringify(normalized)},'?id=eq.1').catch(e=>console.warn('extra_apts save:',e));
+  }
+  rebuildAPTS();
+}
+function rebuildAPTS(){
+  const extra=loadExtraApts();
+  // امسح الشقق الإضافية القديمة وأضيف الجديدة
+  Object.keys(APTS).forEach(k=>{ if(APTS[k]._extra) delete APTS[k]; });
+  Object.entries(extra).forEach(([num,info])=>{
+    APTS[num]={...info,_extra:true};
+  });
+  // أعد بناء APT_LIST
+  APT_LIST.length=0;
+  Object.keys(APTS).sort().forEach(k=>APT_LIST.push(k));
+  // رفرش الـ pickers لو مفتوحين
+  if(typeof renderAptGrid==='function') renderAptGrid();
+}
+
+const APT_LIST=Object.keys(APTS).sort();
 // DEFAULT PRICE MAP - overridden by settings
 const DEFAULT_PRICE_MAP={'2026-05-28':{single:8500,double:9900},'2026-06-02':{single:3700,double:6800},'2026-06-07':{single:3700,double:6800},'2026-06-12':{single:3900,double:7800},'2026-06-17':{single:3900,double:7800},'2026-06-22':{single:8500,double:9900},'2026-06-27':{single:8500,double:9900},'2026-07-02':{single:5400,double:8800},'2026-07-07':{single:8500,double:9900},'2026-07-12':{single:8500,double:9900},'2026-07-17':{single:9400,double:12800},'2026-07-22':{single:9400,double:12800},'2026-07-27':{single:9400,double:12800},'2026-08-01':{single:9400,double:12800},'2026-08-06':{single:9400,double:12800},'2026-08-11':{single:9400,double:12800},'2026-08-16':{single:9400,double:12800},'2026-08-21':{single:9400,double:12800},'2026-08-26':{single:9400,double:12800},'2026-08-31':{single:9400,double:12800},'2026-09-05':{single:9400,double:12800},'2026-09-10':{single:9400,double:12800},'2026-09-15':{single:9400,double:12800},
   '2026-09-20':{single:6500,double:8500}};
@@ -1500,15 +1566,32 @@ let currentUser=null,selApts=[],activeBusConv=null,activeBusIdx=0,dragInfo=null,
 // Bus names & multi-bus per convoy: {convoyNum: ['الباص الأول', 'الباص الثاني']}
 let BUS_NAMES={};
 function saveBusNames(){
-  // Normalize all keys to strings before saving
-  const normalized={};Object.entries(BUS_NAMES).forEach(([k,v])=>{normalized[String(k)]=v;});
+  const normalized={};
+  Object.entries(BUS_NAMES).forEach(([k,v])=>{normalized[String(k)]=v;});
+  // احتفظ بالشقق الإضافية المخبية
+  try{const ea=JSON.parse(localStorage.getItem('mtr_extra_apts')||'{}');if(Object.keys(ea).length)normalized['__extra_apts']=ea;}catch(e){}
   try{localStorage.setItem('mtr_bus_names',JSON.stringify(normalized));}catch(e){}
   if(typeof sbFetch==='function'){sbFetch('mtr_settings','PATCH',{bus_names:JSON.stringify(normalized)},'?id=eq.1').catch(()=>{});}
 }
 function loadBusNames(settingsRow){
   if(settingsRow?.bus_names){
-    try{const p=JSON.parse(settingsRow.bus_names);if(p&&typeof p==='object'){const normalized={};Object.entries(p).forEach(([k,v])=>{normalized[String(k)]=v;});BUS_NAMES={...normalized};}}catch(e){}
-  }else{try{const s=localStorage.getItem('mtr_bus_names');if(s){const p=JSON.parse(s);const normalized={};Object.entries(p).forEach(([k,v])=>{normalized[String(k)]=v;});BUS_NAMES=normalized;}}catch(e){}}}
+    try{
+      const p=JSON.parse(settingsRow.bus_names);
+      if(p&&typeof p==='object'){
+        // استخرج الشقق الإضافية المخبية
+        if(p['__extra_apts']&&typeof p['__extra_apts']==='object'){
+          try{localStorage.setItem('mtr_extra_apts',JSON.stringify(p['__extra_apts']));}catch(e){}
+        }
+        // حمّل أسماء الباصات بدون الـ key الخاص
+        const normalized={};
+        Object.entries(p).forEach(([k,v])=>{if(k!=='__extra_apts')normalized[String(k)]=v;});
+        BUS_NAMES={...normalized};
+      }
+    }catch(e){}
+  }else{
+    try{const s=localStorage.getItem('mtr_bus_names');if(s){const p=JSON.parse(s);const normalized={};Object.entries(p).forEach(([k,v])=>{if(k!=='__extra_apts')normalized[String(k)]=v;});BUS_NAMES=normalized;}}catch(e){}
+  }
+}
 function getBusNames(cn){return BUS_NAMES[String(cn)]||['الباص الأول'];}
 function getBusCount(cn){return getBusNames(cn).length;}
 
@@ -1628,6 +1711,7 @@ async function initApp(){
   hotels=htls||[];
   hotelBookings=(Array.isArray(hbks)?hbks:[]).map(r=>typeof mHB==='function'?mHB(r):r);
   if(setts&&setts[0])settings=mS(setts[0]);
+  rebuildAPTS(); // بعد ما اتحملت الإعدادات من Supabase (فيها extra_apts)
   hideAll();
   // Restore session
   try{const s=JSON.parse(sessionStorage.getItem('mtr_sess')||'null');if(s){const f=users.find(u=>u.username===s.username&&u.password===s.password);if(f){loginUser(f);return;}}}catch(e){}
@@ -1644,36 +1728,19 @@ function mS(r){
     try{
       const pm=JSON.parse(r.price_map);
       if(pm&&typeof pm==='object'&&Object.keys(pm).length>0){
-        PRICE_MAP={...pm}; // use DB prices as-is, no merge with defaults
-        // Also save locally for offline
+        PRICE_MAP={...pm};
         try{localStorage.setItem('mtr_price_map',r.price_map);}catch(e){}
       }
     }catch(e){console.warn('Price map parse error:',e);}
   } else {
-    // Try localStorage cache
     try{
       const cached=localStorage.getItem('mtr_price_map');
       if(cached){const pm=JSON.parse(cached);if(pm&&Object.keys(pm).length>0)PRICE_MAP={...pm};}
     }catch(e){}
   }
+
   loadLocks(r);
-  loadBusNames(r);
-  if(r.custom_apts){
-    try{
-      const ca=JSON.parse(r.custom_apts);
-      if(ca&&typeof ca==='object'){
-        Object.assign(APTS,ca);
-        if(typeof CUSTOM_APTS!=='undefined')Object.assign(CUSTOM_APTS,ca);
-        const nl=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));APT_LIST.length=0;nl.forEach(k=>APT_LIST.push(k));
-        try{localStorage.setItem('mtr_custom_apts',JSON.stringify(ca));}catch(e){}
-      }
-    }catch(e){console.warn('custom_apts parse:',e);}
-  } else {
-    try{
-      const cached=localStorage.getItem('mtr_custom_apts');
-      if(cached){const ca=JSON.parse(cached);if(ca&&typeof ca==='object'){Object.assign(APTS,ca);if(typeof CUSTOM_APTS!=='undefined')Object.assign(CUSTOM_APTS,ca);const nl=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));APT_LIST.length=0;nl.forEach(k=>APT_LIST.push(k));}}
-    }catch(e){}
-  }
+  loadBusNames(r); // loadBusNames بتحمل extra_apts تلقائياً من جوه bus_names
   if(r.custom_roles){
     try{
       const cr=JSON.parse(r.custom_roles);
@@ -2051,7 +2118,7 @@ function showTab(t){
   if(t==='users'){renderUsers();}
   if(t==='add'){populateConvoys();populateCities();populateSupSel();renderGrid();}
   if(t==='hotels'){renderHotelStats();renderHotelBookings();}
-  if(t==='mgr'){loadMgr();renderCatsMgr();}
+  if(t==='mgr'){loadMgr();renderCatsMgr();renderExtraAptsList();}
   if(t==='locks'){renderLockManager();renderBypassUsers();}
   if(t==='prices'){
     renderPriceMgrInPrices();
@@ -2281,8 +2348,27 @@ function addPayRow(){
   d.innerHTML=`<input type="number" class="pa" placeholder="المبلغ" oninput="calcTotal()" style="flex:none;width:95px"><input type="date" class="pd"><select class="pp">${PM_TYPES.map(p=>`<option>${p}</option>`).join('')}</select><input type="text" class="pn" placeholder="ملاحظة"><button class="btn btn-d btn-sm" onclick="this.parentElement.remove();calcTotal()">×</button>`;
   document.getElementById('pay-cont').appendChild(d);
 }
+function toggleTransportOnly(){
+  const cb=document.getElementById('f-transport-only');
+  const wrap=document.getElementById('apt-section-wrap');
+  const extraEl=document.getElementById('f-extra-seats');
+  if(!cb||!wrap)return;
+  if(cb.checked){
+    wrap.style.display='none';
+    selApts=[];
+    document.getElementById('sel-bar').innerHTML='<span style="font-size:11px;color:var(--tx3);align-self:center">لم تختر شقة بعد</span>';
+    document.getElementById('apt-p-sec').style.display='none';
+    if(extraEl){extraEl.focus();}
+  } else {
+    wrap.style.display='';
+    renderAptGrid();
+  }
+  calcTotal();
+}
+
 async function saveBooking(){
   const pt=document.getElementById('f-party').value;
+  const isTransportOnly=document.getElementById('f-transport-only')?.checked||false;
   let name='',phone='',phone2='',pickup='';
   if(pt==='supplier'){
     const ss=document.getElementById('f-sup-sel');
@@ -2300,6 +2386,11 @@ async function saveBooking(){
   const cnv=document.getElementById('f-convoy').value;
   if(!cnv){document.getElementById('f-convoy').classList.add('err');return;}
   document.getElementById('f-convoy').classList.remove('err');
+  // لو مش transport only لازم يختار شقة
+  if(!isTransportOnly&&!selApts.length){
+    mtrPopup('تنبيه','⚠️ اختار شقة على الأقل\nأو فعّل خيار "نقل فقط بدون شقة"','warn');
+    return;
+  }
   pickup=document.getElementById('f-pickup').value;
   const cn=parseInt(cnv);
   const convoy2Val=parseInt(document.getElementById('f-convoy2')?.value)||null;
@@ -2344,7 +2435,7 @@ async function saveBooking(){
   const busIdxVal=parseInt(document.getElementById('f-bus-sel')?.value)||0;
   // sa2 = مقاعد العودة: نفس عدد الذهاب بالظبط
   const sa2=convoy2Val?[...Array(netSeatsTotal).keys()].map(()=>({seatNum:null,extra:false})):[];
-  const payload={name,phone,phone2,pickup,convoy:cn,convoy2:convoy2Val,checkin:conv.checkin,checkout:conv.checkout,apts:selApts,apt_prices:ap,apts_total:at+at2,apts2:selApts2,apt_prices2:ap2,seats:base1+base2,extra_seats:extra,seat_discount:sd,seat_price:sp,seat_disc_amt:sda,int_seats:intS,int_seat_price:intP,int_total:intT,disc,total,paid,remaining:total-paid,payments:pays,notes:document.getElementById('f-notes').value,seat_note:document.getElementById('f-seat-note')?.value?.trim()||'',seat_assign:sa,seat_assign2:sa2,mgr_snap:settings,created_by:(document.getElementById('f-sales-rep')?.value||currentUser?.name||'—'),party_type:pt,supplier_id:supplierId,adults:parseInt(document.getElementById('f-adults')?.value)||0,children:parseInt(document.getElementById('f-children')?.value)||0,bus_idx:busIdxVal,_discReason:document.getElementById('f-disc-reason')?.value||''};
+  const payload={name,phone,phone2,pickup,convoy:cn,convoy2:convoy2Val,checkin:conv.checkin,checkout:conv.checkout,apts:selApts,apt_prices:ap,apts_total:at+at2,apts2:selApts2,apt_prices2:ap2,seats:base1+base2,extra_seats:extra,seat_discount:sd,seat_price:sp,seat_disc_amt:sda,int_seats:intS,int_seat_price:intP,int_total:intT,disc,total,paid,remaining:total-paid,payments:pays,notes:document.getElementById('f-notes').value,seat_note:(document.getElementById('f-seat-note')?.value?.trim()||'')+(isTransportOnly?' [نقل فقط]':''),seat_assign:sa,seat_assign2:sa2,mgr_snap:settings,created_by:(document.getElementById('f-sales-rep')?.value||currentUser?.name||'—'),party_type:pt,supplier_id:supplierId,adults:parseInt(document.getElementById('f-adults')?.value)||0,children:parseInt(document.getElementById('f-children')?.value)||0,bus_idx:busIdxVal,_discReason:document.getElementById('f-disc-reason')?.value||''};
   // Store disc reason in notes if provided (temp workaround until SQL updated)
   const drVal=document.getElementById('f-disc-reason')?.value?.trim();
   if(drVal&&!payload.notes) payload.notes='خصم: '+drVal;
@@ -2366,6 +2457,10 @@ async function saveBooking(){
 }
 function resetForm(){
   selApts=[];selApts2=[];
+  const toEl=document.getElementById('f-transport-only');
+  if(toEl){toEl.checked=false;}
+  const aptWrap=document.getElementById('apt-section-wrap');
+  if(aptWrap)aptWrap.style.display='';
   document.getElementById('f-name').value='';document.getElementById('f-phone').value='';
   document.getElementById('f-phone2').value='';
   document.getElementById('f-notes').value='';document.getElementById('f-convoy').value='';
@@ -3773,6 +3868,57 @@ async function saveMgr(){
     updateLogoDsp();const el=document.getElementById('mgr-ok');el.style.display='inline';setTimeout(()=>el.style.display='none',2000);
   }catch(e){alert('فشل: '+e.message)}
 }
+
+// ====== إدارة الشقق الإضافية ======
+function addExtraApt(){
+  const numEl=document.getElementById('ea-num');
+  const descEl=document.getElementById('ea-desc');
+  const typeEl=document.getElementById('ea-type');
+  const num=(numEl.value||'').trim();
+  const desc=(descEl.value||'').trim();
+  const type=typeEl.value||'double';
+  if(!num){mtrPopup('تنبيه','⚠️ اكتب رقم الشقة','warn');return;}
+  if(APTS[num]&&!APTS[num]._extra){mtrPopup('تنبيه',`⚠️ الشقة ${num} موجودة بالفعل في القائمة الأساسية`,'warn');return;}
+  const extra=loadExtraApts();
+  extra[num]={desc:desc||'شقة إضافية',type,seats:type==='single'?2:4};
+  saveExtraApts(extra);
+  renderExtraAptsList();
+  numEl.value='';descEl.value='';
+  mtrPopup('تم',`✅ تمت إضافة الشقة ${num} وحفظها`,'ok');
+}
+function deleteExtraApt(num){
+  mtrPopup('تأكيد',`هل تحذف الشقة ${num} من الشقق الإضافية؟\nالحجوزات الحالية عليها لن تتأثر.`,'confirm',()=>{
+    const extra=loadExtraApts();
+    delete extra[num];
+    saveExtraApts(extra);
+    renderExtraAptsList();
+  });
+}
+function renderExtraAptsList(){
+  const el=document.getElementById('extra-apts-list');
+  if(!el)return;
+  const extra=loadExtraApts();
+  const keys=Object.keys(extra).sort();
+  if(!keys.length){
+    el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--tx3);font-size:13px">لا توجد شقق إضافية حتى الآن</div>`;
+    return;
+  }
+  el.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px">
+    ${keys.map(num=>{
+      const a=extra[num];
+      const usedIn=bookings.filter(b=>(b.apts||[]).includes(num)||(b.apts2||[]).includes(num)).length;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sf2);border-radius:8px;border:1px solid var(--bd2)">
+        <span style="font-size:18px;font-weight:900;color:var(--pr);min-width:50px">${num}</span>
+        <span style="flex:1;font-size:13px;color:var(--tx)">${a.desc||'—'}</span>
+        <span class="badge" style="background:${a.type==='single'?'var(--acl)':'var(--prl)'};color:${a.type==='single'?'var(--ac)':'var(--pr)'}">
+          ${a.type==='single'?'غرفة · 2 شخص':'غرفتين · 4 أشخاص'}
+        </span>
+        ${usedIn?`<span class="badge b-wn">${usedIn} حجز</span>`:''}
+        <button class="btn btn-d btn-sm" onclick="deleteExtraApt('${num}')">🗑</button>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
 function updateLogoDsp(){
   const lo=document.getElementById('hdr-limg'),lp=document.getElementById('hdr-lph');
   const llo=document.getElementById('login-logo-img'),llp=document.getElementById('login-logo-ph');
@@ -3891,72 +4037,6 @@ function updatePmTot(pfx,ci){
   if(elS)elS.textContent=(s+ss*sp).toLocaleString();
   if(elD)elD.textContent=(d+ds*sp).toLocaleString();
 }
-// ============================================================
-// APARTMENT MANAGEMENT (Add/Remove)
-// ============================================================
-let CUSTOM_APTS = {};
-
-function renderAptListMgr(){
-  const el=document.getElementById('apt-list-mgr');if(!el)return;
-  const list=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  if(!list.length){el.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:.5rem 0">لا توجد شقق</div>';return;}
-  const rows=list.map(a=>{
-    const info=APTS[a];
-    const isCustom=!!CUSTOM_APTS[a];
-    const bg=isCustom?'var(--acl)':'var(--sf2)';
-    const border=isCustom?'var(--ac)':'var(--bd2)';
-    const clr=isCustom?'var(--ac)':'var(--pr)';
-    const delBtn=isCustom?`<button onclick="removeCustomApt('${a}')" style="background:var(--dn);color:#fff;border:none;border-radius:4px;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:1;flex-shrink:0;padding:0">×</button>`:'';
-    return `<div style="display:flex;align-items:center;gap:4px;background:${bg};border:1.5px solid ${border};border-radius:8px;padding:4px 8px 4px 6px;font-size:12px">`
-      +`<span style="font-weight:700;color:${clr}">${a}</span>`
-      +`<span style="color:var(--tx2);font-size:11px">${info.desc||''} · ${info.type==='single'?'غرفة':'غرفتين'}</span>`
-      +delBtn+`</div>`;
-  }).join('');
-  const orig=list.filter(a=>!CUSTOM_APTS[a]).length;
-  const added=Object.keys(CUSTOM_APTS).length;
-  el.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.65rem">${rows}</div>`
-    +`<div style="font-size:11px;color:var(--tx3)">أصلية: ${orig} · <span style="color:var(--ac)">مضافة: ${added}</span> (الأخضر = مضاف يدوياً)</div>`;
-}
-
-function addCustomApt(){
-  const numEl=document.getElementById('new-apt-num');
-  const descEl=document.getElementById('new-apt-desc');
-  const typeEl=document.getElementById('new-apt-type');
-  const num=(numEl?.value||'').trim();
-  const desc=(descEl?.value||'').trim();
-  const type=typeEl?.value||'double';
-  if(!num){alert('أدخل رقم الشقة');numEl?.focus();return;}
-  if(APTS[num]){alert('الشقة '+num+' موجودة بالفعل');return;}
-  const seats=type==='single'?2:4;
-  const finalDesc=desc||(type==='single'?'غرفة':'غرفتين');
-  APTS[num]={desc:finalDesc,type,seats};
-  CUSTOM_APTS[num]={desc:finalDesc,type,seats};
-  const nl=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  APT_LIST.length=0;nl.forEach(k=>APT_LIST.push(k));
-  if(numEl)numEl.value='';
-  if(descEl)descEl.value='';
-  saveCustomApts();
-  renderAptListMgr();
-  alert('✓ تمت إضافة الشقة '+num);
-}
-
-function removeCustomApt(num){
-  if(!confirm('حذف الشقة '+num+'؟ (ستُزال من قوائم الحجز الجديدة فقط)'))return;
-  delete APTS[num];
-  delete CUSTOM_APTS[num];
-  const nl=Object.keys(APTS).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  APT_LIST.length=0;nl.forEach(k=>APT_LIST.push(k));
-  saveCustomApts();
-  renderAptListMgr();
-}
-
-async function saveCustomApts(){
-  const str=JSON.stringify(CUSTOM_APTS);
-  try{localStorage.setItem('mtr_custom_apts',str);}catch(e){}
-  try{await sbFetch('mtr_settings','PATCH',{custom_apts:str},'?id=eq.1');}catch(e){console.warn('saveCustomApts:',e);}
-}
-
-
 async function savePriceMgr(applyAll){
   // Smart prefix detection: try both prefixes and use whichever has rendered inputs
   const pfxB='pmB_', pfxA='pmA_';
@@ -4116,7 +4196,10 @@ function editBooking(id){
         ${users.map(u=>`<option value="${u.name}" ${u.name===b.createdBy?'selected':''}>${u.name} (${u.username})</option>`).join('')}
       </select>
     </div>
-    <div class="fg" style="margin-top:.75rem"><label>الشقق المحجوزة <small style="font-weight:400;color:var(--tx3)">(اضغط لإضافة/إزالة)</small></label>
+    <div class="fg" style="margin-top:.75rem">
+      <label>الشقق المحجوزة <small style="font-weight:400;color:var(--tx3)">(اضغط لإضافة/إزالة)</small>
+        <button type="button" onclick="clearEditApts(${b.id})" style="margin-right:8px;background:var(--wnl);border:1px solid var(--wn);color:var(--wn);border-radius:6px;padding:2px 10px;font-size:11px;font-weight:700;cursor:pointer">🚌 نقل فقط — مسح كل الشقق</button>
+      </label>
       <div id="edit-apt-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:5px 0">
         ${APT_LIST.map(a=>{const bkd=bookedApts(b.convoy,b.id).includes(a);const sel=(b.apts||[]).includes(a);return`<button type="button" id="edit-ab-${a}" class="ab ${bkd&&!sel?'bkd':sel?'sel':'av'}" onclick="toggleEditApt('${a}',${b.id})" ${bkd&&!sel?'disabled':''}>${a}<br><span style="font-size:9px;opacity:.7">${APTS[a].type==='single'?'غرفة':'غرفتين'}</span></button>`;}).join('')}
       </div>
@@ -4229,7 +4312,7 @@ async function saveEditBooking(id){
 
   // Get selected apts
   const newApts=editSelApts[id]||b.apts||[];
-  if(!newApts.length){ alert('اختار شقة على الأقل'); return; }
+  const isTransportOnly=(newApts.length===0); // لو مفيش شقق = نقل فقط تلقائياً
 
   // Apt prices from settings (read-only)
   const newAptPrices={};
@@ -4401,6 +4484,23 @@ async function saveEditBooking(id){
 
 let editSelApts={};
 let editSelApts2={};
+
+function clearEditApts(bookingId){
+  editSelApts[bookingId]=[];
+  // اعمل refresh للـ grid
+  document.querySelectorAll(`[id^="edit-ab-"]`).forEach(btn=>{
+    if(btn.id.startsWith('edit-ab-')){
+      const a=btn.id.replace('edit-ab-','');
+      btn.className=btn.className.replace('sel','av');
+    }
+  });
+  const bar=document.getElementById('edit-sel-bar');
+  if(bar)bar.innerHTML='<span style="font-size:11px;color:var(--tx3);align-self:center">🚌 نقل فقط — بدون شقة</span>';
+  const rows=document.getElementById('edit-apt-rows');
+  if(rows)rows.innerHTML='<span style="font-size:12px;color:var(--tx3)">لا توجد شقق — سيتم الحفظ كحجز نقل فقط</span>';
+  // إعادة حساب الإجمالي
+  if(typeof updateEditTotal==='function') updateEditTotal(bookingId);
+}
 
 function onEditConv2Chg(bookingId){
   const b=bookings.find(x=>x.id===bookingId);if(!b)return;
@@ -6043,22 +6143,11 @@ window.printOneTable = function(sectionId){
 
 // ====== DESIGN TAB ======
 document.addEventListener('DOMContentLoaded', function(){
-  // Add Design tab
+  // تابة التصميم موجودة مباشرة في HTML - نحط المحتوى في الـ div الموجود
   const tabsEl=document.querySelector('.tabs');
-  if(tabsEl&&!document.getElementById('tab-design')){
-    const btn=document.createElement('button');
-    btn.className='tab h';btn.id='tab-design';
-    btn.textContent='🎨 تصميم';
-    btn.onclick=function(){showTab('design');};
-    tabsEl.insertBefore(btn,document.getElementById('tab-mgr'));
-  }
-  // Add design section
-  const mainEl=document.getElementById('main-area');
-  if(mainEl&&!document.getElementById('design')){
-    const sec=document.createElement('div');
-    sec.id='design';sec.className='sec';
-    sec.innerHTML=buildDesignHTML();
-    mainEl.insertBefore(sec,document.getElementById('mgr'));
+  const designSec=document.getElementById('design');
+  if(designSec&&!designSec.innerHTML.trim()){
+    designSec.innerHTML=buildDesignHTML();
   }
   // Override showTab
   const origShow=window.showTab;
@@ -7092,7 +7181,6 @@ window.showTab=function(t){
     const ps=document.getElementById('prices');if(ps)ps.classList.add('active');
     // Use renderPriceMgrInPrices which renders with correct pmB_ prefix
     if(typeof renderPriceMgrInPrices==='function') renderPriceMgrInPrices();
-    if(typeof renderAptListMgr==='function') renderAptListMgr();
     if(typeof renderCatsMgrInto2==='function') renderCatsMgrInto2();
     else if(typeof renderCatsMgr==='function'){
       const cm2=document.getElementById('cats-mgr-2');
