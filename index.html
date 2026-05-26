@@ -1051,6 +1051,31 @@ tr:hover td{background:#f5f8fc}
     <div style="font-size:12px;color:var(--tx2);margin-bottom:.75rem">في حالة تغيير بيانات Supabase أو وجود مشكلة في الاتصال</div>
     <button class="btn btn-d" onclick="resetConn()">إعادة إعداد Supabase</button>
   </div>
+
+  <!-- ====== شقق إضافية في تاب الأسعار ====== -->
+  <div class="card">
+    <div class="ctitle">🏠 شقق إضافية</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">أضف شقق خارج الشقق الأساسية — هتظهر في الحجوزات فوراً وتُحفظ تلقائياً</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;padding:10px;background:var(--sf2);border-radius:8px;border:1px dashed var(--bd2)">
+      <div class="fg" style="flex:0 0 110px;margin:0">
+        <label>رقم الشقة</label>
+        <input type="text" id="ea-num" placeholder="مثال: 505" maxlength="10" style="font-weight:800;font-size:15px;text-align:center">
+      </div>
+      <div class="fg" style="flex:1;min-width:160px;margin:0">
+        <label>وصف الشقة</label>
+        <input type="text" id="ea-desc" placeholder="مثال: غرفتين · ترى البحر">
+      </div>
+      <div class="fg" style="flex:0 0 130px;margin:0">
+        <label>النوع</label>
+        <select id="ea-type">
+          <option value="double">غرفتين (4 أشخاص)</option>
+          <option value="single">غرفة (2 شخص)</option>
+        </select>
+      </div>
+      <button class="btn btn-p" onclick="addExtraApt()" style="align-self:flex-end;white-space:nowrap">➕ إضافة شقة</button>
+    </div>
+    <div id="extra-apts-list"></div>
+  </div>
 </div>
 <div id="mgr" class="sec">
   <div class="info-box">التعديلات تطبق على كل الأجهزة</div>
@@ -1082,34 +1107,6 @@ tr:hover td{background:#f5f8fc}
     <div style="font-size:12px;color:var(--pr)">💡 إدارة الأسعار وفئات الحسابات موجودة في تبويب <strong>الأسعار</strong></div>
   </div>
 
-  <!-- ====== شقق إضافية ====== -->
-  <div class="card">
-    <div class="ctitle">🏠 شقق إضافية</div>
-    <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">أضف شقق خارج الشقق الأساسية — هتظهر في الحجوزات فوراً</div>
-
-    <!-- فورم إضافة شقة -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;padding:10px;background:var(--sf2);border-radius:8px;border:1px dashed var(--bd2)">
-      <div class="fg" style="flex:0 0 110px;margin:0">
-        <label>رقم الشقة</label>
-        <input type="text" id="ea-num" placeholder="مثال: 505" maxlength="10" style="font-weight:800;font-size:15px;text-align:center">
-      </div>
-      <div class="fg" style="flex:1;min-width:160px;margin:0">
-        <label>وصف الشقة</label>
-        <input type="text" id="ea-desc" placeholder="مثال: غرفتين · ترى البحر">
-      </div>
-      <div class="fg" style="flex:0 0 130px;margin:0">
-        <label>النوع</label>
-        <select id="ea-type">
-          <option value="double">غرفتين (4 أشخاص)</option>
-          <option value="single">غرفة (2 شخص)</option>
-        </select>
-      </div>
-      <button class="btn btn-p" onclick="addExtraApt()" style="align-self:flex-end;white-space:nowrap">➕ إضافة شقة</button>
-    </div>
-
-    <!-- قائمة الشقق الإضافية -->
-    <div id="extra-apts-list"></div>
-  </div>
 </div>
 </div></div><!-- end main/app -->
 
@@ -2115,11 +2112,12 @@ function showTab(t){
   if(t==='users'){renderUsers();}
   if(t==='add'){populateConvoys();populateCities();populateSupSel();renderGrid();}
   if(t==='hotels'){renderHotelStats();renderHotelBookings();}
-  if(t==='mgr'){loadMgr();renderCatsMgr();renderExtraAptsList();}
+  if(t==='mgr'){loadMgr();renderCatsMgr();}
   if(t==='locks'){renderLockManager();renderBypassUsers();}
   if(t==='prices'){
     renderPriceMgrInPrices();
     renderCatsMgr();
+    renderExtraAptsList();
     // Sync cats-mgr-2 with cats-mgr
     const cm2=document.getElementById('cats-mgr-2');
     const cm=document.getElementById('cats-mgr');
