@@ -1686,7 +1686,7 @@ async function doConnect(){
     showCfgErr('فشل الاتصال: '+e.message.slice(0,80));
   }
 }
-function resetConn(){if(!confirm('إعادة الإعداد؟'))return;localStorage.removeItem(SB_URL_KEY);localStorage.removeItem(SB_KEY_KEY);location.reload()}
+async function resetConn(){if(!await confirm('إعادة الإعداد؟'))return;localStorage.removeItem(SB_URL_KEY);localStorage.removeItem(SB_KEY_KEY);location.reload()}
 
 // ============================================================
 // INIT APP
@@ -1983,12 +1983,12 @@ function addCustomRole(){
   alert(`✓ تم إضافة دور "${label}"`);
 }
 
-function deleteCustomRole(roleId){
+async function deleteCustomRole(roleId){
   const builtIn=['admin','bookings','accounts','operations','viewer'];
   if(builtIn.includes(roleId)){alert('لا يمكن حذف الأدوار المدمجة');return;}
   const used=users.filter(u=>u.role===roleId).length;
   if(used>0){alert('لا يمكن حذف الدور - يوجد '+used+' مستخدم بهذا الدور\nغيّر دور المستخدمين أولاً');return;}
-  if(!confirm('حذف الدور "'+getRoleLabel(roleId)+'"؟'))return;
+  if(!await confirm('حذف الدور "'+getRoleLabel(roleId)+'"؟'))return;
   delete customRoles[roleId];
   delete customRoleLabels[roleId];
   saveCustomRoles();
@@ -2028,7 +2028,7 @@ async function addUser(){
   }catch(e){alert('فشل: '+e.message)}
 }
 async function removeUser(id){
-  if(!confirm('حذف المستخدم؟'))return;
+  if(!await confirm('حذف المستخدم؟'))return;
   const u=users.find(x=>x.id===id);
   try{await sbFetch('mtr_users','DELETE',null,`?id=eq.${id}`);users=users.filter(x=>x.id!==id);addLog(`حذف مستخدم: ${u?.name}`,'del',`اسم المستخدم: ${u?.username||'-'}`);renderUsers();}catch(e){alert('فشل: '+e.message)}
 }
@@ -2411,7 +2411,7 @@ async function saveBooking(){
   const sd=parseFloat(document.getElementById('f-seatd').value)||0;
   const netSeats=Math.max(0,(base1+base2+extra)-sd); // الإجمالي الصح
   const isExtra=convEffSeats(cn)+netSeats>MAX_SEATS;
-  if(isExtra&&!confirm('تحذير: الباص ممتلئ. تكمل؟'))return;
+  if(isExtra&&!await confirm('تحذير: الباص ممتلئ. تكمل؟'))return;
   const conv=getConv(cn);
   const ap=getAptPrices(),at=Object.values(ap).reduce((s,v)=>s+v,0);
   const ap2=convoy2Val?getAptPrices2():{};
@@ -2600,11 +2600,11 @@ async function delBooking(id){
   const approvedPays=accEntries.filter(e=>e.bookingRef===String(id)&&!e.bookingPayRef?.startsWith('pair_'));
   let delPays=false;
   if(approvedPays.length){
-    const choice=confirm(`حذف الحجز؟\n\nيوجد ${approvedPays.length} دفعة معتمدة في الحسابات بإجمالي ${approvedPays.reduce((s,e)=>s+e.amount,0).toLocaleString()} ج\n\nاضغط موافق لحذف الحجز مع الدفعات المعتمدة\nاضغط إلغاء لإلغاء العملية`);
+    const choice=await confirm(`حذف الحجز؟\n\nيوجد ${approvedPays.length} دفعة معتمدة في الحسابات بإجمالي ${approvedPays.reduce((s,e)=>s+e.amount,0).toLocaleString()} ج\n\nاضغط موافق لحذف الحجز مع الدفعات المعتمدة\nاضغط إلغاء لإلغاء العملية`);
     if(!choice)return;
     delPays=true;
   }else{
-    if(!confirm('حذف الحجز نهائياً؟'))return;
+    if(!await confirm('حذف الحجز نهائياً؟'))return;
   }
   try{
     await sbFetch('mtr_bookings','DELETE',null,`?id=eq.${id}`);
@@ -2703,10 +2703,10 @@ function renameBus(cn,idx){
   });
 }
 
-function removeBus(cn,idx){
+async function removeBus(cn,idx){
   const names=getBusNames(cn);
   if(names.length<=1){alert('لا يمكن حذف الباص الوحيد');return;}
-  if(!confirm('حذف الباص "'+names[idx]+'"؟'))return;
+  if(!await confirm('حذف الباص "'+names[idx]+'"؟'))return;
   const k=String(cn);
   if(!BUS_NAMES[k])BUS_NAMES[k]=[...names];
   BUS_NAMES[k].splice(idx,1);
@@ -3187,7 +3187,7 @@ async function busDrop(e,cn,toSn){
   }
 }
 async function clearSeat(cn,sn){
-  if(!confirm('إلغاء التخصيص؟'))return;
+  if(!await confirm('إلغاء التخصيص؟'))return;
   const b=bookings.find(bb=>bb.convoy===cn&&(bb.seatAssign||[]).some(s=>s.seatNum===sn));if(!b)return;
   b.seatAssign.forEach((sa,i)=>{if(sa.seatNum===sn)b.seatAssign[i].seatNum=null;});
   await sbFetch('mtr_bookings','PATCH',{seat_assign:b.seatAssign},`?id=eq.${b.id}`);
@@ -3195,7 +3195,7 @@ async function clearSeat(cn,sn){
 }
 
 async function clearSeat2(cn,sn){
-  if(!confirm('إلغاء تخصيص كرسي العودة؟'))return;
+  if(!await confirm('إلغاء تخصيص كرسي العودة؟'))return;
   const b=bookings.find(bb=>bb.convoy2===cn&&(bb.seatAssign2||[]).some(s=>s.seatNum===sn));if(!b)return;
   b.seatAssign2.forEach((sa,i)=>{if(sa.seatNum===sn)b.seatAssign2[i].seatNum=null;});
   await sbFetch('mtr_bookings','PATCH',{seat_assign2:b.seatAssign2},`?id=eq.${b.id}`);
@@ -3207,7 +3207,7 @@ async function moveToBus(bookingId,fromBusIdx,toBusIdx){
   const busNames=getBusNames(b.convoy);
   const toName=busNames[toBusIdx]||'الباص '+(toBusIdx+1);
   const fromName=busNames[fromBusIdx]||'الباص '+(fromBusIdx+1);
-  if(!confirm(`نقل "${b.name}" من ${fromName} إلى ${toName}؟`))return;
+  if(!await confirm(`نقل "${b.name}" من ${fromName} إلى ${toName}؟`))return;
   // Clear all seat assignments for this client first
   if(b.seatAssign)b.seatAssign.forEach(sa=>sa.seatNum=null);
   b.busIdx=toBusIdx;
@@ -3428,7 +3428,7 @@ async function delAccE(id){
   const pairRef=e.bookingRef;
   const paired=pairRef&&pairRef.startsWith('pair_')?accEntries.filter(x=>x.bookingRef===pairRef&&x.id!==id):[];
   const pairMsg=paired.length?`\n\nتحذير: هذا القيد له طرف مقابل (${paired[0]?.type||''} - ${paired[0]?.amount?.toLocaleString()||0} ج).\nهل تريد حذف الطرفين معاً؟`:'';
-  const doDeletePair=paired.length?confirm('حذف القيد؟'+pairMsg):confirm('حذف القيد؟');
+  const doDeletePair=paired.length?await confirm('حذف القيد؟'+pairMsg):await confirm('حذف القيد؟');
   if(!doDeletePair)return;
   try{
     const idsToDelete=[id,...(doDeletePair&&paired.length?paired.map(p=>p.id):[])];
@@ -3471,7 +3471,7 @@ async function approvePay(ref,pmType,amount,clientName,date,bookingId,payIdx,saf
     if(el_pm)pmType=el_pm.value||pmType;
     if(el_date)date=el_date.value||date;
   }
-  if(!confirm(`اعتماد ${amount.toLocaleString()} ج - ${pmType}؟`))return;
+  if(!await confirm(`اعتماد ${amount.toLocaleString()} ج - ${pmType}؟`))return;
   if(isHotel){
     // Hotel booking payment approval
     const hb=typeof hotelBookings!=='undefined'?hotelBookings.find(x=>x.id===bookingId):null;
@@ -3503,7 +3503,7 @@ async function approvePay(ref,pmType,amount,clientName,date,bookingId,payIdx,saf
   }catch(e){alert('فشل: '+e.message)}
 }
 async function delPendPay(bookingId,payIdx){
-  if(!confirm('حذف الدفعة؟'))return;
+  if(!await confirm('حذف الدفعة؟'))return;
   const b=bookings.find(x=>x.id===bookingId);if(!b)return;
   const amt=b.payments[payIdx]?.amount||0;
   b.payments.splice(payIdx,1);b.paid=Math.max(0,b.paid-amt);b.remaining=b.total-b.paid;
@@ -4093,8 +4093,8 @@ function addCat(t){
   try{localStorage.setItem('mtr_cats',JSON.stringify({pm:PM_TYPES,exp:EXP_CATS}));}catch(e){}
   if(inp)inp.value='';renderCatsMgr();
 }
-function removeCat(t,i){
-  if(!confirm('حذف هذه الفئة؟'))return;
+async function removeCat(t,i){
+  if(!await confirm('حذف هذه الفئة؟'))return;
   if(t==='pm')PM_TYPES.splice(i,1);else EXP_CATS.splice(i,1);
   try{localStorage.setItem('mtr_cats',JSON.stringify({pm:PM_TYPES,exp:EXP_CATS}));}catch(e){}
   renderCatsMgr();
@@ -5093,7 +5093,7 @@ window.saveMeEntry = async function(){
   const debitTotal = rows.filter(r=>r.op==='expense').reduce((s,r)=>s+r.amount,0);
   const creditTotal = rows.filter(r=>r.op==='in').reduce((s,r)=>s+r.amount,0);
   if(Math.abs(debitTotal-creditTotal) > 0.01){
-    if(!confirm(`تحذير: المدين (${debitTotal.toLocaleString()}) ≠ الدائن (${creditTotal.toLocaleString()}). هل تريد الحفظ؟`)) return;
+    if(!await confirm(`تحذير: المدين (${debitTotal.toLocaleString()}) ≠ الدائن (${creditTotal.toLocaleString()}). هل تريد الحفظ؟`)) return;
   }
   const pairRef = 'pair_'+Date.now();
   try{
@@ -6050,9 +6050,9 @@ window.saveMgr = async function(){
 const origSavePriceMgr = window.savePriceMgr;
 window.savePriceMgr = async function(applyAll){
   if(applyAll){
-    const choice = confirm('تطبيق الأسعار الجديدة على:\n\nاضغط موافق → الجديد فقط\nاضغط إلغاء → الجديد والموجود (سيعدّل أسعار كل الحجوزات!)');
+    const choice = await confirm('تطبيق الأسعار الجديدة على:\n\nاضغط موافق → الجديد فقط\nاضغط إلغاء → الجديد والموجود (سيعدّل أسعار كل الحجوزات!)');
     if(!choice){ // Apply to existing too
-      if(!confirm('⚠ سيتم تعديل أسعار كل الحجوزات الموجودة. تأكيد؟')) return;
+      if(!await confirm('⚠ سيتم تعديل أسعار كل الحجوزات الموجودة. تأكيد؟')) return;
       // Update all bookings apt prices
       await doApplyPricesToAll();
     }
@@ -7291,7 +7291,7 @@ window.seedPresetsForDest = async function(dest){
   const existing = hotels.filter(h=>h.destination===dest).map(h=>h.name.trim().toLowerCase());
   const toAdd = list.filter(h=>!existing.includes(h.name.trim().toLowerCase()));
   if(!toAdd.length){alert('كل فنادق '+dest+' موجودة بالفعل ✓');return;}
-  if(!confirm('إضافة '+toAdd.length+' فندق جديد لـ '+dest+'؟'))return;
+  if(!await confirm('إضافة '+toAdd.length+' فندق جديد لـ '+dest+'؟'))return;
   showLoading('جاري إضافة الفنادق...');
   let added=0;
   for(const h of toAdd){
@@ -7308,7 +7308,7 @@ window.seedPresetsForDest = async function(dest){
 window.seedAllPresets = async function(){
   const dests=Object.keys(PRESET_HOTELS);
   const total=dests.reduce((s,d)=>s+PRESET_HOTELS[d].length,0);
-  if(!confirm('إضافة كل الفنادق الجاهزة ('+total+' فندق) لكل الوجهات؟'))return;
+  if(!await confirm('إضافة كل الفنادق الجاهزة ('+total+' فندق) لكل الوجهات؟'))return;
   showLoading('جاري إضافة الفنادق...');
   let added=0;
   for(const dest of dests){
@@ -7485,7 +7485,7 @@ function editHotel(id){
 
 async function deleteHotel(id){
   const h=hotels.find(x=>x.id==id);
-  if(!confirm('حذف الفندق "'+h?.name+'"؟'))return;
+  if(!await confirm('حذف الفندق "'+h?.name+'"؟'))return;
   try{
     await sbFetch('htl_hotels','DELETE',null,`?id=eq.${id}`);
     hotels=hotels.filter(x=>x.id!=id);
@@ -7864,7 +7864,7 @@ function editHotelBooking(id){
 
 async function deleteHotelBooking(id){
   const b=hotelBookings.find(x=>x.id==id);
-  if(!confirm('حذف حجز "'+b?.name+'"؟'))return;
+  if(!await confirm('حذف حجز "'+b?.name+'"؟'))return;
   try{
     await sbFetch('htl_bookings','DELETE',null,`?id=eq.${id}`);
     hotelBookings=hotelBookings.filter(x=>x.id!=id);
