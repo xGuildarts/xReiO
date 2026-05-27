@@ -1770,6 +1770,7 @@ function loginUser(f){
   populateConvoys();populateCities();populateSalesReps();renderGrid();
   document.getElementById('acc-date').value=new Date().toISOString().split('T')[0];
   renderDash();
+  renderExtraAptsList();
   // Always restore last tab — works on refresh AND first login
   setTimeout(()=>{ showTab(lastTab); },350);
 }
