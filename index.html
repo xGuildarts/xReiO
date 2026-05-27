@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -1055,7 +1053,7 @@ tr:hover td{background:#f5f8fc}
   <!-- ====== شقق إضافية في تاب الأسعار ====== -->
   <div class="card">
     <div class="ctitle">🏠 شقق إضافية</div>
-    <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">أضف شقق خارج الشقق الأساسية — هتظهر في الحجوزات فوراً وتُحفظ تلقائياً</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">أضف شقق خارج الشقق الأساسية — اختار الأفواج اللي هتظهر فيها بس، ومش هتأثر على باقي الأفواج</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;padding:10px;background:var(--sf2);border-radius:8px;border:1px dashed var(--bd2)">
       <div class="fg" style="flex:0 0 110px;margin:0">
         <label>رقم الشقة</label>
@@ -1071,6 +1069,12 @@ tr:hover td{background:#f5f8fc}
           <option value="double">غرفتين (4 أشخاص)</option>
           <option value="single">غرفة (2 شخص)</option>
         </select>
+      </div>
+      <div class="fg" style="flex:1;min-width:200px;margin:0">
+        <label>الأفواج اللي هتظهر فيها <span style="font-weight:400;color:var(--tx3)">(اختار فوج أو أكتر)</span></label>
+        <div id="ea-convoys-wrap" style="border:1px solid var(--bd2);border-radius:var(--r);background:var(--sf);max-height:130px;overflow-y:auto;padding:5px 8px;display:flex;flex-wrap:wrap;gap:4px">
+          <span style="font-size:11px;color:var(--tx3);align-self:center">جاري التحميل...</span>
+        </div>
       </div>
       <button class="btn btn-p" onclick="addExtraApt()" style="align-self:flex-end;white-space:nowrap">➕ إضافة شقة</button>
     </div>
@@ -1158,7 +1162,7 @@ function rebuildAPTS(){
   // امسح الشقق الإضافية القديمة وأضيف الجديدة
   Object.keys(APTS).forEach(k=>{ if(APTS[k]._extra) delete APTS[k]; });
   Object.entries(extra).forEach(([num,info])=>{
-    APTS[num]={...info,_extra:true};
+    APTS[num]={...info,_extra:true,convoys:info.convoys||[]};
   });
   // أعد بناء APT_LIST
   APT_LIST.length=0;
@@ -2085,6 +2089,15 @@ function populateConvoys(){
   }).join('');
   populateConvoy2Sel();
 }
+function renderAptGrid(){renderGrid();}
+
+// تهيئة checkboxes الأفواج في فورم إضافة الشقة الإضافية
+function initExtraAptConvoysUI(){
+  const wrap=document.getElementById('ea-convoys-wrap');
+  if(!wrap)return;
+  wrap.innerHTML=CONVOYS.map(c=>'<label style="display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;background:var(--sf);border:1px solid var(--bd2);white-space:nowrap"><input type="checkbox" value="'+c.num+'" style="accent-color:var(--pr)"> ف'+c.num+' · '+c.label+'</label>').join('');
+}
+
 function populateSupSel(){
   const sel=document.getElementById('f-sup-sel');
   if(!sel)return;
@@ -2119,6 +2132,7 @@ function showTab(t){
     renderPriceMgrInPrices();
     renderCatsMgr();
     renderExtraAptsList();
+    initExtraAptConvoysUI();
     // Sync cats-mgr-2 with cats-mgr
     const cm2=document.getElementById('cats-mgr-2');
     const cm=document.getElementById('cats-mgr');
@@ -2209,9 +2223,17 @@ function renderGrid2(cn2){
   if(!cn2){cn2=parseInt(document.getElementById('f-convoy2')?.value)||0;}
   if(!cn2)return;
   const bk=bookedApts(cn2);
-  document.getElementById('apt-grid-2').innerHTML=APT_LIST.map(a=>{
+  const visibleList=APT_LIST.filter(a=>{
+    const apt=APTS[a];
+    if(!apt._extra)return true;
+    const convs=apt.convoys;
+    if(!convs||convs.length===0)return false;
+    return convs.includes(cn2);
+  });
+  document.getElementById('apt-grid-2').innerHTML=visibleList.map(a=>{
     const ib=bk.includes(a),is=selApts2.includes(a);
-    return `<button class="ab ${ib?'bkd':is?'sel':'av'}" onclick="toggleApt2('${a}')" ${ib?'disabled':''}>${a}<br><span style="font-size:9px;opacity:.7">${APTS[a].type==='single'?'غرفة':'غرفتين'}</span></button>`;
+    const extraBadge=APTS[a]._extra?'<span style="font-size:8px;background:var(--wnl);color:var(--wn);border-radius:3px;padding:0 2px">+</span>':'';
+    return `<button class="ab ${ib?'bkd':is?'sel':'av'}" onclick="toggleApt2('${a}')" ${ib?'disabled':''}>${a}${extraBadge}<br><span style="font-size:9px;opacity:.7">${APTS[a].type==='single'?'غرفة':'غرفتين'}</span></button>`;
   }).join('');
 }
 function toggleApt2(a){
@@ -2269,9 +2291,19 @@ function populateConvoy2Sel(){
 function renderGrid(){
   const cn=parseInt(document.getElementById('f-convoy').value)||0;
   const bk=cn?bookedApts(cn):[];
-  document.getElementById('apt-grid').innerHTML=APT_LIST.map(a=>{
+  // الشقق الإضافية تظهر بس لو الفوج الحالي موجود في قائمة convoys بتاعتها
+  const visibleList=APT_LIST.filter(a=>{
+    const apt=APTS[a];
+    if(!apt._extra)return true;
+    if(!cn)return false;
+    const convs=apt.convoys;
+    if(!convs||convs.length===0)return false;
+    return convs.includes(cn);
+  });
+  document.getElementById('apt-grid').innerHTML=visibleList.map(a=>{
     const ib=bk.includes(a),is=selApts.includes(a);
-    return `<button class="ab ${ib?'bkd':is?'sel':'av'}" onclick="toggleApt('${a}')" ${ib?'disabled':''}>${a}<br><span style="font-size:9px;opacity:.7">${APTS[a].type==='single'?'غرفة':'غرفتين'}</span></button>`;
+    const extraBadge=APTS[a]._extra?'<span style="font-size:8px;background:var(--wnl);color:var(--wn);border-radius:3px;padding:0 2px">+</span>':'';
+    return `<button class="ab ${ib?'bkd':is?'sel':'av'}" onclick="toggleApt('${a}')" ${ib?'disabled':''}>${a}${extraBadge}<br><span style="font-size:9px;opacity:.7">${APTS[a].type==='single'?'غرفة':'غرفتين'}</span></button>`;
   }).join('');
 }
 function toggleApt(a){
@@ -3875,12 +3907,17 @@ function addExtraApt(){
   const type=typeEl.value||'double';
   if(!num){mtrPopup({icon:'⚠️',title:'تنبيه',msg:'اكتب رقم الشقة',btns:[{label:'حسناً',cls:'primary',val:true}]});return;}
   if(APTS[num]&&!APTS[num]._extra){mtrPopup({icon:'⚠️',title:'تنبيه',msg:`الشقة <b>${num}</b> موجودة بالفعل في القائمة الأساسية`,btns:[{label:'حسناً',cls:'primary',val:true}]});return;}
+  // اجمع الأفواج المختارة
+  const selectedConvoys=Array.from(document.querySelectorAll('#ea-convoys-wrap input[type=checkbox]:checked')).map(cb=>parseInt(cb.value));
+  if(!selectedConvoys.length){mtrPopup({icon:'⚠️',title:'تنبيه',msg:'اختار فوج واحد على الأقل',btns:[{label:'حسناً',cls:'primary',val:true}]});return;}
   const extra=loadExtraApts();
-  extra[num]={desc:desc||'شقة إضافية',type,seats:type==='single'?2:4};
+  extra[num]={desc:desc||'شقة إضافية',type,seats:type==='single'?2:4,convoys:selectedConvoys};
   saveExtraApts(extra);
   renderExtraAptsList();
   numEl.value='';descEl.value='';
-  mtrPopup({icon:'✅',title:'تم',msg:`تمت إضافة الشقة <b>${num}</b> وحفظها`,btns:[{label:'حسناً',cls:'success',val:true}]});
+  // فكّ تحديد الأفواج
+  document.querySelectorAll('#ea-convoys-wrap input[type=checkbox]').forEach(cb=>cb.checked=false);
+  mtrPopup({icon:'✅',title:'تم',msg:`تمت إضافة الشقة <b>${num}</b> للأفواج: ${selectedConvoys.join('، ')}`,btns:[{label:'حسناً',cls:'success',val:true}]});
 }
 async function deleteExtraApt(num){
   const ok=await mtrPopup({icon:'🗑️',title:'حذف شقة',msg:`هل تحذف الشقة <b>${num}</b> من الشقق الإضافية؟<br><small style="color:var(--tx3)">الحجوزات الحالية عليها لن تتأثر.</small>`,btns:[{label:'حذف',cls:'danger',val:true},{label:'إلغاء',cls:'secondary',val:false}]});
@@ -3903,17 +3940,56 @@ function renderExtraAptsList(){
     ${keys.map(num=>{
       const a=extra[num];
       const usedIn=bookings.filter(b=>(b.apts||[]).includes(num)||(b.apts2||[]).includes(num)).length;
-      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sf2);border-radius:8px;border:1px solid var(--bd2)">
+      const convs=a.convoys||[];
+      const convLabel=convs.length?convs.map(cn=>{const c=CONVOYS.find(x=>x.num===cn);return c?('ف'+cn+' ('+c.label+')'):'ف'+cn;}).join(' · '):'<span style="color:var(--dn)">بدون أفواج</span>';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sf2);border-radius:8px;border:1px solid var(--bd2);flex-wrap:wrap">
         <span style="font-size:18px;font-weight:900;color:var(--pr);min-width:50px">${num}</span>
-        <span style="flex:1;font-size:13px;color:var(--tx)">${a.desc||'—'}</span>
+        <span style="flex:1;min-width:120px;font-size:13px;color:var(--tx)">${a.desc||'—'}</span>
         <span class="badge" style="background:${a.type==='single'?'var(--acl)':'var(--prl)'};color:${a.type==='single'?'var(--ac)':'var(--pr)'}">
           ${a.type==='single'?'غرفة · 2 شخص':'غرفتين · 4 أشخاص'}
         </span>
+        <span style="font-size:11px;color:var(--tx2);background:var(--prl);border-radius:6px;padding:2px 7px;max-width:300px;overflow:hidden;text-overflow:ellipsis">🚌 ${convLabel}</span>
         ${usedIn?`<span class="badge b-wn">${usedIn} حجز</span>`:''}
+        <button class="btn btn-sm" onclick="editExtraAptConvoys('${num}')" style="font-size:11px">✏️ الأفواج</button>
         <button class="btn btn-d btn-sm" onclick="deleteExtraApt('${num}')">🗑</button>
       </div>`;
     }).join('')}
   </div>`;
+}
+
+// تعديل أفواج شقة إضافية موجودة
+function editExtraAptConvoys(num){
+  const extra=loadExtraApts();
+  const a=extra[num];if(!a)return;
+  const currentConvs=a.convoys||[];
+  const cbsHtml=CONVOYS.map(c=>`<label style="display:flex;align-items:center;gap:5px;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:12px;background:${currentConvs.includes(c.num)?'var(--prl)':'transparent'}">
+    <input type="checkbox" value="${c.num}" ${currentConvs.includes(c.num)?'checked':''} style="accent-color:var(--pr)">
+    ف${c.num} · ${c.label}
+  </label>`).join('');
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999999;display:flex;align-items:center;justify-content:center;padding:1rem';
+  wrap.dataset.aptNum=num;
+  wrap.innerHTML=`<div style="background:var(--sf);border-radius:16px;padding:1.5rem;width:100%;max-width:420px;max-height:80vh;display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:16px;font-weight:800;color:var(--pr)">✏️ تعديل أفواج الشقة ${num}</div>
+    <div style="overflow-y:auto;max-height:350px;display:flex;flex-direction:column;gap:3px;border:1px solid var(--bd2);border-radius:8px;padding:8px">${cbsHtml}</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="this.closest('[data-apt-num]').remove()">إلغاء</button>
+      <button class="btn btn-p" onclick="_saveAptConvoys(this)">حفظ</button>
+    </div>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function _saveAptConvoys(btn){
+  const wrap=btn.closest('[data-apt-num]');
+  const num=wrap.dataset.aptNum;
+  const convs=Array.from(wrap.querySelectorAll('input[type=checkbox]:checked')).map(cb=>parseInt(cb.value));
+  if(!convs.length){alert('اختار فوج واحد على الأقل');return;}
+  const ex=loadExtraApts();
+  if(!ex[num]){alert('الشقة مش موجودة!');return;}
+  ex[num].convoys=convs;
+  saveExtraApts(ex);
+  renderExtraAptsList();
+  wrap.remove();
 }
 function updateLogoDsp(){
   const lo=document.getElementById('hdr-limg'),lp=document.getElementById('hdr-lph');
@@ -7177,6 +7253,8 @@ window.showTab=function(t){
     const ps=document.getElementById('prices');if(ps)ps.classList.add('active');
     // Use renderPriceMgrInPrices which renders with correct pmB_ prefix
     if(typeof renderPriceMgrInPrices==='function') renderPriceMgrInPrices();
+    if(typeof renderExtraAptsList==='function') renderExtraAptsList();
+    if(typeof initExtraAptConvoysUI==='function') initExtraAptConvoysUI();
     if(typeof renderCatsMgrInto2==='function') renderCatsMgrInto2();
     else if(typeof renderCatsMgr==='function'){
       const cm2=document.getElementById('cats-mgr-2');
