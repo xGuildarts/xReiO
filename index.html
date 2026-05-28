@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -1297,26 +1299,43 @@ function renderLockManager(){
   const el=document.getElementById('lock-manager-container');
   if(!el)return;
   const lockedCount=CONVOYS.filter(c=>LOCKED_CONVOYS[c.num]).length;
+  const openCount=CONVOYS.length-lockedCount;
   el.innerHTML=`
-    <div style="display:flex;gap:6px;margin-bottom:.75rem;flex-wrap:wrap;align-items:center">
-      <span style="font-size:12px;color:var(--tx2)">مقفول: <b style="color:var(--dn)">${lockedCount}</b> · مفتوح: <b style="color:var(--ac)">${CONVOYS.length-lockedCount}</b></span>
-      <button class="btn btn-d btn-sm" onclick="lockAll()" style="font-size:11px">🔒 قفل الكل</button>
-      <button class="btn btn-s btn-sm" onclick="unlockAll()" style="font-size:11px">🔓 فتح الكل</button>
+    <div style="display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap">
+      <div style="flex:1;min-width:100px;background:var(--dnl);border:1.5px solid var(--dn);border-radius:10px;padding:10px 14px;text-align:center">
+        <div style="font-size:24px;font-weight:900;color:var(--dn)">${lockedCount}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--dn);margin-top:2px">🔒 مقفول</div>
+      </div>
+      <div style="flex:1;min-width:100px;background:var(--acl);border:1.5px solid var(--ac);border-radius:10px;padding:10px 14px;text-align:center">
+        <div style="font-size:24px;font-weight:900;color:var(--ac)">${openCount}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--ac);margin-top:2px">🔓 مفتوح</div>
+      </div>
+      <div style="flex:1;min-width:100px;background:var(--bg);border:1.5px solid var(--bd2);border-radius:10px;padding:10px 14px;text-align:center">
+        <div style="font-size:24px;font-weight:900;color:var(--tx)">${CONVOYS.length}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-top:2px">📋 الإجمالي</div>
+      </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px">
-    ${CONVOYS.map(c=>{
-      const locked=!!LOCKED_CONVOYS[c.num];
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;border:1px solid ${locked?'var(--dn)':'var(--bd)'};background:${locked?'var(--dnl)':'var(--sf2)'}">
-        <div>
-          <span style="font-size:11px;font-weight:700;color:${locked?'var(--dn)':'var(--tx)'}">${locked?'🔒':'🔓'} ${c.label}</span>
-          <div style="font-size:10px;color:var(--tx3);margin-top:1px">${c.checkin}</div>
-        </div>
-        <button onclick="toggleConvLock(${c.num})"
-          style="padding:4px 10px;border-radius:6px;border:1px solid ${locked?'var(--dn)':'var(--ac)'};background:${locked?'var(--dn)':'var(--ac)'};color:#fff;cursor:pointer;font-size:11px;font-family:Cairo,Arial;font-weight:700">
-          ${locked?'فتح':'قفل'}
-        </button>
-      </div>`;
-    }).join('')}
+    <div style="display:flex;gap:6px;margin-bottom:.9rem;flex-wrap:wrap">
+      <button class="btn btn-d btn-sm" onclick="lockAll()">🔒 قفل الكل</button>
+      <button class="btn btn-s btn-sm" onclick="unlockAll()">🔓 فتح الكل</button>
+    </div>
+    <div style="border:1.5px solid var(--bd2);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07)">
+      <div style="display:grid;grid-template-columns:1fr 130px 130px 90px;background:var(--pr);color:#fff;padding:11px 16px;font-size:13px;font-weight:800;gap:8px">
+        <div>الفوج</div><div style="text-align:center">تاريخ الدخول</div><div style="text-align:center">تاريخ الخروج</div><div style="text-align:center">الحالة</div>
+      </div>
+      ${CONVOYS.map((c,i)=>{
+        const locked=!!LOCKED_CONVOYS[c.num];
+        const rowBg=locked?'var(--dnl)':i%2===0?'var(--sf)':'var(--sf2)';
+        const bdr=locked?'var(--dn)':'var(--bd)';
+        return `<div style="display:grid;grid-template-columns:1fr 130px 130px 90px;align-items:center;padding:11px 16px;gap:8px;background:${rowBg};border-top:1.5px solid ${bdr}">
+          <div style="font-size:14px;font-weight:800;color:${locked?'var(--dn)':'var(--tx)'}">${locked?'🔒':'🔓'} ${c.label}</div>
+          <div style="text-align:center;font-size:13px;font-weight:700;color:var(--tx2)">${c.checkin}</div>
+          <div style="text-align:center;font-size:13px;font-weight:700;color:var(--tx2)">${c.checkout||'—'}</div>
+          <div style="text-align:center">
+            <button onclick="toggleConvLock(${c.num})" style="padding:6px 14px;border-radius:8px;border:1.5px solid ${locked?'var(--dn)':'var(--ac)'};background:${locked?'var(--dn)':'var(--ac)'};color:#fff;cursor:pointer;font-size:12px;font-family:Cairo,Arial;font-weight:800;min-width:60px">${locked?'فتح':'قفل'}</button>
+          </div>
+        </div>`;
+      }).join('')}
     </div>`;
 }
 // Load custom roles from localStorage
@@ -1346,22 +1365,98 @@ function renderBypassUsers(){
   el.innerHTML=bypassUsers.map(u=>`<div style="padding:7px 14px;border-radius:8px;background:var(--acl);border:1px solid var(--ac);font-size:12px;font-weight:700;color:var(--ac)">👤 ${u.name} <span style="font-weight:400;color:var(--tx2);font-size:11px">(${u.role==='admin'?'GM':u.role})</span></div>`).join('');
 }
 
-function _lockTableHTML(){
-  const rows=CONVOYS.map(c=>{
+function _lockTableData(){
+  return CONVOYS.map((c,i)=>{
     const locked=!!LOCKED_CONVOYS[c.num];
-    return `<tr><td>${c.label}</td><td>${c.checkin}</td><td>${locked?'🔒 مقفول':'🔓 مفتوح'}</td></tr>`;
-  }).join('');
-  return `<table border="1" style="border-collapse:collapse;width:100%;font-family:Cairo,Arial;direction:rtl"><thead><tr style="background:#1a5276;color:#fff"><th style="padding:8px">الفوج</th><th>تاريخ الدخول</th><th>الحالة</th></tr></thead><tbody>${rows}</tbody></table>`;
+    return {label:c.label,checkin:c.checkin,checkout:c.checkout||'—',locked};
+  });
 }
+
 function exportLocksExcel(){
-  const BOM='\uFEFF';
-  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><style>td,th{font-family:Arial;font-size:11pt;text-align:right}</style></head><body>${_lockTableHTML()}</body></html>`;
+  const setts=(typeof settings!=='undefined'?settings:{})||{};
+  const rows=_lockTableData().map((r,i)=>`<tr style="background:${r.locked?'#fadbd8':i%2===0?'#fff':'#f7f9fb'}">
+    <td style="padding:9px 12px;font-size:12pt;font-weight:700;border:1px solid #dce6f0;color:${r.locked?'#c0392b':'#1a2535'}">${r.locked?'🔒':'🔓'} ${r.label}</td>
+    <td style="padding:9px 12px;font-size:11pt;border:1px solid #dce6f0;text-align:center;color:#4a6278">${r.checkin}</td>
+    <td style="padding:9px 12px;font-size:11pt;border:1px solid #dce6f0;text-align:center;color:#4a6278">${r.checkout}</td>
+    <td style="padding:9px 12px;font-size:11pt;border:1px solid #dce6f0;text-align:center;font-weight:800;color:${r.locked?'#c0392b':'#117a65'}">${r.locked?'🔒 مقفول':'🔓 مفتوح'}</td>
+  </tr>`).join('');
+  const lockedCount=_lockTableData().filter(r=>r.locked).length;
+  const BOM='﻿';
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8">
+<style>
+  body{font-family:Cairo,Arial;direction:rtl}
+  h2{color:#1a5276;font-size:14pt;margin-bottom:4px}
+  .sub{font-size:10pt;color:#888;margin-bottom:14px}
+  table{border-collapse:collapse;width:100%}
+  th{background:#1a5276;color:#fff;padding:10px 14px;font-size:12pt;font-weight:800;border:1px solid #1a5276;text-align:right}
+</style></head><body>
+<h2>🔒 تقفيل الأفواج — ${setts.name||'مصيف مطروح 2026'}</h2>
+<div class="sub">تاريخ التصدير: ${new Date().toLocaleDateString('ar-EG')} · مقفول: ${lockedCount} · مفتوح: ${CONVOYS.length-lockedCount}</div>
+<table>
+  <thead><tr>
+    <th>الفوج</th><th style="text-align:center">تاريخ الدخول</th><th style="text-align:center">تاريخ الخروج</th><th style="text-align:center">الحالة</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+</body></html>`;
   const blob=new Blob([BOM+html],{type:'application/vnd.ms-excel;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='تقفيل_الأفواج_'+new Date().toLocaleDateString('en-CA')+'.xls';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='تقفيل_الأفواج_'+new Date().toLocaleDateString('en-CA')+'.xls';a.click();
 }
+
 function exportLocksPDF(){
-  const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>تقفيل الأفواج</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap" rel="stylesheet"><style>body{font-family:'Cairo',Arial;padding:20px;direction:rtl}h2{margin-bottom:12px;color:#1a5276}table{width:100%;border-collapse:collapse}th{background:#1a5276;color:#fff;padding:8px;text-align:right}td{padding:7px;border-bottom:1px solid #ddd}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{@page{size:A4;margin:10mm}}</style></head><body><h2>🔒 جدول تقفيل الأفواج — ${settings.name||'مصيف مطروح 2026'}</h2><p style="font-size:11px;color:#888;margin-bottom:12px">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>${_lockTableHTML()}<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});window.open(URL.createObjectURL(blob),'_blank');
+  const setts=(typeof settings!=='undefined'?settings:{})||{};
+  const rows=_lockTableData().map((r,i)=>`<tr style="background:${r.locked?'#fadbd8':i%2===0?'#fff':'#f7f9fb'}">
+    <td style="padding:10px 14px;font-size:13px;font-weight:800;border-bottom:1.5px solid ${r.locked?'#f5b7b1':'#dce6f0'};color:${r.locked?'#c0392b':'#1a2535'}">${r.locked?'🔒':'🔓'} ${r.label}</td>
+    <td style="padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1.5px solid ${r.locked?'#f5b7b1':'#dce6f0'};text-align:center;color:#4a6278">${r.checkin}</td>
+    <td style="padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1.5px solid ${r.locked?'#f5b7b1':'#dce6f0'};text-align:center;color:#4a6278">${r.checkout}</td>
+    <td style="padding:10px 14px;font-size:12px;font-weight:800;border-bottom:1.5px solid ${r.locked?'#f5b7b1':'#dce6f0'};text-align:center;color:${r.locked?'#c0392b':'#117a65'}">${r.locked?'🔒 مقفول':'🔓 مفتوح'}</td>
+  </tr>`).join('');
+  const lockedCount=_lockTableData().filter(r=>r.locked).length;
+  const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
+<title>تقفيل الأفواج</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;padding:24px;margin:0}
+@media print{@page{size:A4 portrait;margin:10mm}body{padding:0}.no-print{display:none!important}}
+.no-print{display:flex;gap:8px;margin-bottom:16px}
+.no-print button{background:#1a5276;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:12px;border-bottom:2.5px solid #d6eaf8}
+.stats{display:flex;gap:10px;margin-bottom:18px}
+.stat{flex:1;padding:10px;border-radius:10px;text-align:center}
+table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+thead tr{background:#1a5276;color:#fff}
+th{padding:12px 16px;font-size:13px;font-weight:800;text-align:right}
+th:not(:first-child){text-align:center}
+td{font-family:'Cairo',Arial,sans-serif}
+</style>
+</head><body>
+<div class="no-print"><button onclick="window.print()">🖨 طباعة / حفظ PDF</button></div>
+<div class="hdr">
+  <div>
+    <div style="font-size:20px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
+    <div style="font-size:14px;font-weight:700;color:#117a65;margin-top:3px">🔒 جدول تقفيل الأفواج</div>
+  </div>
+  <div style="font-size:11px;color:#888;text-align:left;line-height:1.8">
+    <div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
+  </div>
+</div>
+<div class="stats">
+  <div class="stat" style="background:#fadbd8;border:1.5px solid #c0392b"><div style="font-size:26px;font-weight:900;color:#c0392b">${lockedCount}</div><div style="font-size:12px;font-weight:700;color:#c0392b">🔒 مقفول</div></div>
+  <div class="stat" style="background:#d5f5e3;border:1.5px solid #117a65"><div style="font-size:26px;font-weight:900;color:#117a65">${CONVOYS.length-lockedCount}</div><div style="font-size:12px;font-weight:700;color:#117a65">🔓 مفتوح</div></div>
+  <div class="stat" style="background:#f0f4f8;border:1.5px solid #dce6f0"><div style="font-size:26px;font-weight:900;color:#1a5276">${CONVOYS.length}</div><div style="font-size:12px;font-weight:700;color:#4a6278">📋 الإجمالي</div></div>
+</div>
+<table>
+  <thead><tr>
+    <th>الفوج</th><th style="text-align:center">تاريخ الدخول</th><th style="text-align:center">تاريخ الخروج</th><th style="text-align:center">الحالة</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
+</body></html>`;
+  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
+  window.open(URL.createObjectURL(blob),'_blank');
 }
 
 // ====== إذن استلام / إذن صرف ======
@@ -2748,219 +2843,383 @@ function printBusLayout(cn,busIdx){
   const allBks=activeBookings().filter(b=>b.convoy===cn&&effSeats(b)>0);
   const bks=allBks.filter(b=>(b.busIdx===undefined?0:b.busIdx)===busIdx);
   const returnClients=activeBookings().filter(b=>b.convoy2===cn&&effSeats(b)>0);
+
+  // ===== الحل الصح: نطبع نفس HTML الشاشة بالضبط =====
+  // نجيب الـ bus-wrap div من الصفحة مباشرةً
+  const busWrapEl=document.querySelector('#bus-layout .bus-wrap');
+  if(busWrapEl){
+    // نجيب كل الـ CSS الحالي من الصفحة
+    const allStyles=Array.from(document.styleSheets).map(ss=>{
+      try{return Array.from(ss.cssRules).map(r=>r.cssText).join('\n');}catch(e){return '';}
+    }).join('\n');
+    const busHTML=busWrapEl.outerHTML;
+    const setts=(typeof settings!=='undefined'?settings:{})||{};
+
+    // جدول الركاب
+    const occ2b={};
+    returnClients.forEach(b=>{(b.seatAssign2||[]).forEach(sa=>{if(sa.seatNum)occ2b[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||''};});});
+    const byPickup={};
+    bks.forEach(b=>{const p=b.pickup||'غير محدد';if(!byPickup[p])byPickup[p]=[];(b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)byPickup[p].push({seatNum:sa.seatNum,name:b.name,phone:b.phone||'',seatNote:b.seatNote||''});});});
+    const pickupList=Object.entries(byPickup).sort((a,b)=>a[0].localeCompare(b[0])).map(([place,seats])=>`<div style="margin-bottom:.4rem;padding:.4rem .7rem;background:#f0f4f8;border-radius:6px;border-right:3px solid #117a65;font-family:'Cairo',sans-serif"><div style="font-weight:800;color:#117a65;font-size:12px;margin-bottom:3px">📍 ${place} — ${seats.length} مقعد</div><div style="display:flex;flex-wrap:wrap;gap:4px">${seats.map(s=>`<span style="background:#fff;border:1px solid #bcd8f0;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700"><span style="color:#1a5276;font-weight:900">${s.seatNum}</span> — ${s.name.split(' ').slice(0,2).join(' ')}${s.phone?' · '+s.phone:''}${s.seatNote?' · 📝 '+s.seatNote:''}</span>`).join('')}</div></div>`).join('');
+    const tableRows=bks.map((b,i)=>{const seats=(b.seatAssign||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');return `<tr style="background:${i%2===0?'#f8fafc':'#fff'}"><td>${i+1}</td><td style="font-weight:700">${b.name}${b.convoy2?' <span style="background:#f9e79f;color:#7d3c98;font-size:8px;font-weight:900;padding:0 4px;border-radius:2px">فوجين</span>':''}</td><td>${b.phone||'—'}</td><td>${b.pickup||'—'}</td><td style="font-weight:800;color:#117a65">${seats||'—'}</td><td style="color:#555">${b.seatNote||'—'}</td></tr>`;}).join('')+returnClients.map(b=>{const s2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');return `<tr style="background:#f9f0ff"><td style="color:#7d3c98">↩</td><td style="font-weight:700;color:#7d3c98">${b.name}</td><td>${b.phone||'—'}</td><td>${b.pickup||'—'}</td><td style="font-weight:800;color:#7d3c98">${s2||'—'}</td><td style="color:#555">${b.seatNote||'—'}</td></tr>`;}).join('');
+
+    const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
+<title>قائمة الباص — ${busName} — ${conv.label}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+${allStyles}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;padding:10px;margin:0}
+@media print{
+  @page{size:A4 landscape;margin:6mm}
+  .no-print{display:none!important}
+  .pg2{page-break-before:always}
+  body{padding:0}
+  /* تأكيد إن الكراسي متتغيرش */
+  .seat{width:250px!important;min-height:180px!important;flex-shrink:0!important}
+  .bus-wrap{overflow:visible!important}
+  .bus-row{flex-wrap:nowrap!important}
+  /* تكبير الخط داخل الكراسي للطباعة */
+  .snum{font-size:26px!important}
+  .seat.empty .snum{font-size:38px!important}
+  .sname{font-size:26px!important}
+  .sphone{font-size:22px!important}
+  .splace{font-size:22px!important}
+  .seat span[style*="font-size:8px"]{font-size:14px!important}
+  .seat span[style*="font-size:9px"]{font-size:15px!important}
+  .seat span[style*="font-size:10px"]{font-size:16px!important}
+  .seat span[style*="font-size:15px"]{font-size:20px!important}
+}
+.no-print{display:flex;gap:8px;margin-bottom:12px}
+.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.pg2 table{width:100%;border-collapse:collapse;font-size:10px}
+.pg2 th{background:#1a5276;color:#fff;padding:5px 8px;text-align:right;font-weight:700}
+.pg2 td{padding:4px 8px;border-bottom:1px solid #e2e8f0;text-align:right}
+.pg2-title{font-size:13px;font-weight:900;color:#1a5276;margin-bottom:6px}
+/* إزالة التفاعلية من الكراسي */
+.seat{cursor:default!important;pointer-events:none!important}
+/* الـ CSS variables للطباعة */
+:root{--pr:#1a5276;--pr2:#2471a3;--prl:#d6eaf8;--ac:#117a65;--acl:#d5f5e3;--gd:#b7950b;--gdl:#f9e79f;--dn:#c0392b;--dnl:#fadbd8;--wn:#d68910;--wnl:#fdebd0;--pu:#7d3c98;--pul:#f4ecf7;--bg:#f0f4f8;--sf:#fff;--sf2:#f7f9fb;--bd:#dce6f0;--bd2:#c5d8ea;--tx:#1a2535;--tx2:#4a6278;--tx3:#8aa0b5;--r:10px;--rl:14px}
+</style>
+</head><body>
+<div class="no-print">
+  <button onclick="window.print()">🖨 طباعة</button>
+</div>
+
+<div style="margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid #d6eaf8;display:flex;justify-content:space-between;align-items:flex-start">
+  <div>
+    <div style="font-size:16px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
+    <div style="font-size:13px;font-weight:700;color:#117a65;margin-top:2px">🚌 ${busName} · ${conv.label}</div>
+    <div style="font-size:11px;color:#4a6278;margin-top:1px">دخول: ${conv.checkin} | خروج: ${conv.checkout}</div>
+  </div>
+  <div style="font-size:11px;color:#555;text-align:left">
+    <div style="font-weight:800;color:#1a5276">${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
+  </div>
+</div>
+
+${busHTML}
+
+${pickupList?`<div style="margin-top:10px"><div style="font-size:13px;font-weight:900;color:#1a5276;margin-bottom:6px">📋 الركاب حسب نقطة التجمع</div>${pickupList}</div>`:''}
+
+<div class="pg2">
+<div class="pg2-title">📊 جدول الركاب التفصيلي</div>
+<table>
+  <thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>ملاحظات</th></tr></thead>
+  <tbody>${tableRows}</tbody>
+</table>
+</div>
+
+<script>
+// إزالة أي عناصر تفاعلية مش محتاجينها
+document.querySelectorAll('[draggable]').forEach(el=>el.removeAttribute('draggable'));
+document.querySelectorAll('.bus-wrap>div:first-child').forEach(el=>{if(el.textContent.includes('ينتظرون'))el.remove();});
+window.onload=()=>setTimeout(()=>window.print(),700);
+<\/script>
+</body></html>`;
+    const blob=new Blob([h],{type:'text/html;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    window.open(url,'_blank');
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    return;
+  }
+
+  // fallback لو مفيش bus-layout ظاهر
   const occ={};
-  bks.forEach(b=>{(b.seatAssign||[]).forEach((sa,idx)=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',seatNote:b.seatNote||'',isDouble:b.convoy2!=null};});});
+  bks.forEach(b=>{(b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',seatNote:b.seatNote||'',isDouble:b.convoy2!=null};});});
   const occ2={};
-  returnClients.forEach(b=>{(b.seatAssign2||[]).forEach((sa,idx)=>{if(sa.seatNum)occ2[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',fromConvoy:b.convoy};});});
+  returnClients.forEach(b=>{(b.seatAssign2||[]).forEach(sa=>{if(sa.seatNum)occ2[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',fromConvoy:b.convoy};});});
   const byPickup={};
   bks.forEach(b=>{const p=b.pickup||'غير محدد';if(!byPickup[p])byPickup[p]=[];
     (b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)byPickup[p].push({seatNum:sa.seatNum,name:b.name,phone:b.phone||'',seatNote:b.seatNote||''});});
   });
   const COLORS=['#1a5276','#117a65','#7d3c98','#c0392b','#d68910','#1abc9c','#e67e22','#2980b9','#8e44ad','#27ae60'];
+  const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
+  const setts=(typeof settings!=='undefined'?settings:{})||{};
 
-  // بناء خلية المقعد — RTL: الكراسي من اليمين للشمال: يمين شمال | ممر | يمين شمال
-  // ترتيب الصف: [كرسي أيمن صف يمين] [كرسي أيسر صف يمين] | ممر | [كرسي أيمن صف شمال] [كرسي أيسر صف شمال]
-  // في الباص: صفوف اليمين = 1,3 (أو홀) وصفوف الشمال = 2,4 (أو زوجي) حسب الترتيب الفعلي
-  // الترتيب الصح في الباص الحقيقي بالعربي (RTL): 2 1 | ممر | 4 3
-  function makeSeatDiv(sn){
-    if(!sn) return `<div style="width:130px;flex-shrink:0"></div>`;
+  // === بناء خلية كرسي مضغوطة ===
+  function makeSeat(sn){
+    if(!sn)return `<div style="width:66px;height:72px;flex-shrink:0"></div>`;
     const isRet=!!occ2[sn];
     const o=isRet?occ2[sn]:occ[sn];
     const col=isRet?'#7d3c98':(o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#eef2f7');
     const txtCol=o?'#fff':'#aaa';
-    const brd=o?(isRet?'3px solid #f9e79f':'2px solid '+col):'2px dashed #ccd4de';
-    return `<div style="width:130px;min-height:115px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:10px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif">
-      <div style="font-size:13px;font-weight:900;opacity:${o?.8:.5};margin-bottom:3px">${sn}</div>
-      ${o?`<div style="font-size:14px;font-weight:900;line-height:1.4;word-break:break-word">${o.name.split(' ').slice(0,3).join(' ')}</div>
-      <div style="font-size:12px;opacity:.9;margin-top:4px">${o.phone||''}</div>
-      <div style="font-size:12px;opacity:.9;margin-top:3px">${(o.pickup||'').slice(0,12)}</div>
-      ${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:10px;font-weight:900;padding:1px 6px;margin-top:4px">↩ عودة</div>':
-        (o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:10px;font-weight:900;padding:1px 6px;margin-top:4px">⚠ فوجين</div>':'')}`
-      :`<div style="font-size:12px;color:#c0c8d4;margin-top:14px">فارغ</div>`}
+    const brd=o?(isRet?'2px solid #f9e79f':'1.5px solid '+col):'1.5px dashed #ccd4de';
+    const nameParts=o?o.name.split(' ').slice(0,2).join(' '):'';
+    return `<div style="width:66px;height:84px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:6px;padding:3px 2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden">
+      <div style="font-size:10px;font-weight:900;opacity:${o?.9:.4}">${sn}</div>
+      ${o?`<div style="font-size:9px;font-weight:800;line-height:1.2;margin-top:1px;word-break:break-all">${nameParts}</div>
+      <div style="font-size:8px;opacity:.85;margin-top:1px">${(o.phone||'').slice(-8)}</div>
+      <div style="font-size:8px;opacity:.85">${(o.pickup||'').slice(0,8)}</div>
+      ${o.seatNote?`<div style="background:rgba(255,255,255,.22);color:#fff;border-radius:2px;font-size:7px;font-weight:700;padding:1px 3px;margin-top:1px;word-break:break-all;line-height:1.2">${o.seatNote.slice(0,18)}</div>`:''}
+      ${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">عودة</div>':
+        (o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">فوجين</div>':'')}`
+      :`<div style="font-size:8px;color:#bbb;margin-top:8px">فارغ</div>`}
     </div>`;
   }
-  // ممر المحور
-  const AISLE=`<div style="width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:16px;font-weight:300">│</div>`;
-  // فاصل الباب
-  const DOOR_ROW=`<div style="width:28px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fffbeb;border:2.5px dashed #d97706;border-radius:8px;min-height:90px;padding:4px;color:#d97706;font-family:'Cairo',sans-serif;font-size:11px;font-weight:900;gap:2px"><span style="font-size:20px">🚪</span><span>باب</span></div>`;
-  // بناء صفوف الباص — RTL: الصف [c2, c1 | ممر | c4, c3]
-  // في الباص الكراسي: يمين (نافذة+ممر) | ممر سير | شمال (ممر+نافذة)
-  // بالعربي من اليمين: كرسي نافذة يمين | كرسي ممر يمين | ممر | كرسي ممر شمال | كرسي نافذة شمال
-  // الأرقام: صف 1: 1(نافذة ي) 2(ممر ي) | 3(ممر ش) 4(نافذة ش)  -- بالعربي: 2 1 | 3 4
-  function buildRow(seats, aisleEl){
-    // seats = [رقم_اليمين_نافذة, رقم_اليمين_ممر, رقم_الشمال_ممر, رقم_الشمال_نافذة]
-    // في RTL نعرض: نافذة_يمين ممر_يمين | ممر | ممر_شمال نافذة_شمال
-    const [a,b,c,d]=seats;
-    return `<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:5px;justify-content:center">
-      ${makeSeatDiv(a)}${makeSeatDiv(b)}${aisleEl||AISLE}${makeSeatDiv(c)}${makeSeatDiv(d)}
+
+  const AISLE=`<div style="width:14px;flex-shrink:0"></div>`;
+
+  function buildRow(a,b,c,d){
+    return `<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">
+      ${makeSeat(a)}${makeSeat(b)}${AISLE}${makeSeat(c)}${makeSeat(d)}
     </div>`;
   }
-  let busRowsHtml='';
+
+  let rows='';
   let sc=1;
 
   // صفوف 1-5 (كراسي 1-20)
   for(let r=0;r<5;r++){
     const s=[sc,sc+1,sc+2,sc+3]; sc+=4;
-    busRowsHtml+=buildRow([s[1],s[0],s[2],s[3]]);
+    rows+=buildRow(s[1],s[0],s[2],s[3]);
   }
 
-  // فاصل
-  busRowsHtml+=`<div style="border-top:2px dashed #cbd5e1;margin:5px 0"></div>`;
+  // حمام + 2 كرسي (صف 6)
+  const WC=`<div style="width:66px;height:72px;flex-shrink:0;background:#e8f4fd;border:1.5px solid #5dade2;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚻</span><span style="font-size:9px;font-weight:900;color:#1a5276">حمام</span></div>`;
+  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">
+    ${makeSeat(sc)}${WC}${AISLE}${makeSeat(sc+2)}${makeSeat(sc+3)}
+  </div>`;
 
-  // صف 6: حمام (merge) | شمال = sc, sc+1
-  const WC_CELL=`<div style="width:500px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#e8f4fd;border:2.5px solid #5dade2;border-radius:10px;min-height:130px;padding:10px;gap:6px;font-family:'Cairo',sans-serif"><span style="font-size:36px">🚻</span><span style="font-size:15px;font-weight:900;color:#1a5276">حمام</span></div>`;
-  busRowsHtml+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:5px;justify-content:center">${WC_CELL}${AISLE}${makeSeatDiv(sc)}${makeSeatDiv(sc+1)}</div>`;
-  sc+=2;
-
-  // صف 7: باب (merge) | شمال = sc, sc+1
-  const DOOR_CELL=`<div style="width:500px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fffbeb;border:2.5px dashed #d97706;border-radius:10px;min-height:130px;padding:10px;gap:6px;font-family:'Cairo',sans-serif"><span style="font-size:36px">🚪</span><span style="font-size:15px;font-weight:900;color:#b7770d">باب</span></div>`;
-  busRowsHtml+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:5px;justify-content:center">${DOOR_CELL}${AISLE}${makeSeatDiv(sc)}${makeSeatDiv(sc+1)}</div>`;
-  sc+=2;
-
-  // فاصل
-  busRowsHtml+=`<div style="border-top:2px dashed #cbd5e1;margin:5px 0"></div>`;
+  // باب + 2 كرسي (صف 7)
+  const DOOR=`<div style="width:66px;height:72px;flex-shrink:0;background:#fffbeb;border:1.5px dashed #d97706;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚪</span><span style="font-size:9px;font-weight:900;color:#b7770d">باب</span></div>`;
+  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">
+    ${makeSeat(sc+1)}${DOOR}${AISLE}${makeSeat(sc+4)}${makeSeat(sc+5)}
+  </div>`;
+  sc+=6;
 
   // صفوف 8-12 (كراسي 25-44)
   for(let r=0;r<5;r++){
     const s=[sc,sc+1,sc+2,sc+3]; sc+=4;
-    busRowsHtml+=buildRow([s[1],s[0],s[2],s[3]]);
+    rows+=buildRow(s[1],s[0],s[2],s[3]);
   }
-  // الكنبة الخلفية: 45-49
-  busRowsHtml+=`<div style="border-top:3px dashed #cbd5e1;margin-top:8px;padding-top:10px">
-    <div style="text-align:center;font-size:14px;font-weight:900;color:#475569;margin-bottom:8px;font-family:'Cairo',sans-serif">🛋 الكنبة الخلفية 🛋</div>
-    <div style="display:flex;gap:5px;justify-content:center;flex-wrap:nowrap">
-      ${[45,46,47,48,49].map(s=>makeSeatDiv(s)).join('')}
+
+  // الكنبة الخلفية
+  rows+=`<div style="border-top:2px dashed #cbd5e1;margin-top:5px;padding-top:5px">
+    <div style="text-align:center;font-size:10px;font-weight:900;color:#475569;margin-bottom:4px;font-family:'Cairo',sans-serif">🛋 الكنبة الخلفية</div>
+    <div style="display:flex;gap:3px;justify-content:center">
+      ${[45,46,47,48,49].map(s=>makeSeat(s)).join('')}
     </div>
   </div>`;
 
+  // دليل الألوان
+  const legend=bks.map((b,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;background:${COLORS[i%COLORS.length]};color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'Cairo',sans-serif">${b.name.split(' ').slice(0,2).join(' ')} · ${b.pickup||'—'}${b.convoy2?' ⚠فوجين':''}</span>`).join('')
+    + returnClients.map(b=>`<span style="display:inline-flex;align-items:center;gap:3px;background:#7d3c98;border:1.5px solid #f9e79f;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'Cairo',sans-serif">↩ ${b.name.split(' ').slice(0,2).join(' ')} عودة</span>`).join('');
+
   // قائمة الركاب حسب التجمع
   const pickupList=Object.entries(byPickup).sort((a,b)=>a[0].localeCompare(b[0])).map(([place,seats])=>`
-    <div style="margin-bottom:.6rem;padding:.6rem .875rem;background:#f0f4f8;border-radius:8px;border-right:4px solid #117a65;font-family:'Cairo',sans-serif">
-      <div style="font-weight:800;color:#117a65;font-size:14px;margin-bottom:5px">📍 ${place} — ${seats.length} مقعد</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">${seats.map(s=>`<span style="background:#fff;border:1px solid #bcd8f0;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700">
-        <span style="color:#1a5276;font-weight:900">${s.seatNum}</span> — ${s.name.split(' ').slice(0,3).join(' ')}${s.phone?' · 📱'+s.phone:''}${s.seatNote?' · 📝'+s.seatNote:''}</span>`).join('')}
+    <div style="margin-bottom:.4rem;padding:.4rem .7rem;background:#f0f4f8;border-radius:6px;border-right:3px solid #117a65;font-family:'Cairo',sans-serif">
+      <div style="font-weight:800;color:#117a65;font-size:12px;margin-bottom:3px">📍 ${place} — ${seats.length} مقعد</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${seats.map(s=>`<span style="background:#fff;border:1px solid #bcd8f0;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">
+        <span style="color:#1a5276;font-weight:900">${s.seatNum}</span> — ${s.name.split(' ').slice(0,2).join(' ')}${s.phone?' · '+s.phone:''}${s.seatNote?' · '+s.seatNote:''}</span>`).join('')}
       </div>
     </div>`).join('');
+
   const returnList=returnClients.length?`
-    <div style="margin-top:.75rem;padding:.6rem .875rem;background:#f4ecf7;border-radius:8px;border-right:4px solid #7d3c98;font-family:'Cairo',sans-serif">
-      <div style="font-weight:800;color:#7d3c98;font-size:14px;margin-bottom:5px">↩ راجعين مع هذا الباص (فوجين)</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">${returnClients.map(b=>{
-        const seats2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).join(' , ');
-        return `<span style="background:#fff;border:1px solid #dcc8f0;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700"><span style="color:#7d3c98;font-weight:900">${seats2||'—'}</span> — ${b.name}${b.phone?' · 📱'+b.phone:''}</span>`;
+    <div style="margin-top:.4rem;padding:.4rem .7rem;background:#f4ecf7;border-radius:6px;border-right:3px solid #7d3c98;font-family:'Cairo',sans-serif">
+      <div style="font-weight:800;color:#7d3c98;font-size:12px;margin-bottom:3px">↩ راجعين مع هذا الباص</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${returnClients.map(b=>{
+        const seats2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).join('،');
+        return `<span style="background:#fff;border:1px solid #dcc8f0;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700"><span style="color:#7d3c98;font-weight:900">${seats2||'—'}</span> — ${b.name}</span>`;
       }).join('')}</div>
     </div>`:'' ;
-  const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
-  const setts=(typeof settings!=='undefined'?settings:{})||{};
+
+  // جدول الركاب
+  const tableRows=bks.map((b,i)=>{
+    const seats=(b.seatAssign||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');
+    const remAmt=b.remaining||0;
+    return `<tr style="background:${i%2===0?'#f8fafc':'#fff'}">
+      <td>${i+1}</td>
+      <td style="font-weight:700">${b.name}${b.convoy2?' <span style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:8px;font-weight:900;padding:0 4px">فوجين</span>':''}</td>
+      <td>${b.phone||'—'}</td>
+      <td>${b.pickup||'—'}</td>
+      <td style="font-weight:800;color:#117a65">${seats||'—'}</td>
+      <td style="font-weight:800;color:${remAmt>0?'#c0392b':'#117a65'}">${remAmt>0?remAmt.toLocaleString()+' ج':'✓ مكتمل'}</td>
+      <td style="color:#555">${b.seatNote||'—'}</td>
+    </tr>`;
+  }).join('') + returnClients.map(b=>{
+    const seats2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');
+    return `<tr style="background:#f9f0ff">
+      <td style="color:#7d3c98">↩</td>
+      <td style="font-weight:700;color:#7d3c98">${b.name} <span style="background:#7d3c98;color:#fff;border-radius:2px;font-size:8px;font-weight:900;padding:0 4px">عودة</span></td>
+      <td>${b.phone||'—'}</td>
+      <td>${b.pickup||'—'}</td>
+      <td style="font-weight:800;color:#7d3c98">${seats2||'—'}</td>
+      <td>—</td>
+      <td style="color:#555">${b.seatNote||'—'}</td>
+    </tr>`;
+  }).join('');
+
   const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
 <title>قائمة الباص — ${busName} — ${conv.label}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;padding:12px;background:#fff;font-size:13px}
-*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;font-size:11px}
+@media screen{body{padding:12px}}
 @media print{
-  @page{margin:6mm;size:A4 landscape}
-  body{padding:0;font-size:12px}
+  @page{margin:8mm;size:A4 landscape}
+  body{font-size:11px}
   .no-print{display:none!important}
-  .print-page{page-break-after:always;page-break-inside:avoid}
-  .print-page:last-child{page-break-after:avoid}
+  .pg2{page-break-before:always}
+  /* الكراسي تحافظ على حجمها بالكامل */
+  .bus-box{overflow:visible!important;page-break-inside:avoid}
+  /* منع أي wrap في صفوف الباص */
+  .bus-box>div[style*="display:flex"]{flex-wrap:nowrap!important}
+  /* الصفحة الأولى كاملة تتطبع بدون قص */
+  .page1{overflow:visible!important}
 }
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid #d6eaf8}
+.bus-box{background:#f8fafc;border:1.5px solid #d6eaf8;border-radius:10px;padding:10px;margin-bottom:8px}
+.driver-bar{background:#1a5276;color:#fff;text-align:center;padding:5px;border-radius:6px;font-size:12px;font-weight:900;margin-bottom:8px;font-family:'Cairo',sans-serif}
+.legend-box{padding:5px 8px;background:#f8fafc;border-radius:6px;border:1px solid #dce6f0;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{background:#1a5276;color:#fff;padding:5px 8px;text-align:right;font-weight:700;font-size:10px}
+td{padding:4px 8px;border-bottom:1px solid #e2e8f0;text-align:right}
+.sec-title{font-size:13px;font-weight:900;color:#1a5276;margin-bottom:6px}
+.no-print{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
 </style>
 </head><body>
-<!-- صفحة 1: الهيدر + خريطة الباص -->
-<div class="print-page">
-<!-- هيدر -->
-<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;padding-bottom:10px;border-bottom:3px solid #d6eaf8">
+<div class="no-print">
+  <button onclick="window.print()">🖨 طباعة</button>
+</div>
+
+<!-- ===== صفحة 1: الهيدر + خريطة الباص + دليل الألوان ===== -->
+<div class="page1">
+<div class="hdr">
   <div>
-    <div style="font-size:24px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
-    <div style="font-size:15px;font-weight:700;color:#117a65;margin-top:4px">🚌 ${busName} &nbsp;·&nbsp; ${conv.label}</div>
-    <div style="font-size:13px;color:#4a6278;margin-top:3px">📅 دخول: ${conv.checkin} (9-11 ص) &nbsp;|&nbsp; خروج: ${conv.checkout} (5-7 ص)</div>
+    <div style="font-size:16px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
+    <div style="font-size:12px;font-weight:700;color:#117a65;margin-top:2px">🚌 ${busName} · ${conv.label}</div>
+    <div style="font-size:10px;color:#4a6278;margin-top:1px">دخول: ${conv.checkin} (9-11ص) | خروج: ${conv.checkout} (5-7ص)</div>
   </div>
-  <div style="text-align:left;font-size:13px;color:#555;min-width:130px;line-height:1.8">
-    <div style="font-weight:800;color:#1a5276;font-size:15px">المحجوز: ${totalOcc} / 49 مقعد</div>
-    <div>${new Date().toLocaleDateString('ar-EG')} — ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
-  </div>
-</div>
-<!-- رسمة الباص -->
-<div style="margin:0 auto 16px;max-width:1000px">
-  <div style="font-size:15px;font-weight:900;color:#1a5276;text-align:center;margin-bottom:10px">🚌 خريطة مقاعد الباص</div>
-  <div style="background:#f8fafc;border:2px solid #d6eaf8;border-radius:12px;padding:14px">
-    <!-- سائق -->
-    <div style="background:#1a5276;color:#fff;text-align:center;padding:8px;border-radius:8px;font-size:15px;font-weight:900;margin-bottom:10px;font-family:'Cairo',sans-serif">🚗 سائق</div>
-    <!-- صفوف الكراسي -->
-    ${busRowsHtml}
+  <div style="text-align:left;font-size:10px;color:#555;line-height:1.7">
+    <div style="font-weight:800;color:#1a5276;font-size:12px">المحجوز: ${totalOcc} / 49</div>
+    <div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
   </div>
 </div>
-<!-- مفتاح الألوان -->
-<div style="margin-bottom:14px;padding:8px 12px;background:#f8fafc;border-radius:8px;border:1px solid #dce6f0">
-  <div style="font-size:13px;font-weight:800;color:#1a5276;margin-bottom:6px">🎨 دليل الألوان</div>
-  <div style="display:flex;flex-wrap:wrap;gap:6px">
-    ${bks.map((b,i)=>`<span style="display:inline-flex;align-items:center;gap:5px;background:${COLORS[i%COLORS.length]};color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">${b.name.split(' ').slice(0,3).join(' ')} · ${b.pickup||'—'}${b.convoy2?' ⚠فوجين':''}</span>`).join('')}
-    ${returnClients.map(b=>`<span style="display:inline-flex;align-items:center;gap:5px;background:#7d3c98;border:2px solid #f9e79f;color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">↩ ${b.name.split(' ').slice(0,3).join(' ')} · عودة</span>`).join('')}
-  </div>
-</div>
-</div><!-- نهاية صفحة 1 -->
 
-<!-- صفحة 2: قائمة الركاب حسب التجمع -->
-<div class="print-page">
-<!-- قائمة الركاب -->
-<div style="border-top:2px solid #d6eaf8;padding-top:12px;margin-bottom:14px">
-  <div style="font-size:16px;font-weight:900;color:#1a5276;margin-bottom:8px">📋 الركاب حسب نقطة التجمع</div>
-  ${pickupList||'<div style="color:#999;font-size:13px">لا يوجد مقاعد محجوزة</div>'}
-  ${returnList}
+<div class="bus-box">
+  <div class="driver-bar">🚗 سائق</div>
+  ${rows}
 </div>
-</div><!-- نهاية صفحة 2 -->
 
-<!-- صفحة 3: جدول تفصيلي -->
-<div class="print-page">
-<!-- جدول تفصيلي -->
-<div>
-  <div style="font-size:16px;font-weight:900;color:#1a5276;margin-bottom:8px">📊 جدول الركاب التفصيلي</div>
-  <table style="width:100%;border-collapse:collapse;font-size:13px;font-family:'Cairo',sans-serif">
-    <thead>
-      <tr style="background:#1a5276;color:#fff">
-        <th style="padding:9px 12px;text-align:right">#</th>
-        <th style="padding:9px 12px;text-align:right">الاسم</th>
-        <th style="padding:9px 12px;text-align:right">📱 الهاتف</th>
-        <th style="padding:9px 12px;text-align:right">📍 التجمع</th>
-        <th style="padding:9px 12px;text-align:right">🪑 المقاعد</th>
-        <th style="padding:9px 12px;text-align:right">ملاحظات</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${bks.map((b,i)=>{
-        const seats=(b.seatAssign||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join(' ، ');
-        return `<tr style="background:${i%2===0?'#f8fafc':'#fff'};border-bottom:1px solid #e2e8f0">
-          <td style="padding:8px 12px;font-weight:800;color:#1a5276">${i+1}</td>
-          <td style="padding:8px 12px;font-weight:700;font-size:14px">${b.name}${b.convoy2?' <span style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:9px;font-weight:900;padding:1px 6px">فوجين</span>':''}</td>
-          <td style="padding:8px 12px;font-size:13px">${b.phone||'—'}</td>
-          <td style="padding:8px 12px">${b.pickup||'—'}</td>
-          <td style="padding:8px 12px;font-weight:800;color:#117a65;font-size:14px">${seats||'لم يُحدد'}</td>
-          <td style="padding:8px 12px;font-size:12px;color:#555">${b.seatNote||'—'}</td>
-        </tr>`;
-      }).join('')}
-      ${returnClients.map((b,i)=>{
-        const seats2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join(' ، ');
-        return `<tr style="background:#f9f0ff;border-bottom:1px solid #e2e8f0">
-          <td style="padding:8px 12px;font-weight:800;color:#7d3c98">↩</td>
-          <td style="padding:8px 12px;font-weight:700;font-size:14px;color:#7d3c98">${b.name} <span style="background:#7d3c98;color:#fff;border-radius:3px;font-size:9px;font-weight:900;padding:1px 6px">عودة</span></td>
-          <td style="padding:8px 12px;font-size:13px">${b.phone||'—'}</td>
-          <td style="padding:8px 12px">${b.pickup||'—'}</td>
-          <td style="padding:8px 12px;font-weight:800;color:#7d3c98;font-size:14px">${seats2||'لم يُحدد'}</td>
-          <td style="padding:8px 12px;font-size:12px;color:#555">${b.seatNote||'—'}</td>
-        </tr>`;
-      }).join('')}
-    </tbody>
-  </table>
+<div class="legend-box">${legend||'<span style="color:#999;font-size:10px">لا يوجد حجوزات</span>'}</div>
+
+<!-- قائمة التجمعات -->
+<div class="sec-title">📋 الركاب حسب نقطة التجمع</div>
+${pickupList||'<div style="color:#999;font-size:11px;margin-bottom:8px">لا يوجد مقاعد محجوزة</div>'}
+${returnList}
 </div>
-</div><!-- نهاية صفحة 3 -->
+
+<!-- ===== صفحة 2: الجدول التفصيلي ===== -->
+<div class="pg2">
+<div class="sec-title" style="margin-top:4px">📊 جدول الركاب التفصيلي</div>
+<table>
+  <thead><tr>
+    <th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>المتبقي</th><th>ملاحظات</th>
+  </tr></thead>
+  <tbody>${tableRows}</tbody>
+</table>
+</div>
+
 <script>window.onload=()=>setTimeout(()=>window.print(),600)<\/script>
 </body></html>`;
+
   const blob=new Blob([h],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   window.open(url,'_blank');
   setTimeout(()=>URL.revokeObjectURL(url),20000);
 }
+
+function downloadBusPDF(cn,busIdx){
+  busIdx=busIdx||0;
+  const conv=getConv(cn);if(!conv)return;
+  const busName=getBusNames(cn)[busIdx]||'الباص '+(busIdx+1);
+  const allBks=activeBookings().filter(b=>b.convoy===cn&&effSeats(b)>0);
+  const bks=allBks.filter(b=>(b.busIdx===undefined?0:b.busIdx)===busIdx);
+  const returnClients=activeBookings().filter(b=>b.convoy2===cn&&effSeats(b)>0);
+  const occ={};
+  bks.forEach(b=>{(b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',seatNote:b.seatNote||'',isDouble:b.convoy2!=null,remaining:b.remaining||0};});});
+  const occ2={};
+  returnClients.forEach(b=>{(b.seatAssign2||[]).forEach(sa=>{if(sa.seatNum)occ2[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',fromConvoy:b.convoy};});});
+  const byPickup={};
+  bks.forEach(b=>{const p=b.pickup||'غير محدد';if(!byPickup[p])byPickup[p]=[];(b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)byPickup[p].push({seatNum:sa.seatNum,name:b.name,phone:b.phone||'',seatNote:b.seatNote||''});});});
+  const COLORS=['#1a5276','#117a65','#7d3c98','#c0392b','#d68910','#1abc9c','#e67e22','#2980b9','#8e44ad','#27ae60'];
+  const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
+  const setts=(typeof settings!=='undefined'?settings:{})||{};
+  function msp(sn){
+    if(!sn)return `<div style="width:66px;height:72px;flex-shrink:0"></div>`;
+    const isRet=!!occ2[sn];const o=isRet?occ2[sn]:occ[sn];
+    const col=isRet?'#7d3c98':(o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#eef2f7');
+    const txtCol=o?'#fff':'#aaa';const brd=o?(isRet?'2px solid #f9e79f':'1.5px solid '+col):'1.5px dashed #ccd4de';
+    const nm=o?o.name.split(' ').slice(0,2).join(' '):'';
+    return `<div style="width:66px;height:84px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:6px;padding:3px 2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden"><div style="font-size:10px;font-weight:900;opacity:${o?.9:.4}">${sn}</div>${o?`<div style="font-size:9px;font-weight:800;line-height:1.2;margin-top:1px;word-break:break-all">${nm}</div><div style="font-size:8px;opacity:.85;margin-top:1px">${(o.phone||'').slice(-8)}</div><div style="font-size:8px;opacity:.85">${(o.pickup||'').slice(0,8)}</div>${o.seatNote?`<div style="background:rgba(255,255,255,.22);color:#fff;border-radius:2px;font-size:7px;font-weight:700;padding:1px 3px;margin-top:1px;word-break:break-all;line-height:1.2">${o.seatNote.slice(0,18)}</div>`:''}${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">فوجين</div>':'')}`:`<div style="font-size:8px;color:#bbb;margin-top:8px">فارغ</div>`}</div>`;
+  }
+  const AI=`<div style="width:14px;flex-shrink:0"></div>`;
+  function br(a,b,c,d){return `<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${msp(a)}${msp(b)}${AI}${msp(c)}${msp(d)}</div>`;}
+  let rows='';let sc=1;
+  for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=br(s[1],s[0],s[2],s[3]);}
+  const WC=`<div style="width:66px;height:72px;flex-shrink:0;background:#e8f4fd;border:1.5px solid #5dade2;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚻</span><span style="font-size:9px;font-weight:900;color:#1a5276">حمام</span></div>`;
+  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${msp(sc)}${WC}${AI}${msp(sc+2)}${msp(sc+3)}</div>`;
+  const DOOR=`<div style="width:66px;height:72px;flex-shrink:0;background:#fffbeb;border:1.5px dashed #d97706;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚪</span><span style="font-size:9px;font-weight:900;color:#b7770d">باب</span></div>`;
+  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${msp(sc+1)}${DOOR}${AI}${msp(sc+4)}${msp(sc+5)}</div>`;sc+=6;
+  for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=br(s[1],s[0],s[2],s[3]);}
+  rows+=`<div style="border-top:2px dashed #cbd5e1;margin-top:5px;padding-top:5px"><div style="text-align:center;font-size:10px;font-weight:900;color:#475569;margin-bottom:4px;font-family:'Cairo',sans-serif">🛋 الكنبة الخلفية</div><div style="display:flex;gap:3px;justify-content:center">${[45,46,47,48,49].map(s=>msp(s)).join('')}</div></div>`;
+  const leg=bks.map((b,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;background:${COLORS[i%COLORS.length]};color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'Cairo',sans-serif">${b.name.split(' ').slice(0,2).join(' ')} · ${b.pickup||'—'}${b.convoy2?' ⚠فوجين':''}</span>`).join('')+returnClients.map(b=>`<span style="display:inline-flex;align-items:center;gap:3px;background:#7d3c98;border:1.5px solid #f9e79f;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'Cairo',sans-serif">↩ ${b.name.split(' ').slice(0,2).join(' ')} عودة</span>`).join('');
+  const pkl=Object.entries(byPickup).sort((a,b)=>a[0].localeCompare(b[0])).map(([place,seats])=>`<div style="margin-bottom:.4rem;padding:.4rem .7rem;background:#f0f4f8;border-radius:6px;border-right:3px solid #117a65;font-family:'Cairo',sans-serif"><div style="font-weight:800;color:#117a65;font-size:12px;margin-bottom:3px">📍 ${place} — ${seats.length} مقعد</div><div style="display:flex;flex-wrap:wrap;gap:4px">${seats.map(s=>`<span style="background:#fff;border:1px solid #bcd8f0;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700"><span style="color:#1a5276;font-weight:900">${s.seatNum}</span> — ${s.name.split(' ').slice(0,2).join(' ')}${s.phone?' · '+s.phone:''}${s.seatNote?' · '+s.seatNote:''}</span>`).join('')}</div></div>`).join('');
+  const retL=returnClients.length?`<div style="margin-top:.4rem;padding:.4rem .7rem;background:#f4ecf7;border-radius:6px;border-right:3px solid #7d3c98;font-family:'Cairo',sans-serif"><div style="font-weight:800;color:#7d3c98;font-size:12px;margin-bottom:3px">↩ راجعين مع هذا الباص</div><div style="display:flex;flex-wrap:wrap;gap:4px">${returnClients.map(b=>{const s2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).join('،');return `<span style="background:#fff;border:1px solid #dcc8f0;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700"><span style="color:#7d3c98;font-weight:900">${s2||'—'}</span> — ${b.name}</span>`;}).join('')}</div></div>`:'' ;
+  const tRows=bks.map((b,i)=>{const seats=(b.seatAssign||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');const rem=b.remaining||0;return `<tr style="background:${i%2===0?'#f8fafc':'#fff'}"><td>${i+1}</td><td style="font-weight:700">${b.name}${b.convoy2?' <span style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:8px;font-weight:900;padding:0 4px">فوجين</span>':''}</td><td>${b.phone||'—'}</td><td>${b.pickup||'—'}</td><td style="font-weight:800;color:#117a65">${seats||'—'}</td><td style="font-weight:800;color:${rem>0?'#c0392b':'#117a65'}">${rem>0?rem.toLocaleString()+' ج':'✓ مكتمل'}</td><td style="color:#555">${b.seatNote||'—'}</td></tr>`;}).join('')+returnClients.map(b=>{const s2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');return `<tr style="background:#f9f0ff"><td style="color:#7d3c98">↩</td><td style="font-weight:700;color:#7d3c98">${b.name} <span style="background:#7d3c98;color:#fff;border-radius:2px;font-size:8px;font-weight:900;padding:0 4px">عودة</span></td><td>${b.phone||'—'}</td><td>${b.pickup||'—'}</td><td style="font-weight:800;color:#7d3c98">${s2||'—'}</td><td>—</td><td style="color:#555">${b.seatNote||'—'}</td></tr>`;}).join('');
+  const fname=`قائمة_${busName}_${conv.label}_${new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')}`.replace(/\s+/g,'_');
+  const hPdf=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>${fname}</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;font-size:11px;padding:10px}@media print{@page{margin:5mm;size:A4 portrait}body{font-size:10px;padding:0}.pg2{page-break-before:always}.no-print{display:none!important}}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid #d6eaf8}.bus-box{background:#f8fafc;border:1.5px solid #d6eaf8;border-radius:10px;padding:10px;margin-bottom:8px}.driver-bar{background:#1a5276;color:#fff;text-align:center;padding:5px;border-radius:6px;font-size:12px;font-weight:900;margin-bottom:8px;font-family:'Cairo',sans-serif}.legend-box{padding:5px 8px;background:#f8fafc;border-radius:6px;border:1px solid #dce6f0;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px}table{width:100%;border-collapse:collapse;font-size:10px}th{background:#1a5276;color:#fff;padding:5px 8px;text-align:right;font-weight:700;font-size:10px}td{padding:4px 8px;border-bottom:1px solid #e2e8f0;text-align:right}.sec-title{font-size:13px;font-weight:900;color:#1a5276;margin-bottom:6px}.no-print{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}.no-print button.green{background:#117a65}.hint{font-size:11px;color:#666;margin-bottom:10px;padding:7px 12px;background:#f0f4f8;border-radius:6px;border-right:3px solid #1a5276}</style></head><body>
+<div class="no-print">
+  <button onclick="window.print()">🖨️ طباعة</button>
+  <button class="green" onclick="doPdfSave()">💾 حفظ PDF</button>
+</div>
+<div class="hint no-print">💡 لحفظ PDF: اضغط "حفظ PDF" أو "طباعة" ← اختار <strong>Save as PDF / حفظ كـ PDF</strong> من الطابعة</div>
+<div class="hdr"><div><div style="font-size:16px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div><div style="font-size:12px;font-weight:700;color:#117a65;margin-top:2px">🚌 ${busName} · ${conv.label}</div><div style="font-size:10px;color:#4a6278;margin-top:1px">دخول: ${conv.checkin} (9-11ص) | خروج: ${conv.checkout} (5-7ص)</div></div><div style="text-align:left;font-size:10px;color:#555;line-height:1.7"><div style="font-weight:800;color:#1a5276;font-size:12px">المحجوز: ${totalOcc} / 49</div><div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="bus-box"><div class="driver-bar">🚗 سائق</div>${rows}</div><div class="legend-box">${leg||'<span style="color:#999;font-size:10px">لا يوجد حجوزات</span>'}</div><div class="sec-title">📋 الركاب حسب نقطة التجمع</div>${pkl||'<div style="color:#999;font-size:11px;margin-bottom:8px">لا يوجد مقاعد محجوزة</div>'}${retL}<div class="pg2"><div class="sec-title" style="margin-top:4px">📊 جدول الركاب التفصيلي</div><table><thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>المتبقي</th><th>ملاحظات</th></tr></thead><tbody>${tRows}</tbody></table></div>
+<script>
+function doPdfSave(){
+  // Try modern showSaveFilePicker with PDF mime (Chrome 86+)
+  if(window.showSaveFilePicker){
+    window.print();
+  } else {
+    window.print();
+  }
+}
+window.onload=function(){
+  // Auto-open print dialog only if opened via PDF button (hash flag)
+  if(location.hash==='#pdf'){
+    setTimeout(function(){window.print();},600);
+  }
+};
+<\/script>
+</body></html>`;
+  const blob2=new Blob([hPdf],{type:'text/html;charset=utf-8'});
+  const url2=URL.createObjectURL(blob2);
+  window.open(url2+'#pdf','_blank');
+  setTimeout(()=>URL.revokeObjectURL(url2),30000);
+}
+
 function renderBusLayout(cn,busIdx){
   busIdx=busIdx||0;
   const conv=getConv(cn),used=convEffSeats(cn);
@@ -3165,13 +3424,20 @@ function renderBusLayout(cn,busIdx){
   if(returnClients.length){busHtml+=`<div class="bus-legend" style="margin-top:4px">${returnClients.map(b=>`<span style="color:var(--pu)"><span class="ldot" style="background:var(--pu)"></span>${b.name.split(' ').slice(0,2).join(' ')} ↩راجع · ${b.pickup||'-'}</span>`).join('')}</div>`;}
   busHtml+=`<div style="font-size:11px;text-align:center;color:var(--tx3);margin-top:.5rem">اسحب من البركة → مقعد · اسحب مقعد → نقل · دبل كليك على أي مقعد → إلغاء التخصيص (يشمل كراسي العودة 🟣)</div></div>`;
   document.getElementById('bus-layout').innerHTML=poolHtml+busHtml;
-  // Add print button after render
+  // Add print + PDF buttons after render
+  const btnWrap=document.createElement('div');
+  btnWrap.style.cssText='margin-top:.75rem;display:flex;gap:8px;flex-wrap:wrap;';
   const printBusBtn=document.createElement('button');
   printBusBtn.className='btn btn-p';
-  printBusBtn.style.cssText='margin-top:.75rem;display:block;';
   printBusBtn.textContent='🖨 طباعة قائمة '+busName;
   printBusBtn.onclick=()=>printBusLayout(cn,busIdx);
-  document.getElementById('bus-layout').appendChild(printBusBtn);
+  const pdfBusBtn=document.createElement('button');
+  pdfBusBtn.className='btn btn-s';
+  pdfBusBtn.textContent='📄 تحميل PDF '+busName;
+  pdfBusBtn.onclick=()=>downloadBusPDF(cn,busIdx);
+  btnWrap.appendChild(printBusBtn);
+  btnWrap.appendChild(pdfBusBtn);
+  document.getElementById('bus-layout').appendChild(btnWrap);
 }
 async function busDrop(e,cn,toSn){
   e.preventDefault();
@@ -5038,6 +5304,164 @@ function exportClosingPDF(){
   window.open(url,'_blank');
   setTimeout(()=>URL.revokeObjectURL(url),15000);
 }
+
+function _getClosingTableData(sectionKey){
+  const sel=document.getElementById('cl-convoy-sel');
+  const cn=sel?parseInt(sel.value):0;
+  const conv=cn?getConv(cn):null;
+  const bks=bookings.filter(b=>b.convoy===cn&&b.partyType!=='supplier');
+  const SP=600,IP=200;
+  const rows=bks.map((b,i)=>{
+    const baseSeats=(b.apts||[]).reduce((s,a)=>{const inf=APTS[a];return s+(inf?(inf.type==='single'?2:4):0);},0);
+    const disc=b.seatDiscount||0;const extra=b.extraSeats||0;
+    const busSeats=Math.max(0,baseSeats-disc)+extra;
+    const goingIncluded=Math.max(0,baseSeats-disc);
+    const aptNet=Math.max(0,(b.aptsTotal||0)-(goingIncluded*SP));
+    const busTot=busSeats*SP;const intSeats=b.intSeats||0;const intTot=intSeats*IP;
+    const hasTransport=busSeats>0;
+    return {i:i+1,name:b.name,phone:b.phone||'—',apts:(b.apts||[]).join('،'),pickup:b.pickup||'—',
+      busSeats,busTot,intSeats,intTot,aptNet,disc:b.disc||0,total:b.total||0,paid:b.paid||0,
+      remaining:(b.total||0)-(b.paid||0),hasTransport};
+  });
+  if(sectionKey==='bus') return {rows:rows.filter(r=>r.remaining>0&&r.hasTransport),conv,title:'تحصيلات في الباص',color:'#d68910'};
+  if(sectionKey==='bld') return {rows:rows.filter(r=>r.remaining>0&&!r.hasTransport),conv,title:'تحصيلات في البرج',color:'#c0392b'};
+  return {rows,conv,title:'التقفيلة الكاملة',color:'#1a5276'};
+}
+
+function exportClosingTableExcel(sectionKey){
+  const setts=(typeof settings!=='undefined'?settings:{})||{};
+  const {rows,conv,title}=_getClosingTableData(sectionKey);
+  if(!rows.length){alert('لا يوجد بيانات');return;}
+  const n=v=>(v||0).toLocaleString();
+  const T={busSeats:rows.reduce((s,r)=>s+r.busSeats,0),busTot:rows.reduce((s,r)=>s+r.busTot,0),intSeats:rows.reduce((s,r)=>s+r.intSeats,0),intTot:rows.reduce((s,r)=>s+r.intTot,0),aptNet:rows.reduce((s,r)=>s+r.aptNet,0),disc:rows.reduce((s,r)=>s+r.disc,0),total:rows.reduce((s,r)=>s+r.total,0),paid:rows.reduce((s,r)=>s+r.paid,0),remaining:rows.reduce((s,r)=>s+r.remaining,0)};
+  const trs=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':'#f7f9fb'}">
+    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:700">${r.i}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:800;font-size:12pt">${r.name}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;direction:ltr;text-align:left">${r.phone}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center">${r.apts}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0">${r.pickup}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center;font-weight:700">${r.busSeats||'—'}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center;font-weight:700;color:#1a5276">${r.busSeats?n(r.busTot):'—'}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats||'—'}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'—'}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:700">${n(r.aptNet)}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;color:${r.disc?'#c0392b':'#aaa'}">${r.disc?n(r.disc):'—'}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:800;color:#1a5276">${n(r.total)}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:700;color:#117a65">${n(r.paid)}</td>
+    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:800;color:#c0392b">${n(r.remaining)}</td>
+  </tr>`).join('');
+  const BOM='﻿';
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8">
+<style>body{font-family:Cairo,Arial;direction:rtl;font-size:11pt}h2{color:#1a5276;font-size:14pt}th{background:#1a5276;color:#fff;padding:9px 12px;font-weight:800;border:1px solid #1a5276;font-size:11pt;text-align:right}tfoot td{background:#e8f4fd;font-weight:900;border:1px solid #1a5276;padding:8px 12px}</style>
+</head><body>
+<h2>📋 ${title} — ${conv?conv.label:''}</h2>
+<p style="color:#888;font-size:10pt;margin-bottom:12px">${setts.name||''} · ${new Date().toLocaleDateString('ar-EG')} · ${rows.length} عميل</p>
+<table border="1" style="border-collapse:collapse;width:100%">
+  <thead><tr>
+    <th>#</th><th>الاسم</th><th>الهاتف</th><th>الشقة</th><th>مكان الركوب</th>
+    <th>كراسي باص</th><th>× 600</th><th>داخلي</th><th>× 200</th>
+    <th>سعر الشقة</th><th>الخصم</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th>
+  </tr></thead>
+  <tbody>${trs}</tbody>
+  <tfoot><tr>
+    <td colspan="5" style="font-size:13pt;font-weight:900;padding:9px 12px">الإجمالي · ${rows.length} عميل</td>
+    <td style="text-align:center">${T.busSeats}</td><td style="text-align:center;color:#1a5276">${n(T.busTot)}</td>
+    <td style="text-align:center;color:#7d3c98">${T.intSeats||'—'}</td><td style="text-align:center;color:#7d3c98">${T.intSeats?n(T.intTot):'—'}</td>
+    <td>${n(T.aptNet)}</td><td style="color:#c0392b">${T.disc?n(T.disc):'—'}</td>
+    <td style="color:#1a5276">${n(T.total)}</td><td style="color:#117a65">${n(T.paid)}</td>
+    <td style="color:#c0392b;font-size:13pt">${n(T.remaining)}</td>
+  </tr></tfoot>
+</table>
+</body></html>`;
+  const blob=new Blob([BOM+html],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=title.replace(/\s/g,'_')+'_'+(conv?conv.checkin:new Date().toLocaleDateString('en-CA'))+'.xls';
+  a.click();
+}
+
+function exportClosingTablePDF(sectionKey){
+  const setts=(typeof settings!=='undefined'?settings:{})||{};
+  const {rows,conv,title,color}=_getClosingTableData(sectionKey);
+  if(!rows.length){alert('لا يوجد بيانات');return;}
+  const n=v=>(v||0).toLocaleString();
+  const T={busSeats:rows.reduce((s,r)=>s+r.busSeats,0),busTot:rows.reduce((s,r)=>s+r.busTot,0),intSeats:rows.reduce((s,r)=>s+r.intSeats,0),intTot:rows.reduce((s,r)=>s+r.intTot,0),aptNet:rows.reduce((s,r)=>s+r.aptNet,0),disc:rows.reduce((s,r)=>s+r.disc,0),total:rows.reduce((s,r)=>s+r.total,0),paid:rows.reduce((s,r)=>s+r.paid,0),remaining:rows.reduce((s,r)=>s+r.remaining,0)};
+  const lightColor=color==='#1a5276'?'#e8f4fd':color==='#d68910'?'#fef9e7':'#fdf2f0';
+  const trs=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':lightColor}">
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:700;color:${color}">${r.i}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:800;font-size:13px">${r.name}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-size:11px;direction:ltr;text-align:left;color:#555">${r.phone}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center"><span style="background:${lightColor};color:${color};border-radius:5px;padding:2px 8px;font-weight:700;font-size:11px">${r.apts}</span></td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;color:#117a65;font-size:11px">${r.pickup}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center;font-weight:700">${r.busSeats||'—'}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center;font-weight:700;color:#1a5276">${r.busSeats?n(r.busTot):'—'}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats||'—'}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'—'}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:700">${n(r.aptNet)}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;color:${r.disc?'#c0392b':'#bbb'}">${r.disc?n(r.disc):'—'}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:800;color:#1a5276">${n(r.total)}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:700;color:#117a65">${n(r.paid)}</td>
+    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:800;color:${color}">${n(r.remaining)}</td>
+  </tr>`).join('');
+  const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
+<title>${title} — ${conv?conv.label:''}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;padding:16px}
+@media print{@page{size:A4 landscape;margin:8mm}body{padding:0}.no-print{display:none!important}}
+.no-print{display:flex;gap:8px;margin-bottom:14px}
+.no-print button{background:${color};color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,${color},${color}cc);color:#fff}
+.stats{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.stat{flex:1;min-width:90px;padding:10px 12px;border-radius:10px;text-align:center;border:1.5px solid}
+table{width:100%;border-collapse:collapse;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+thead tr{background:${color};color:#fff}
+th{padding:10px 12px;font-size:12px;font-weight:800;text-align:right;white-space:nowrap}
+tfoot tr{background:${lightColor}}
+tfoot td{padding:9px 12px;font-weight:800;font-size:12px;border-top:2.5px solid ${color}}
+</style></head><body>
+<div class="no-print"><button onclick="window.print()">🖨 طباعة / حفظ PDF</button></div>
+<div class="hdr">
+  <div>
+    <div style="font-size:18px;font-weight:900">${title}</div>
+    <div style="font-size:13px;opacity:.9;margin-top:3px">${setts.name||''} · فوج ${conv?conv.label:''}</div>
+    <div style="font-size:11px;opacity:.75;margin-top:1px">دخول ${conv?conv.checkin:''} · خروج ${conv?conv.checkout:''} · ${rows.length} عميل</div>
+  </div>
+  <div style="text-align:left;font-size:11px;opacity:.8">${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
+</div>
+<div class="stats">
+  <div class="stat" style="background:#f0f4f8;border-color:#dce6f0"><div style="font-size:18px;font-weight:900;color:#1a5276">${n(T.total)}</div><div style="font-size:11px;color:#4a6278;font-weight:700;margin-top:2px">الإجمالي</div></div>
+  <div class="stat" style="background:#d5f5e3;border-color:#117a65"><div style="font-size:18px;font-weight:900;color:#117a65">${n(T.paid)}</div><div style="font-size:11px;color:#117a65;font-weight:700;margin-top:2px">المحصل</div></div>
+  <div class="stat" style="background:#fadbd8;border-color:#c0392b"><div style="font-size:18px;font-weight:900;color:#c0392b">${n(T.remaining)}</div><div style="font-size:11px;color:#c0392b;font-weight:700;margin-top:2px">المتبقي</div></div>
+  <div class="stat" style="background:#e8f4fd;border-color:#1a5276"><div style="font-size:18px;font-weight:900;color:#1a5276">${rows.length}</div><div style="font-size:11px;color:#4a6278;font-weight:700;margin-top:2px">عدد العملاء</div></div>
+</div>
+<table>
+  <thead><tr>
+    <th>#</th><th>الاسم</th><th>الهاتف</th><th style="text-align:center">الشقة</th><th>مكان الركوب</th>
+    <th style="text-align:center">كراسي باص</th><th style="text-align:center">× 600</th>
+    <th style="text-align:center">داخلي</th><th style="text-align:center">× 200</th>
+    <th>سعر الشقة</th><th>الخصم</th>
+    <th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th>
+  </tr></thead>
+  <tbody>${trs}</tbody>
+  <tfoot><tr>
+    <td colspan="5" style="font-size:13px;font-weight:900;color:${color}">الإجمالي · ${rows.length} عميل</td>
+    <td style="text-align:center;color:#1a5276">${T.busSeats}</td>
+    <td style="text-align:center;color:#1a5276">${n(T.busTot)}</td>
+    <td style="text-align:center;color:#7d3c98">${T.intSeats||'—'}</td>
+    <td style="text-align:center;color:#7d3c98">${T.intSeats?n(T.intTot):'—'}</td>
+    <td style="color:${color}">${n(T.aptNet)}</td>
+    <td style="color:#c0392b">${T.disc?n(T.disc):'—'}</td>
+    <td style="color:#1a5276;font-size:14px">${n(T.total)}</td>
+    <td style="color:#117a65;font-size:14px">${n(T.paid)}</td>
+    <td style="color:${color};font-size:15px;font-weight:900">${n(T.remaining)}</td>
+  </tr></tfoot>
+</table>
+<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
+</body></html>`;
+  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
 // Replaces single double-entry form with flexible N-party form
 
 (function(){
@@ -5328,9 +5752,9 @@ function renderClosing(){
   const collBus=rows.filter(r=>r.remaining>0&&r.hasTransport);
   const collBuilding=rows.filter(r=>r.remaining>0&&!r.hasTransport);
   const n=v=>(v||0).toLocaleString('ar-EG');
-  const hs=c=>`background:linear-gradient(135deg,${c},${c}dd);color:#fff;padding:9px 10px;text-align:right;font-size:11px;font-weight:700;white-space:nowrap`;
-  const ts=`border:1px solid #e0e7f0;padding:7px 9px;text-align:right;font-size:12px`;
-  const fs=c=>`background:${c};padding:7px 9px;font-weight:800;text-align:right;font-size:12px;border-top:2px solid ${c.replace('44','ff').replace('0.2)','1)')}`;
+  const hs=c=>`background:${c};color:#fff;padding:11px 13px;text-align:right;font-size:12px;font-weight:800;white-space:nowrap;border-bottom:2px solid rgba(0,0,0,.15)`;
+  const ts=`border-bottom:1.5px solid #e8eef5;padding:9px 12px;text-align:right;font-size:13px;vertical-align:middle`;
+  const fs=c=>`background:${c}22;padding:9px 12px;font-weight:900;text-align:right;font-size:13px;border-top:2.5px solid ${c}`;
   function mkTable(data,title,color,light){
     if(!data.length)return'';
     const TT={busSeats:data.reduce((s,r)=>s+r.busSeats,0),busTot:data.reduce((s,r)=>s+r.busTot,0),
@@ -5353,9 +5777,9 @@ function renderClosing(){
           <th style="${hs(color)}">سعر الشقة</th><th style="${hs(color)}">الخصم</th>
           <th style="${hs(color)}">الإجمالي</th><th style="${hs(color)}">المدفوع</th><th style="${hs(color)}">المتبقي</th>
         </tr></thead>
-        <tbody>${data.map((r,idx)=>`<tr style="background:${idx%2===0?'#fff':light}">
+        <tbody>${data.map((r,idx)=>`<tr style="background:${idx%2===0?'#fff':light};transition:background .1s">
           <td style="${ts};font-weight:700;color:${color}">${r.i}</td>
-          <td style="${ts};font-weight:700">${r.name}</td>
+          <td style="${ts};font-weight:800;font-size:14px">${r.name}</td>
           <td style="${ts};font-size:11px;direction:ltr;text-align:left">${r.phone}</td>
           <td style="${ts};text-align:center"><span style="background:${light};color:${color};border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700">${r.apts}</span></td>
           <td style="${ts};color:#117a65;font-size:11px">${r.pickup}</td>
@@ -5365,9 +5789,9 @@ function renderClosing(){
           <td style="${ts};text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'-'}</td>
           <td style="${ts};font-weight:700">${n(r.aptNet)}</td>
           <td style="${ts};color:${r.disc?'#c0392b':'#aaa'}">${r.disc?n(r.disc):'-'}</td>
-          <td style="${ts};font-weight:800;color:#1a5276">${n(r.total)}</td>
-          <td style="${ts};font-weight:700;color:#117a65">${n(r.paid)}</td>
-          <td style="${ts};font-weight:800;color:${color}">${n(r.remaining)}</td>
+          <td style="${ts};font-weight:800;font-size:14px;color:#1a5276">${n(r.total)}</td>
+          <td style="${ts};font-weight:700;font-size:14px;color:#117a65">${n(r.paid)}</td>
+          <td style="${ts};font-weight:900;font-size:14px;color:${color}">${n(r.remaining)}</td>
         </tr>`).join('')}</tbody>
         <tfoot><tr style="background:${light}">
           <td style="padding:7px 9px;font-weight:800;font-size:13px;color:${color}" colspan="5">الإجمالي</td>
@@ -5377,9 +5801,9 @@ function renderClosing(){
           <td style="${fs(light)};text-align:center;color:#7d3c98">${TT.intSeats?n(TT.intTot):'-'}</td>
           <td style="${fs(light)};color:${color}">${n(TT.aptNet)}</td>
           <td style="${fs(light)};color:#c0392b">${TT.disc?n(TT.disc):'-'}</td>
-          <td style="${fs(light)};color:#1a5276">${n(TT.total)}</td>
-          <td style="${fs(light)};color:#117a65">${n(TT.paid)}</td>
-          <td style="${fs(light)};color:${color}">${n(TT.remaining)}</td>
+          <td style="${fs(light)};color:#1a5276;font-size:14px">${n(TT.total)}</td>
+          <td style="${fs(light)};color:#117a65;font-size:14px">${n(TT.paid)}</td>
+          <td style="${fs(light)};color:${color};font-size:15px;font-weight:900">${n(TT.remaining)}</td>
         </tr></tfoot>
       </table></div></div>`;
   }
@@ -5398,9 +5822,21 @@ function renderClosing(){
         <div style="background:rgba(192,57,43,.4);border-radius:8px;padding:.5rem .875rem;text-align:center"><div style="font-size:10px;color:rgba(255,255,255,.7)">المتبقي</div><div style="font-size:16px;font-weight:800;color:#ff8a80">${n(T.remaining)} ج</div></div>
       </div>
     </div>
-    ${mainTbl?`<div style="display:flex;justify-content:flex-end;margin-top:.5rem;margin-bottom:1rem"><button class="btn btn-p btn-sm" onclick="printOneTable('closing-main')">🖨 طباعة التقفيلة الكاملة</button></div><div id="closing-main">${mainTbl}</div>`:''}
-    ${busColl?`<div style="display:flex;justify-content:flex-end;margin-top:.5rem;margin-bottom:1rem"><button class="btn btn-sm" onclick="printOneTable('closing-bus')" style="background:var(--wnl);color:var(--wn);border-color:var(--wn)">🖨 طباعة تحصيلات الباص</button></div><div id="closing-bus">${busColl}</div>`:''}
-    ${bldColl?`<div style="display:flex;justify-content:flex-end;margin-top:.5rem;margin-bottom:1rem"><button class="btn btn-sm" onclick="printOneTable('closing-bld')" style="background:var(--dnl);color:var(--dn);border-color:var(--dn)">🖨 طباعة تحصيلات البرج</button></div><div id="closing-bld">${bldColl}</div>`:''}
+    ${mainTbl?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:.5rem;margin-bottom:.75rem">
+      <button class="btn btn-p btn-sm" onclick="printOneTable('closing-main')">🖨 طباعة التقفيلة الكاملة</button>
+      <button class="btn btn-s btn-sm" onclick="exportClosingTableExcel('main')">📥 Excel التقفيلة</button>
+      <button class="btn btn-d btn-sm" onclick="exportClosingTablePDF('main')">📄 PDF التقفيلة</button>
+    </div><div id="closing-main">${mainTbl}</div>`:''}
+    ${busColl?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:.5rem;margin-bottom:.75rem">
+      <button class="btn btn-sm" onclick="printOneTable('closing-bus')" style="background:var(--wnl);color:var(--wn);border-color:var(--wn)">🖨 طباعة تحصيلات الباص</button>
+      <button class="btn btn-sm" onclick="exportClosingTableExcel('bus')" style="background:var(--gdl);color:var(--gd);border-color:var(--gd)">📥 Excel الباص</button>
+      <button class="btn btn-sm" onclick="exportClosingTablePDF('bus')" style="background:var(--wnl);color:var(--wn);border-color:var(--wn)">📄 PDF الباص</button>
+    </div><div id="closing-bus">${busColl}</div>`:''}
+    ${bldColl?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:.5rem;margin-bottom:.75rem">
+      <button class="btn btn-sm" onclick="printOneTable('closing-bld')" style="background:var(--dnl);color:var(--dn);border-color:var(--dn)">🖨 طباعة تحصيلات البرج</button>
+      <button class="btn btn-sm" onclick="exportClosingTableExcel('bld')" style="background:var(--gdl);color:var(--gd);border-color:var(--gd)">📥 Excel البرج</button>
+      <button class="btn btn-sm" onclick="exportClosingTablePDF('bld')" style="background:var(--dnl);color:var(--dn);border-color:var(--dn)">📄 PDF البرج</button>
+    </div><div id="closing-bld">${bldColl}</div>`:''}
     ${allOk}`;
 }
 
@@ -6188,29 +6624,176 @@ window.printOneTable = function(sectionId){
   const cn=sel?parseInt(sel.value):0;
   const conv=cn?getConv(cn):null;
   const setts=(typeof settings!=='undefined'?settings:{})||{};
-  const titles={
-    'closing-main':'تقفيلة الفوج',
-    'closing-bus':'تحصيلات الباص',
-    'closing-bld':'تحصيلات البرج'
-  };
-  const title=titles[sectionId]||'كشف حسابي';
-  const h='<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">'
-    +'<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">'
-    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Cairo,Arial,sans-serif;direction:rtl;padding:10px;font-size:12px}'
-    +'*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}'
-    +'@media print{@page{margin:5mm;size:A4 landscape}body{padding:0}}</style></head><body>'
-    +`<div style="text-align:center;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #d6eaf8">`
-    +`<div style="font-size:18px;font-weight:800;color:#1a5276">${setts.name||''}</div>`
-    +`<div style="font-size:14px;font-weight:700;color:#117a65;margin-top:3px">${title} ${conv?'· فوج '+conv.label:''}</div>`
-    +`<div style="font-size:11px;color:#888;margin-top:2px">${new Date().toLocaleDateString('ar-EG')}</div>`
-    +`</div>`
-    +el.innerHTML
-    +'<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\\/script>'
-    +'</body></html>';
+  const titles={'closing-main':'تقفيلة الفوج الكاملة','closing-bus':'تحصيلات الباص','closing-bld':'تحصيلات البرج'};
+  const colors={'closing-main':'#1a5276','closing-bus':'#d68910','closing-bld':'#c0392b'};
+  const title=titles[sectionId]||'كشف';
+  const color=colors[sectionId]||'#1a5276';
+
+  // جيب CSS المتغيرات من الصفحة
+  const cssVars=`:root{--pr:#1a5276;--ac:#117a65;--dn:#c0392b;--wn:#d68910;--pu:#7d3c98;--tx:#1a2535;--tx2:#4a6278;--tx3:#8aa0b5;--sf:#fff;--sf2:#f7f9fb;--bg:#f0f4f8;--bd:#dce6f0;--bd2:#c5d8ea;--acl:#d5f5e3;--dnl:#fadbd8;--wnl:#fdebd0;--gdl:#f9e79f;--prl:#d6eaf8;--r:10px}`;
+
+  const tableHTML=el.innerHTML;
+  const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
+<title>${title}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+${cssVars}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;background:#f0f4f8;color:#1a2535}
+/* ====== شريط التحكم ====== */
+#ctrl-bar{
+  position:fixed;top:0;right:0;left:0;z-index:999;
+  background:#1a2535;color:#fff;padding:10px 18px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+  font-family:'Cairo',Arial,sans-serif;
+}
+#ctrl-bar .lbl{font-size:12px;opacity:.7;white-space:nowrap}
+#ctrl-bar .val{font-size:13px;font-weight:800;min-width:36px;text-align:center}
+#ctrl-bar input[type=range]{
+  width:160px;accent-color:${color};cursor:pointer;
+}
+#ctrl-bar button{
+  padding:7px 18px;border:none;border-radius:8px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Cairo',Arial;white-space:nowrap;
+}
+.btn-print{background:${color};color:#fff}
+.btn-fit{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)!important}
+.btn-close{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3)!important}
+#ctrl-bar .sep{width:1px;height:28px;background:rgba(255,255,255,.2)}
+/* ====== منطقة المعاينة ====== */
+#preview-area{
+  padding-top:70px;
+  display:flex;justify-content:center;align-items:flex-start;
+  min-height:100vh;padding-bottom:30px;
+}
+#page-wrap{
+  background:#fff;
+  box-shadow:0 4px 30px rgba(0,0,0,.18);
+  border-radius:4px;
+  transform-origin:top center;
+  transition:transform .15s ease;
+  width:297mm; /* A4 landscape */
+  min-height:210mm;
+  padding:12mm;
+  overflow:visible;
+}
+/* ====== هيدر الطباعة ====== */
+.print-hdr{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:12px;padding-bottom:10px;border-bottom:3px solid ${color};
+}
+/* ====== جدول ====== */
+table{width:100%;border-collapse:collapse}
+th,td{font-family:'Cairo',Arial,sans-serif;text-align:right}
+@media print{
+  #ctrl-bar{display:none!important}
+  #preview-area{padding-top:0!important}
+  body{background:#fff}
+  #page-wrap{
+    box-shadow:none!important;border-radius:0!important;
+    width:100%!important;padding:8mm!important;
+    transform:none!important;
+  }
+  @page{size:A4 landscape;margin:0}
+}
+</style>
+</head><body>
+
+<!-- شريط التحكم -->
+<div id="ctrl-bar">
+  <span style="font-size:15px;font-weight:900">${title}</span>
+  <span style="font-size:12px;opacity:.6">${conv?'فوج '+conv.label:''}</span>
+  <div id="ctrl-bar" style="all:unset;display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap">
+    <div id="ctrl-bar-inner" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="lbl">حجم العرض:</span>
+      <input type="range" id="scaleSlider" min="30" max="130" value="75" oninput="applyScale(this.value)">
+      <span class="val" id="scaleVal">75%</span>
+      <div class="sep"></div>
+      <button class="btn-fit" onclick="fitToWidth()">📐 ملاءمة العرض</button>
+      <button class="btn-fit" onclick="setScale(100)">100%</button>
+      <div class="sep"></div>
+      <select id="pageSize" onchange="applyPageSize()" style="padding:6px 10px;border-radius:7px;font-family:'Cairo',Arial;font-size:12px;font-weight:700;background:#2c3e50;color:#fff;border:1px solid rgba(255,255,255,.3);cursor:pointer">
+        <option value="297x210">A4 أفقي</option>
+        <option value="210x297">A4 عمودي</option>
+        <option value="420x297">A3 أفقي</option>
+      </select>
+      <div class="sep"></div>
+      <button class="btn-print" onclick="window.print()">🖨 طباعة / PDF</button>
+      <button class="btn-close" onclick="window.close()">✕ إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- منطقة المعاينة -->
+<div id="preview-area">
+  <div id="page-wrap">
+    <!-- هيدر -->
+    <div class="print-hdr">
+      <div>
+        <div style="font-size:20px;font-weight:900;color:${color}">${setts.name||'مصيف مطروح 2026'}</div>
+        <div style="font-size:14px;font-weight:700;color:#117a65;margin-top:3px">${title} ${conv?'· فوج '+conv.label:''}</div>
+        <div style="font-size:11px;color:#888;margin-top:2px">${conv?'دخول '+conv.checkin+' · خروج '+conv.checkout:''}</div>
+      </div>
+      <div style="text-align:left;font-size:11px;color:#888;line-height:1.9">
+        <div style="font-weight:700;font-size:13px;color:#1a2535">تاريخ الطباعة</div>
+        <div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>
+    <!-- محتوى الجدول -->
+    <div id="table-content">${tableHTML}</div>
+  </div>
+</div>
+
+<script>
+let currentScale=75;
+const wrap=document.getElementById('page-wrap');
+
+function applyScale(v){
+  currentScale=parseInt(v);
+  document.getElementById('scaleVal').textContent=v+'%';
+  document.getElementById('scaleSlider').value=v;
+  wrap.style.transform='scale('+v/100+')';
+  // نضبط ارتفاع الـ container عشان الصفحة ما تتداخلش
+  const h=wrap.getBoundingClientRect().height;
+  document.getElementById('preview-area').style.minHeight=(h+100)+'px';
+}
+
+function setScale(v){applyScale(v);}
+
+function fitToWidth(){
+  const available=window.innerWidth-60;
+  const wrapW=wrap.offsetWidth;
+  const s=Math.floor((available/wrapW)*100);
+  applyScale(Math.min(s,130));
+}
+
+function applyPageSize(){
+  const v=document.getElementById('pageSize').value;
+  const [w,h]=v.split('x');
+  wrap.style.width=w+'mm';
+  wrap.style.minHeight=h+'mm';
+  // CSS @page
+  let style=document.getElementById('dynamic-page-style');
+  if(!style){style=document.createElement('style');style.id='dynamic-page-style';document.head.appendChild(style);}
+  style.textContent='@media print{@page{size:'+w+'mm '+h+'mm;margin:0}}';
+  fitToWidth();
+}
+
+// تشغيل تلقائي عند الفتح
+window.onload=function(){
+  // شيل الأزرار من داخل الجدول (أزرار الطباعة والـ PDF الموجودة في الجدول)
+  document.querySelectorAll('#table-content button, #table-content .btn').forEach(b=>b.remove());
+  document.querySelectorAll('#table-content [style*="display:flex"][style*="gap"]').forEach(d=>{
+    if(d.querySelector('button')) d.remove();
+  });
+  fitToWidth();
+};
+<\/script>
+</body></html>`;
+
   const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
-  setTimeout(()=>URL.revokeObjectURL(url),15000);
+  window.open(URL.createObjectURL(blob),'_blank');
 };
 
 // ====== DESIGN TAB ======
