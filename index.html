@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -1455,7 +1456,7 @@ td{font-family:'Cairo',Arial,sans-serif}
 </table>
 <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
-  openHtmlPrint(h,'تقفيل الأفواج','#1a5276');}
+  openHtmlPrint(h,'تقفيل الأفواج','#1a5276','تقفيل_الأفواج_'+new Date().toLocaleDateString('en-CA'));}
 
 // ====== إذن استلام / إذن صرف ======
 function printVoucher(bookingId, type){
@@ -1639,7 +1640,7 @@ async function doVoucherAction(bookingId, type, action){
 </div>
 <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
-  openHtmlPrint(h,'إيصال','#117a65');
+  openHtmlPrint(h,'إيصال','#117a65',(isReceipt?'إذن_استلام':'إذن_صرف')+'_'+b.name.replace(/\s+/g,'_')+'_'+today);
 }
 
 
@@ -2933,11 +2934,9 @@ document.querySelectorAll('.bus-wrap>div:first-child').forEach(el=>{if(el.textCo
 window.onload=()=>setTimeout(()=>window.print(),700);
 <\/script>
 </body></html>`;
-    openHtmlPrint(h,'تقرير','#1a5276');
+    openHtmlPrint(h,'تقرير','#1a5276','قائمة_'+busName.replace(/\s+/g,'_')+'_'+conv.label.replace(/\s+/g,'_'));
     return;
   }
-
-  // fallback لو مفيش bus-layout ظاهر
   const occ={};
   bks.forEach(b=>{(b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',seatNote:b.seatNote||'',isDouble:b.convoy2!=null};});});
   const occ2={};
@@ -3139,7 +3138,7 @@ ${returnList}
 <script>window.onload=()=>setTimeout(()=>window.print(),600)<\/script>
 </body></html>`;
 
-  openHtmlPrint(h,'تقرير','#1a5276');
+  openHtmlPrint(h,'تقرير','#1a5276','قائمة_'+busName.replace(/\s+/g,'_')+'_'+conv.label.replace(/\s+/g,'_'));
 }
 
 function downloadBusPDF(cn,busIdx){
@@ -3453,7 +3452,8 @@ async function busDrop(e,cn,toSn){
       await sbFetch('mtr_bookings','PATCH',{seat_assign2:b.seatAssign2},`?id=eq.${bookingId}`);
       renderBusLayout(activeBusConv,activeBusIdx);renderBusTab();return;
     }
-    const occ={};activeBookings().filter(b=>b.convoy===cn).forEach(b=>{(b.seatAssign||[]).forEach((sa,idx)=>{if(sa.seatNum)occ[sa.seatNum]={bookingId:b.id,assignIdx:idx};});});
+    const curBusIdx=activeBusIdx||0;
+    const occ={};activeBookings().filter(b=>b.convoy===cn&&(b.busIdx===undefined?0:b.busIdx)===curBusIdx).forEach(b=>{(b.seatAssign||[]).forEach((sa,idx)=>{if(sa.seatNum)occ[sa.seatNum]={bookingId:b.id,assignIdx:idx};});});
     if(occ[toSn]){const bTo=bookings.find(x=>x.id===occ[toSn].bookingId);bTo.seatAssign[occ[toSn].assignIdx].seatNum=null;await sbFetch('mtr_bookings','PATCH',{seat_assign:bTo.seatAssign},`?id=eq.${bTo.id}`);}
     const b=bookings.find(x=>x.id===bookingId);if(!b)return;
     b.seatAssign[assignIdx].seatNum=toSn;
@@ -3462,7 +3462,8 @@ async function busDrop(e,cn,toSn){
   }
   if(dragInfo&&dragInfo.cn===cn){
     const fromSn=dragInfo.sn;dragInfo=null;if(fromSn===toSn)return;
-    const occ={};activeBookings().filter(b=>b.convoy===cn).forEach(b=>{(b.seatAssign||[]).forEach((sa,idx)=>{if(sa.seatNum)occ[sa.seatNum]={bookingId:b.id,assignIdx:idx};});});
+    const curBusIdx2=activeBusIdx||0;
+    const occ={};activeBookings().filter(b=>b.convoy===cn&&(b.busIdx===undefined?0:b.busIdx)===curBusIdx2).forEach(b=>{(b.seatAssign||[]).forEach((sa,idx)=>{if(sa.seatNum)occ[sa.seatNum]={bookingId:b.id,assignIdx:idx};});});
     const from=occ[fromSn];if(!from)return;
     const bF=bookings.find(x=>x.id===from.bookingId),to=occ[toSn];
     if(to){const bT=bookings.find(x=>x.id===to.bookingId);bF.seatAssign[from.assignIdx].seatNum=toSn;bT.seatAssign[to.assignIdx].seatNum=fromSn;await sbFetch('mtr_bookings','PATCH',{seat_assign:bT.seatAssign},`?id=eq.${bT.id}`);}
@@ -4020,7 +4021,9 @@ function genReport(){
 function printRpt(){
   const c=document.getElementById('rpt-printable');if(!c){alert('أنشئ التقرير أولاً');return;}
   const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Cairo',Arial,sans-serif;padding:20px;direction:rtl;color:#1a2535;font-size:13px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}th{background:#1a5276;color:#fff;padding:8px 10px;text-align:right;font-weight:700;font-size:11px}td{padding:7px 10px;border-bottom:1px solid #eaf2fb;text-align:right}tr:nth-child(even) td{background:#f8fafc}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{@page{margin:10mm;size:A4}body{padding:0}}</style></head><body>${c.innerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
-  openHtmlPrint(h,'تقرير','#7d3c98');
+  const rptTitleEl=c.querySelector('div[style*="font-size:15px"]');
+  const rptTitle=rptTitleEl?rptTitleEl.textContent.trim():'تقرير';
+  openHtmlPrint(h,'تقرير','#7d3c98',rptTitle.replace(/\s+/g,'_')+'_'+new Date().toLocaleDateString('en-CA'));
 }
 function exportRptExcel(){
   const tbl=document.querySelector('#rpt-printable table');
@@ -4040,7 +4043,7 @@ function exportRptPDF(){
   const titleEl=c.querySelector('div[style*="font-size:15px"]');
   const title=titleEl?titleEl.textContent.trim():'تقرير';
   const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>${title}</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Cairo',Arial,sans-serif;padding:16px;direction:rtl;color:#1a2535;font-size:12px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}th{background:#1a5276;color:#fff;padding:7px 9px;text-align:right;font-weight:700;font-size:10px}td{padding:6px 9px;border-bottom:1px solid #e0eaf5;text-align:right}tr:nth-child(even) td{background:#f4f8fc}.badge{padding:2px 6px;border-radius:10px;font-size:10px}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{@page{margin:8mm;size:A4 landscape}button{display:none!important}}</style></head><body>${c.innerHTML}<script>window.onload=function(){document.querySelectorAll('button').forEach(b=>b.style.display='none');setTimeout(()=>window.print(),500);}<\/script></body></html>`;
-  openHtmlPrint(h,title||'معاينة','#1a5276');
+  openHtmlPrint(h,title||'معاينة','#1a5276',title.replace(/\s+/g,'_')+'_'+new Date().toLocaleDateString('en-CA'));
 }
 
 // ============================================================
@@ -5081,7 +5084,8 @@ ${notesHtml?`<div class="terms"><span class="terms-t">الشروط والملا�
 </div></div>
 <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),600))<\/script></body></html>`;
   try{
-    openHtmlPrint(rH,'إيصال الحجز','#117a65');
+    const receiptFilename='إيصال_'+b.name.replace(/\s+/g,'_')+'_فوج'+b.convoy+'_'+new Date().toLocaleDateString('en-CA');
+    openHtmlPrint(rH,'إيصال الحجز','#117a65',receiptFilename);
     addLog(`طباعة إيصال: ${b.name}`,'edit',`فوج ${b.convoy} · الإجمالي: ${(b.total||0).toLocaleString()} ج · شقق: ${(b.apts||[]).join('، ')||'-'}`);
   }catch(err){alert('تعذر فتح الإيصال: '+err.message)}
 }
@@ -5231,7 +5235,7 @@ function printClosing(){
     +out.innerHTML
     +'<script>window.onload=function(){setTimeout(function(){window.print();},500);}<\\/script>'
     +'</body></html>';
-  openHtmlPrint(h,'كشف حساب','#117a65');
+  openHtmlPrint(h,'كشف حساب','#117a65','تقفيلة_'+(conv?conv.label.replace(/\s+/g,'_')+'_'+conv.checkin:'الفوج'));
 }
 
 function exportClosingExcel(){
@@ -5264,7 +5268,7 @@ function exportClosingExcel(){
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;a.download='تقفيلة_فوج'+(conv?'_'+conv.checkin:'')+'.csv';
+  a.href=url;a.download='تقفيلة_'+(conv?conv.label.replace(/\s+/g,'_')+'_'+conv.checkin:'فوج')+'.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
@@ -5284,7 +5288,7 @@ function exportClosingPDF(){
     +out.innerHTML
     +'<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\\/script>'
     +'</body></html>';
-  openHtmlPrint(h,'التقفيلة الكاملة','#1a5276');
+  openHtmlPrint(h,'التقفيلة الكاملة','#1a5276','تقفيلة_'+(conv?conv.label.replace(/\s+/g,'_')+'_'+conv.checkin:'فوج'));
 }
 
 function _getClosingTableData(sectionKey){
@@ -5357,7 +5361,7 @@ function exportClosingTableExcel(sectionKey){
 </body></html>`;
   const blob=new Blob([BOM+html],{type:'application/vnd.ms-excel;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=title.replace(/\s/g,'_')+'_'+(conv?conv.checkin:new Date().toLocaleDateString('en-CA'))+'.xls';
+  a.download=title.replace(/\s/g,'_')+'_'+(conv?conv.label.replace(/\s+/g,'_')+'_'+conv.checkin:new Date().toLocaleDateString('en-CA'))+'.xls';
   a.click();
 }
 
@@ -5441,7 +5445,7 @@ tfoot td{padding:9px 12px;font-weight:800;font-size:12px;border-top:2.5px solid 
 </table>
 <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
-  openHtmlPrint(h,'سجل النشاط','#7d3c98');}
+  openHtmlPrint(h,'سجل النشاط','#7d3c98','سجل_النشاط_'+new Date().toLocaleDateString('en-CA'));}
 // Replaces single double-entry form with flexible N-party form
 
 (function(){
@@ -5878,7 +5882,7 @@ function printClosing(){
     +out.innerHTML
     +'<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\\/script>'
     +'</body></html>';
-  openHtmlPrint(h,'كشف حساب','#117a65');
+  openHtmlPrint(h,'كشف حساب','#117a65','تقفيلة_'+(conv?conv.label.replace(/\s+/g,'_')+'_'+conv.checkin:'الفوج'));
 }
 </script>
 <script>
@@ -5992,7 +5996,7 @@ window.printEntryPopup = function(id){
     + inner.innerHTML
     + '<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>'
     + '</body></html>';
-  openHtmlPrint(h,'قيد محاسبي','#7d3c98');
+  openHtmlPrint(h,'قيد محاسبي','#7d3c98','قيد_محاسبي_J'+id+'_'+new Date().toLocaleDateString('en-CA'));
 };
 
 window.openEntryEdit = function(id){
@@ -6595,8 +6599,9 @@ window.loginUser = (function(){
   // الدالة الأساسية - تاخد HTML وتفتح نافذة معاينة مع تحكم كامل
   window.openPrintPreview = function(htmlContent, opts){
     opts = opts || {};
-    const title   = opts.title   || 'معاينة الطباعة';
-    const color   = opts.color   || '#1a5276';
+    const title    = opts.title    || 'معاينة الطباعة';
+    const color    = opts.color    || '#1a5276';
+    const filename = opts.filename || title.replace(/[^\u0600-\u06FFa-zA-Z0-9_\-]/g,'_');
 
     // إذا fullHtml=true يعني المحتوى HTML كامل وعنده styles خاصة بيه - خليه كما هو
     const iframeDoc = opts.fullHtml
@@ -6670,6 +6675,7 @@ body{font-family:'Cairo',Arial,sans-serif;direction:rtl;background:#d0d7de;min-h
   <\/select>
   <div class="pv-sep"><\/div>
   <button class="pv-btn pv-print" onclick="doPrint()">🖨 طباعة / PDF<\/button>
+  <button class="pv-btn pv-ghost" onclick="doDownload()">💾 تنزيل<\/button>
   <button class="pv-btn pv-ghost" onclick="window.close()">✕<\/button>
 <\/div>
 <div id="pv-wrap">
@@ -6730,6 +6736,19 @@ function doPrint(){
   try{frame.contentWindow.print();}
   catch(e){window.print();}
 }
+function doDownload(){
+  // تنزيل محتوى الـ iframe كـ HTML باسم ذكي
+  try{
+    var fDoc=frame.contentDocument||frame.contentWindow.document;
+    var html=fDoc.documentElement.outerHTML;
+    var b=new Blob([html],{type:'text/html;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download=${JSON.stringify(filename)}+'.html';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  }catch(e){alert('تعذر التنزيل: '+e.message);}
+}
 window.onresize=pvFit;
 <\/script>
 <\/body><\/html>`;
@@ -6747,13 +6766,14 @@ window.onresize=pvFit;
 // ====== نافذة المعاينة العامة - نهاية ======
 
 // Helper: كل دالة طباعة HTML تستخدم openHtmlPrint بدل window.open
-window.openHtmlPrint = function(html, title, color){
+window.openHtmlPrint = function(html, title, color, filename){
   // شيل بس script الـ auto-print وخلي كل الـ CSS والستايل كما هو
   const clean = html.replace(/<script[\s\S]*?<\/script>/gi, '');
   window.openPrintPreview(clean, {
     title: title||'معاينة',
     color: color||'#1a5276',
-    fullHtml: true
+    fullHtml: true,
+    filename: filename||title||'ملف'
   });
 };
 </script>
@@ -6799,6 +6819,7 @@ window.printOneTable = function(sectionId){
   </style>${hdrHTML}${clone.innerHTML}`;
 
   window.openPrintPreview(fullHTML, {title, color,
+    filename: title.replace(/\s+/g,'_')+'_'+(conv?conv.label.replace(/\s+/g,'_')+'_'+conv.checkin:'')+'_'+new Date().toLocaleDateString('en-CA'),
     size: sectionId==='closing-main'?'297x210':'297x210'});
 };
 <\/script>
@@ -8401,7 +8422,7 @@ ${termsHtml?`<div class="terms"><span class="terms-t">الشروط والأحك�
 </div></div>
 <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),600))<\/script></body></html>`;
   try{
-    openHtmlPrint(rH,'إيصال فندقي','#117a65');
+    openHtmlPrint(rH,'إيصال فندقي','#117a65','إيصال_فندقي_'+b.name.replace(/\s+/g,'_')+'_'+new Date().toLocaleDateString('en-CA'));
     addLog('طباعة إيصال فندق: '+b.name,'edit',b.dest+' - '+b.hotelName);
   }catch(err){alert('تعذر فتح الإيصال: '+err.message)}
 }
