@@ -1455,9 +1455,7 @@ td{font-family:'Cairo',Arial,sans-serif}
 </table>
 <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  window.open(URL.createObjectURL(blob),'_blank');
-}
+  openHtmlPrint(h,'تقفيل الأفواج','#1a5276');}
 
 // ====== إذن استلام / إذن صرف ======
 function printVoucher(bookingId, type){
@@ -1641,8 +1639,7 @@ async function doVoucherAction(bookingId, type, action){
 </div>
 <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),20000);
+  openHtmlPrint(h,'إيصال','#117a65');
 }
 
 
@@ -2936,10 +2933,7 @@ document.querySelectorAll('.bus-wrap>div:first-child').forEach(el=>{if(el.textCo
 window.onload=()=>setTimeout(()=>window.print(),700);
 <\/script>
 </body></html>`;
-    const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    window.open(url,'_blank');
-    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    openHtmlPrint(h,'تقرير','#1a5276');
     return;
   }
 
@@ -3145,10 +3139,7 @@ ${returnList}
 <script>window.onload=()=>setTimeout(()=>window.print(),600)<\/script>
 </body></html>`;
 
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
-  setTimeout(()=>URL.revokeObjectURL(url),20000);
+  openHtmlPrint(h,'تقرير','#1a5276');
 }
 
 function downloadBusPDF(cn,busIdx){
@@ -3216,7 +3207,7 @@ window.onload=function(){
 </body></html>`;
   const blob2=new Blob([hPdf],{type:'text/html;charset=utf-8'});
   const url2=URL.createObjectURL(blob2);
-  window.open(url2+'#pdf','_blank');
+  window.open(url2,'_blank');
   setTimeout(()=>URL.revokeObjectURL(url2),30000);
 }
 
@@ -4029,7 +4020,7 @@ function genReport(){
 function printRpt(){
   const c=document.getElementById('rpt-printable');if(!c){alert('أنشئ التقرير أولاً');return;}
   const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Cairo',Arial,sans-serif;padding:20px;direction:rtl;color:#1a2535;font-size:13px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}th{background:#1a5276;color:#fff;padding:8px 10px;text-align:right;font-weight:700;font-size:11px}td{padding:7px 10px;border-bottom:1px solid #eaf2fb;text-align:right}tr:nth-child(even) td{background:#f8fafc}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{@page{margin:10mm;size:A4}body{padding:0}}</style></head><body>${c.innerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),15000);
+  openHtmlPrint(h,'تقرير','#7d3c98');
 }
 function exportRptExcel(){
   const tbl=document.querySelector('#rpt-printable table');
@@ -4049,7 +4040,7 @@ function exportRptPDF(){
   const titleEl=c.querySelector('div[style*="font-size:15px"]');
   const title=titleEl?titleEl.textContent.trim():'تقرير';
   const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>${title}</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Cairo',Arial,sans-serif;padding:16px;direction:rtl;color:#1a2535;font-size:12px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}th{background:#1a5276;color:#fff;padding:7px 9px;text-align:right;font-weight:700;font-size:10px}td{padding:6px 9px;border-bottom:1px solid #e0eaf5;text-align:right}tr:nth-child(even) td{background:#f4f8fc}.badge{padding:2px 6px;border-radius:10px;font-size:10px}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{@page{margin:8mm;size:A4 landscape}button{display:none!important}}</style></head><body>${c.innerHTML}<script>window.onload=function(){document.querySelectorAll('button').forEach(b=>b.style.display='none');setTimeout(()=>window.print(),500);}<\/script></body></html>`;
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),20000);
+  openHtmlPrint(h,title||'معاينة','#1a5276');
 }
 
 // ============================================================
@@ -5090,10 +5081,7 @@ ${notesHtml?`<div class="terms"><span class="terms-t">الشروط والملا�
 </div></div>
 <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),600))<\/script></body></html>`;
   try{
-    const blob=new Blob([rH],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);
-    const win=window.open(url,'_blank');
-    if(win){setTimeout(()=>URL.revokeObjectURL(url),15000);}
-    else{const iframe=document.createElement('iframe');iframe.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:none;z-index:99999;background:#fff';iframe.srcdoc=rH;document.body.appendChild(iframe);iframe.onload=()=>setTimeout(()=>{iframe.contentWindow.print();setTimeout(()=>document.body.removeChild(iframe),8000)},700);}
+    openHtmlPrint(rH,'إيصال الحجز','#117a65');
     addLog(`طباعة إيصال: ${b.name}`,'edit',`فوج ${b.convoy} · الإجمالي: ${(b.total||0).toLocaleString()} ج · شقق: ${(b.apts||[]).join('، ')||'-'}`);
   }catch(err){alert('تعذر فتح الإيصال: '+err.message)}
 }
@@ -5243,10 +5231,7 @@ function printClosing(){
     +out.innerHTML
     +'<script>window.onload=function(){setTimeout(function(){window.print();},500);}<\\/script>'
     +'</body></html>';
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
-  setTimeout(()=>URL.revokeObjectURL(url),15000);
+  openHtmlPrint(h,'كشف حساب','#117a65');
 }
 
 function exportClosingExcel(){
@@ -5299,10 +5284,7 @@ function exportClosingPDF(){
     +out.innerHTML
     +'<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\\/script>'
     +'</body></html>';
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
-  setTimeout(()=>URL.revokeObjectURL(url),15000);
+  openHtmlPrint(h,'التقفيلة الكاملة','#1a5276');
 }
 
 function _getClosingTableData(sectionKey){
@@ -5459,9 +5441,7 @@ tfoot td{padding:9px 12px;font-weight:800;font-size:12px;border-top:2.5px solid 
 </table>
 <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  window.open(URL.createObjectURL(blob),'_blank');
-}
+  openHtmlPrint(h,'سجل النشاط','#7d3c98');}
 // Replaces single double-entry form with flexible N-party form
 
 (function(){
@@ -5898,10 +5878,7 @@ function printClosing(){
     +out.innerHTML
     +'<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\\/script>'
     +'</body></html>';
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
-  setTimeout(()=>URL.revokeObjectURL(url),15000);
+  openHtmlPrint(h,'كشف حساب','#117a65');
 }
 </script>
 <script>
@@ -6015,10 +5992,7 @@ window.printEntryPopup = function(id){
     + inner.innerHTML
     + '<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>'
     + '</body></html>';
-  const blob = new Blob([h], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
-  setTimeout(()=>URL.revokeObjectURL(url), 15000);
+  openHtmlPrint(h,'قيد محاسبي','#7d3c98');
 };
 
 window.openEntryEdit = function(id){
@@ -6616,6 +6590,185 @@ window.loginUser = (function(){
 
 </script>
 <script>
+// ====== نافذة المعاينة العامة - تشتغل على كل طباعة في السيستم ======
+(function(){
+  // الدالة الأساسية - تاخد HTML وتفتح نافذة معاينة مع تحكم كامل
+  window.openPrintPreview = function(htmlContent, opts){
+    opts = opts || {};
+    const title   = opts.title   || 'معاينة الطباعة';
+    const color   = opts.color   || '#1a5276';
+
+    // CSS vars للـ iframe
+    const cssVars=`:root{--pr:#1a5276;--pr2:#2471a3;--prl:#d6eaf8;--ac:#117a65;--acl:#d5f5e3;--gd:#b7950b;--gdl:#f9e79f;--dn:#c0392b;--dnl:#fadbd8;--wn:#d68910;--wnl:#fdebd0;--pu:#7d3c98;--pul:#f4ecf7;--bg:#f0f4f8;--sf:#fff;--sf2:#f7f9fb;--bd:#dce6f0;--bd2:#c5d8ea;--tx:#1a2535;--tx2:#4a6278;--tx3:#8aa0b5;--r:10px}`;
+
+    // نظّف المحتوى من scripts وأزرار print
+    const cleanContent = htmlContent
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/window\.onload[^;]*;/g, '');
+
+    // الـ iframe document كامل
+    const iframeDoc = `<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="UTF-8">
+<title>${title}<\/title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+${cssVars}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;padding:10mm;margin:0}
+table{width:100%;border-collapse:collapse}
+th,td{font-family:'Cairo',Arial,sans-serif;text-align:right}
+@media print{body{padding:0}@page{margin:0}}
+<\/style>
+<\/head><body>${cleanContent}<\/body><\/html>`;
+
+    // نافذة المعاينة الخارجية
+    const winHTML = `<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="UTF-8"><title>🖨 ${title}<\/title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;background:#d0d7de;min-height:100vh}
+#pv-bar{position:fixed;top:0;right:0;left:0;z-index:9999;background:#1e2d3d;color:#fff;
+  padding:8px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  box-shadow:0 2px 16px rgba(0,0,0,.4);font-family:'Cairo',Arial,sans-serif;min-height:52px}
+.pv-title{font-size:14px;font-weight:800;white-space:nowrap}
+.pv-sep{width:1px;height:26px;background:rgba(255,255,255,.2);flex-shrink:0}
+.pv-lbl{font-size:11px;opacity:.65;white-space:nowrap}
+.pv-val{font-size:13px;font-weight:900;min-width:40px;text-align:center;color:#7ec8f7}
+#pvSlider{width:130px;accent-color:${color};cursor:pointer}
+#pvSize{padding:5px 9px;border-radius:7px;font-family:'Cairo',Arial;font-size:12px;
+  font-weight:700;background:#2c3e50;color:#fff;border:1px solid rgba(255,255,255,.25);cursor:pointer}
+.pv-btn{padding:6px 16px;border:none;border-radius:8px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Cairo',Arial;white-space:nowrap}
+.pv-print{background:${color};color:#fff}
+.pv-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)!important}
+#pv-wrap{padding-top:60px;display:flex;justify-content:center;padding-bottom:40px;min-height:100vh}
+#pv-shadow{
+  background:#fff;box-shadow:0 4px 30px rgba(0,0,0,.25);border-radius:3px;
+  transform-origin:top center;transition:transform .12s ease;
+  overflow:hidden;
+}
+#pv-frame{display:block;border:none;width:297mm;height:210mm}
+@media print{
+  #pv-bar{display:none!important}
+  #pv-wrap{padding-top:0!important;background:#fff!important;display:block}
+  #pv-shadow{box-shadow:none!important;border-radius:0!important;
+    transform:none!important;width:100%!important;}
+  #pv-frame{width:100%!important;height:100vh!important}
+  @page{margin:0}
+}
+<\/style><\/head><body>
+<div id="pv-bar">
+  <span class="pv-title">🖨 ${title}<\/span>
+  <div class="pv-sep"><\/div>
+  <span class="pv-lbl">الحجم:<\/span>
+  <input type="range" id="pvSlider" min="25" max="150" value="75" oninput="pvScale(this.value)">
+  <span class="pv-val" id="pvVal">75%<\/span>
+  <div class="pv-sep"><\/div>
+  <button class="pv-btn pv-ghost" onclick="pvFit()">📐 ملاءمة<\/button>
+  <button class="pv-btn pv-ghost" onclick="pvScale(100)">100%<\/button>
+  <div class="pv-sep"><\/div>
+  <span class="pv-lbl">الورق:<\/span>
+  <select id="pvSize" onchange="pvPageSize()">
+    <option value="297x210">A4 أفقي<\/option>
+    <option value="210x297">A4 عمودي<\/option>
+    <option value="420x297">A3 أفقي<\/option>
+    <option value="297x420">A3 عمودي<\/option>
+  <\/select>
+  <div class="pv-sep"><\/div>
+  <button class="pv-btn pv-print" onclick="doPrint()">🖨 طباعة / PDF<\/button>
+  <button class="pv-btn pv-ghost" onclick="window.close()">✕<\/button>
+<\/div>
+<div id="pv-wrap">
+  <div id="pv-shadow">
+    <iframe id="pv-frame" scrolling="no"><\/iframe>
+  <\/div>
+<\/div>
+<script>
+var frame=document.getElementById('pv-frame');
+var shadow=document.getElementById('pv-shadow');
+// اكتب المحتوى في الـ iframe مباشرةً بدل srcdoc (أأمن من XSS ومشاكل parsing)
+var doc = frame.contentDocument || frame.contentWindow.document;
+doc.open();doc.write(${JSON.stringify(iframeDoc)});doc.close();
+
+// بعد ما يتحمل نظّبط الأبعاد
+frame.onload=function(){
+  var fDoc=frame.contentDocument||frame.contentWindow.document;
+  var body=fDoc.body;
+  if(body){
+    var h=Math.max(body.scrollHeight,210*3.78)|0;
+    frame.style.height=h+'px';
+    shadow.style.height=h+'px';
+  }
+  setTimeout(pvFit,50);
+};
+
+function pvScale(v){
+  v=parseInt(v);
+  document.getElementById('pvVal').textContent=v+'%';
+  document.getElementById('pvSlider').value=v;
+  shadow.style.transform='scale('+v/100+')';
+  var rect=shadow.getBoundingClientRect();
+  document.getElementById('pv-wrap').style.minHeight=(rect.height+80)+'px';
+}
+function pvFit(){
+  var avail=window.innerWidth-48;
+  var sw=shadow.offsetWidth||1122;
+  pvScale(Math.min(Math.floor(avail/sw*100),150));
+}
+function pvPageSize(){
+  var parts=document.getElementById('pvSize').value.split('x');
+  var w=parts[0],h=parts[1];
+  frame.style.width=w+'mm';
+  shadow.style.width=w+'mm';
+  // أبلغ الـ iframe بحجم الورق
+  try{
+    var fw=frame.contentWindow;
+    if(fw){
+      var st=fw.document.getElementById('_ps');
+      if(!st){st=fw.document.createElement('style');st.id='_ps';fw.document.head.appendChild(st);}
+      st.textContent='@media print{@page{size:'+w+'mm '+h+'mm;margin:0}}';
+    }
+  }catch(e){}
+  pvFit();
+}
+function doPrint(){
+  // طباعة محتوى الـ iframe مباشرةً
+  try{frame.contentWindow.print();}
+  catch(e){window.print();}
+}
+window.onresize=pvFit;
+<\/script>
+<\/body><\/html>`;
+
+    const blob = new Blob([winHTML], {type:'text/html;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const win  = window.open(url, '_blank');
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    return win;
+  };
+;
+
+  // window.open override removed - each print function calls openPrintPreview directly
+})();
+// ====== نافذة المعاينة العامة - نهاية ======
+
+// Helper: كل دالة طباعة HTML تستخدم openHtmlPrint بدل window.open
+window.openHtmlPrint = function(html, title, color){
+  // جيب الـ body content
+  const bm = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+  const bodyContent = bm ? bm[1] : html;
+  // شيل script الـ auto-print
+  const clean = bodyContent
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/window\.onload[^;]*;/g,'');
+  window.openPrintPreview(clean, {
+    title: title||'معاينة',
+    color: color||'#1a5276'
+  });
+};
+</script>
+<script>
 // ====== printOneTable - print individual closing tables ======
 window.printOneTable = function(sectionId){
   const el=document.getElementById(sectionId);
@@ -6629,172 +6782,40 @@ window.printOneTable = function(sectionId){
   const title=titles[sectionId]||'كشف';
   const color=colors[sectionId]||'#1a5276';
 
-  // جيب CSS المتغيرات من الصفحة
-  const cssVars=`:root{--pr:#1a5276;--ac:#117a65;--dn:#c0392b;--wn:#d68910;--pu:#7d3c98;--tx:#1a2535;--tx2:#4a6278;--tx3:#8aa0b5;--sf:#fff;--sf2:#f7f9fb;--bg:#f0f4f8;--bd:#dce6f0;--bd2:#c5d8ea;--acl:#d5f5e3;--dnl:#fadbd8;--wnl:#fdebd0;--gdl:#f9e79f;--prl:#d6eaf8;--r:10px}`;
+  // جيب الـ CSS variables
+  const cssVars=`:root{--pr:#1a5276;--pr2:#2471a3;--prl:#d6eaf8;--ac:#117a65;--acl:#d5f5e3;--gd:#b7950b;--gdl:#f9e79f;--dn:#c0392b;--dnl:#fadbd8;--wn:#d68910;--wnl:#fdebd0;--pu:#7d3c98;--pul:#f4ecf7;--bg:#f0f4f8;--sf:#fff;--sf2:#f7f9fb;--bd:#dce6f0;--bd2:#c5d8ea;--tx:#1a2535;--tx2:#4a6278;--tx3:#8aa0b5;--r:10px}`;
 
-  const tableHTML=el.innerHTML;
-  const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
-<title>${title}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
-<style>
-${cssVars}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-body{font-family:'Cairo',Arial,sans-serif;direction:rtl;background:#f0f4f8;color:#1a2535}
-/* ====== شريط التحكم ====== */
-#ctrl-bar{
-  position:fixed;top:0;right:0;left:0;z-index:999;
-  background:#1a2535;color:#fff;padding:10px 18px;
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  box-shadow:0 2px 12px rgba(0,0,0,.3);
-  font-family:'Cairo',Arial,sans-serif;
-}
-#ctrl-bar .lbl{font-size:12px;opacity:.7;white-space:nowrap}
-#ctrl-bar .val{font-size:13px;font-weight:800;min-width:36px;text-align:center}
-#ctrl-bar input[type=range]{
-  width:160px;accent-color:${color};cursor:pointer;
-}
-#ctrl-bar button{
-  padding:7px 18px;border:none;border-radius:8px;font-size:13px;font-weight:700;
-  cursor:pointer;font-family:'Cairo',Arial;white-space:nowrap;
-}
-.btn-print{background:${color};color:#fff}
-.btn-fit{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)!important}
-.btn-close{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3)!important}
-#ctrl-bar .sep{width:1px;height:28px;background:rgba(255,255,255,.2)}
-/* ====== منطقة المعاينة ====== */
-#preview-area{
-  padding-top:70px;
-  display:flex;justify-content:center;align-items:flex-start;
-  min-height:100vh;padding-bottom:30px;
-}
-#page-wrap{
-  background:#fff;
-  box-shadow:0 4px 30px rgba(0,0,0,.18);
-  border-radius:4px;
-  transform-origin:top center;
-  transition:transform .15s ease;
-  width:297mm; /* A4 landscape */
-  min-height:210mm;
-  padding:12mm;
-  overflow:visible;
-}
-/* ====== هيدر الطباعة ====== */
-.print-hdr{
-  display:flex;justify-content:space-between;align-items:flex-start;
-  margin-bottom:12px;padding-bottom:10px;border-bottom:3px solid ${color};
-}
-/* ====== جدول ====== */
-table{width:100%;border-collapse:collapse}
-th,td{font-family:'Cairo',Arial,sans-serif;text-align:right}
-@media print{
-  #ctrl-bar{display:none!important}
-  #preview-area{padding-top:0!important}
-  body{background:#fff}
-  #page-wrap{
-    box-shadow:none!important;border-radius:0!important;
-    width:100%!important;padding:8mm!important;
-    transform:none!important;
-  }
-  @page{size:A4 landscape;margin:0}
-}
-</style>
-</head><body>
-
-<!-- شريط التحكم -->
-<div id="ctrl-bar">
-  <span style="font-size:15px;font-weight:900">${title}</span>
-  <span style="font-size:12px;opacity:.6">${conv?'فوج '+conv.label:''}</span>
-  <div id="ctrl-bar" style="all:unset;display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap">
-    <div id="ctrl-bar-inner" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span class="lbl">حجم العرض:</span>
-      <input type="range" id="scaleSlider" min="30" max="130" value="75" oninput="applyScale(this.value)">
-      <span class="val" id="scaleVal">75%</span>
-      <div class="sep"></div>
-      <button class="btn-fit" onclick="fitToWidth()">📐 ملاءمة العرض</button>
-      <button class="btn-fit" onclick="setScale(100)">100%</button>
-      <div class="sep"></div>
-      <select id="pageSize" onchange="applyPageSize()" style="padding:6px 10px;border-radius:7px;font-family:'Cairo',Arial;font-size:12px;font-weight:700;background:#2c3e50;color:#fff;border:1px solid rgba(255,255,255,.3);cursor:pointer">
-        <option value="297x210">A4 أفقي</option>
-        <option value="210x297">A4 عمودي</option>
-        <option value="420x297">A3 أفقي</option>
-      </select>
-      <div class="sep"></div>
-      <button class="btn-print" onclick="window.print()">🖨 طباعة / PDF</button>
-      <button class="btn-close" onclick="window.close()">✕ إغلاق</button>
-    </div>
-  </div>
-</div>
-
-<!-- منطقة المعاينة -->
-<div id="preview-area">
-  <div id="page-wrap">
-    <!-- هيدر -->
-    <div class="print-hdr">
-      <div>
-        <div style="font-size:20px;font-weight:900;color:${color}">${setts.name||'مصيف مطروح 2026'}</div>
-        <div style="font-size:14px;font-weight:700;color:#117a65;margin-top:3px">${title} ${conv?'· فوج '+conv.label:''}</div>
-        <div style="font-size:11px;color:#888;margin-top:2px">${conv?'دخول '+conv.checkin+' · خروج '+conv.checkout:''}</div>
-      </div>
-      <div style="text-align:left;font-size:11px;color:#888;line-height:1.9">
-        <div style="font-weight:700;font-size:13px;color:#1a2535">تاريخ الطباعة</div>
-        <div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
-      </div>
-    </div>
-    <!-- محتوى الجدول -->
-    <div id="table-content">${tableHTML}</div>
-  </div>
-</div>
-
-<script>
-let currentScale=75;
-const wrap=document.getElementById('page-wrap');
-
-function applyScale(v){
-  currentScale=parseInt(v);
-  document.getElementById('scaleVal').textContent=v+'%';
-  document.getElementById('scaleSlider').value=v;
-  wrap.style.transform='scale('+v/100+')';
-  // نضبط ارتفاع الـ container عشان الصفحة ما تتداخلش
-  const h=wrap.getBoundingClientRect().height;
-  document.getElementById('preview-area').style.minHeight=(h+100)+'px';
-}
-
-function setScale(v){applyScale(v);}
-
-function fitToWidth(){
-  const available=window.innerWidth-60;
-  const wrapW=wrap.offsetWidth;
-  const s=Math.floor((available/wrapW)*100);
-  applyScale(Math.min(s,130));
-}
-
-function applyPageSize(){
-  const v=document.getElementById('pageSize').value;
-  const [w,h]=v.split('x');
-  wrap.style.width=w+'mm';
-  wrap.style.minHeight=h+'mm';
-  // CSS @page
-  let style=document.getElementById('dynamic-page-style');
-  if(!style){style=document.createElement('style');style.id='dynamic-page-style';document.head.appendChild(style);}
-  style.textContent='@media print{@page{size:'+w+'mm '+h+'mm;margin:0}}';
-  fitToWidth();
-}
-
-// تشغيل تلقائي عند الفتح
-window.onload=function(){
-  // شيل الأزرار من داخل الجدول (أزرار الطباعة والـ PDF الموجودة في الجدول)
-  document.querySelectorAll('#table-content button, #table-content .btn').forEach(b=>b.remove());
-  document.querySelectorAll('#table-content [style*="display:flex"][style*="gap"]').forEach(d=>{
+  // نظّف المحتوى من أزرار الطباعة والـ flex wrappers
+  const clone = el.cloneNode(true);
+  clone.querySelectorAll('[style*="display:flex"][style*="gap"]').forEach(d=>{
     if(d.querySelector('button')) d.remove();
   });
-  fitToWidth();
+  clone.querySelectorAll('button').forEach(b=>b.remove());
+
+  const hdrHTML=`<div style="border-bottom:3px solid ${color};padding-bottom:10px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+      <div style="font-size:20px;font-weight:900;color:${color};font-family:Cairo,Arial">${setts.name||''}</div>
+      <div style="font-size:14px;font-weight:700;color:#117a65;margin-top:3px;font-family:Cairo,Arial">${title}${conv?' · فوج '+conv.label:''}</div>
+      ${conv?`<div style="font-size:11px;color:#888;margin-top:2px;font-family:Cairo,Arial">دخول ${conv.checkin} · خروج ${conv.checkout}</div>`:''}
+    </div>
+    <div style="font-size:11px;color:#888;text-align:left;font-family:Cairo,Arial">
+      <div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
+  </div>`;
+
+  const fullHTML = `<style>${cssVars}
+    *{font-family:'Cairo',Arial,sans-serif}
+    table{width:100%;border-collapse:collapse}
+    th,td{font-family:'Cairo',Arial,sans-serif;text-align:right}
+  </style>${hdrHTML}${clone.innerHTML}`;
+
+  window.openPrintPreview(fullHTML, {title, color,
+    size: sectionId==='closing-main'?'297x210':'297x210'});
 };
 <\/script>
 </body></html>`;
 
-  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
-  window.open(URL.createObjectURL(blob),'_blank');
-};
+  openHtmlPrint(h,'تحصيلات الباص','#d68910');};
 
 // ====== DESIGN TAB ======
 document.addEventListener('DOMContentLoaded', function(){
@@ -8391,10 +8412,7 @@ ${termsHtml?`<div class="terms"><span class="terms-t">الشروط والأحك�
 </div></div>
 <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),600))<\/script></body></html>`;
   try{
-    const blob=new Blob([rH],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);
-    const win=window.open(url,'_blank');
-    if(win){setTimeout(()=>URL.revokeObjectURL(url),15000);}
-    else{const iframe=document.createElement('iframe');iframe.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:none;z-index:99999';iframe.srcdoc=rH;document.body.appendChild(iframe);iframe.onload=()=>setTimeout(()=>{iframe.contentWindow.print();setTimeout(()=>document.body.removeChild(iframe),8000)},700);}
+    openHtmlPrint(rH,'إيصال فندقي','#117a65');
     addLog('طباعة إيصال فندق: '+b.name,'edit',b.dest+' - '+b.hotelName);
   }catch(err){alert('تعذر فتح الإيصال: '+err.message)}
 }
