@@ -6622,7 +6622,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:right}
 
     // نافذة المعاينة الخارجية
     const winHTML = `<!DOCTYPE html><html dir="rtl" lang="ar"><head>
-<meta charset="UTF-8"><title>🖨 ${title}<\/title>
+<meta charset="UTF-8"><title>${filename}<\/title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -6676,7 +6676,7 @@ body{font-family:'Cairo',Arial,sans-serif;direction:rtl;background:#d0d7de;min-h
   <\/select>
   <div class="pv-sep"><\/div>
   <button class="pv-btn pv-print" onclick="doPrint()">🖨 طباعة / PDF<\/button>
-  <button class="pv-btn pv-ghost" onclick="doDownload()">💾 تنزيل<\/button>
+  <button class="pv-btn pv-ghost" onclick="doDownload()">💾 حفظ PDF<\/button>
   <button class="pv-btn pv-ghost" onclick="window.close()">✕<\/button>
 <\/div>
 <div id="pv-wrap">
@@ -6733,22 +6733,26 @@ function pvPageSize(){
   pvFit();
 }
 function doPrint(){
-  // طباعة محتوى الـ iframe مباشرةً
-  try{frame.contentWindow.print();}
-  catch(e){window.print();}
+  // نغير title النافذة الحالية لاسم الملف عشان المتصفح يستخدمه في Save As
+  try{ document.title = ${JSON.stringify(filename)}; }catch(te){}
+  try{ frame.contentWindow.print(); }
+  catch(e){ window.print(); }
 }
 function doDownload(){
-  // تنزيل محتوى الـ iframe كـ HTML باسم ذكي
+  // نغير title النافذة الحالية لاسم الملف عشان المتصفح يستخدمه في Save As
+  try{ document.title = ${JSON.stringify(filename)}; }catch(te){}
   try{
-    var fDoc=frame.contentDocument||frame.contentWindow.document;
-    var html=fDoc.documentElement.outerHTML;
-    var b=new Blob([html],{type:'text/html;charset=utf-8'});
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(b);
-    a.download=${JSON.stringify(filename)}+'.html';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-  }catch(e){alert('تعذر التنزيل: '+e.message);}
+    var fw=frame.contentWindow;
+    if(fw){
+      var st=fw.document.getElementById('_ps');
+      if(!st){st=fw.document.createElement('style');st.id='_ps';fw.document.head.appendChild(st);}
+      var pvSel=document.getElementById('pvSize');
+      var parts=(pvSel?pvSel.value:'210x297').split('x');
+      var pw=parts[0],ph=parts[1];
+      st.textContent='@media print{@page{size:'+pw+'mm '+ph+'mm;margin:8mm}}';
+    }
+    frame.contentWindow.print();
+  }catch(e){window.print();}
 }
 window.onresize=pvFit;
 <\/script>
