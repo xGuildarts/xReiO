@@ -6598,28 +6598,21 @@ window.loginUser = (function(){
     const title   = opts.title   || 'معاينة الطباعة';
     const color   = opts.color   || '#1a5276';
 
-    // CSS vars للـ iframe
-    const cssVars=`:root{--pr:#1a5276;--pr2:#2471a3;--prl:#d6eaf8;--ac:#117a65;--acl:#d5f5e3;--gd:#b7950b;--gdl:#f9e79f;--dn:#c0392b;--dnl:#fadbd8;--wn:#d68910;--wnl:#fdebd0;--pu:#7d3c98;--pul:#f4ecf7;--bg:#f0f4f8;--sf:#fff;--sf2:#f7f9fb;--bd:#dce6f0;--bd2:#c5d8ea;--tx:#1a2535;--tx2:#4a6278;--tx3:#8aa0b5;--r:10px}`;
-
-    // نظّف المحتوى من scripts وأزرار print
-    const cleanContent = htmlContent
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/window\.onload[^;]*;/g, '');
-
-    // الـ iframe document كامل
-    const iframeDoc = `<!DOCTYPE html><html dir="rtl" lang="ar"><head>
-<meta charset="UTF-8">
-<title>${title}<\/title>
+    // إذا fullHtml=true يعني المحتوى HTML كامل وعنده styles خاصة بيه - خليه كما هو
+    const iframeDoc = opts.fullHtml
+      ? htmlContent  // HTML كامل بكل الـ styles والـ CSS الخاص بيه
+      : (()=>{
+          // بناء iframe doc من body content فقط مع CSS افتراضي
+          const cssVars=`:root{--pr:#1a5276;--pr2:#2471a3;--prl:#d6eaf8;--ac:#117a65;--acl:#d5f5e3;--gd:#b7950b;--gdl:#f9e79f;--dn:#c0392b;--dnl:#fadbd8;--wn:#d68910;--wnl:#fdebd0;--pu:#7d3c98;--pul:#f4ecf7;--bg:#f0f4f8;--sf:#fff;--sf2:#f7f9fb;--bd:#dce6f0;--bd2:#c5d8ea;--tx:#1a2535;--tx2:#4a6278;--tx3:#8aa0b5;--r:10px}`;
+          return `<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="UTF-8"><title>${title}<\/title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
-<style>
-${cssVars}
-*{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+<style>${cssVars}*{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;padding:10mm;margin:0}
-table{width:100%;border-collapse:collapse}
-th,td{font-family:'Cairo',Arial,sans-serif;text-align:right}
-@media print{body{padding:0}@page{margin:0}}
-<\/style>
-<\/head><body>${cleanContent}<\/body><\/html>`;
+table{width:100%;border-collapse:collapse}th,td{text-align:right}
+@media print{body{padding:0}@page{margin:0}}<\/style>
+<\/head><body>${htmlContent}<\/body><\/html>`;
+        })();
 
     // نافذة المعاينة الخارجية
     const winHTML = `<!DOCTYPE html><html dir="rtl" lang="ar"><head>
@@ -6755,16 +6748,12 @@ window.onresize=pvFit;
 
 // Helper: كل دالة طباعة HTML تستخدم openHtmlPrint بدل window.open
 window.openHtmlPrint = function(html, title, color){
-  // جيب الـ body content
-  const bm = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-  const bodyContent = bm ? bm[1] : html;
-  // شيل script الـ auto-print
-  const clean = bodyContent
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/window\.onload[^;]*;/g,'');
+  // شيل بس script الـ auto-print وخلي كل الـ CSS والستايل كما هو
+  const clean = html.replace(/<script[\s\S]*?<\/script>/gi, '');
   window.openPrintPreview(clean, {
     title: title||'معاينة',
-    color: color||'#1a5276'
+    color: color||'#1a5276',
+    fullHtml: true
   });
 };
 </script>
