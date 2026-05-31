@@ -297,7 +297,7 @@ textarea{resize:vertical;min-height:60px}
 .b-pu{background:var(--pul);color:var(--pu)}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th{text-align:right;padding:10px 13px;border-bottom:2px solid var(--prl);color:var(--pr);font-weight:700;font-size:14px;background:var(--sf2);white-space:nowrap}
-td{padding:10px 13px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;white-space:nowrap}
+td{padding:10px 13px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;white-space:wrap}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f5f8fc}
 .tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd)}
@@ -2861,31 +2861,31 @@ function printBusLayout(cn,busIdx){
 
   // بناء خلية كرسي - حجم مكبّر للطباعة (80x105px)
   function mkSeat(sn){
-    if(!sn)return `<div style="width:80px;height:105px;flex-shrink:0"></div>`;
+    if(!sn)return `<div style="width:250px;height:130px;flex-shrink:0"></div>`;
     const isR=!!occ2[sn];
     const o=isR?occ2[sn]:occ[sn];
     const bg=isR?'#7d3c98':(o?o.col:'#f0f4f8');
     const tc=o?'#fff':'#b0bec5';
     const br=o?(isR?'2px solid #f9e79f':'2px solid '+bg):'1.5px dashed #ccd4de';
-    const nm=o?o.name.split(' ').slice(0,2).join(' '):'';
-    return `<div style="width:80px;height:105px;flex-shrink:0;background:${bg};color:${tc};border:${br};border-radius:7px;padding:5px 4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-      <div style="font-size:13px;font-weight:900;opacity:${o?1:.35};line-height:1">${sn}</div>
-      ${o?`<div style="font-size:11px;font-weight:800;line-height:1.25;margin-top:3px;word-break:break-word;max-width:100%">${nm}</div>
-      <div style="font-size:10px;opacity:.9;margin-top:2px;direction:ltr">${(o.phone||'').slice(-10)}</div>
-      <div style="font-size:10px;opacity:.9;margin-top:2px;overflow:hidden;white-space:nowrap;max-width:100%">${(o.pickup||'').slice(0,10)}</div>
-      ${o.seatNote?`<div style="background:rgba(255,255,255,.25);border-radius:3px;font-size:9px;font-weight:700;padding:1px 3px;margin-top:2px;max-width:100%;overflow:hidden;white-space:nowrap">📝${o.seatNote.slice(0,12)}</div>`:''}
-      ${isR?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:9px;font-weight:900;padding:0 3px;margin-top:2px">↩عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:9px;font-weight:900;padding:0 3px;margin-top:2px">⚠فوجين</div>':'')}`
-      :`<div style="font-size:10px;color:#b0bec5;margin-top:14px">فارغ</div>`}
+    const nm=o?o.name:'';
+    return `<div style="width:250px;height:130px;flex-shrink:0;background:${bg};color:${tc};border:${br};border-radius:7px;padding:6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+      <div style="font-size:14px;font-weight:900;opacity:${o?1:.35};line-height:1">${sn}</div>
+      ${o?`<div style="font-size:12px;font-weight:800;line-height:1.3;margin-top:4px;word-break:break-word;max-width:100%">${nm}</div>
+      <div style="font-size:11px;opacity:.95;margin-top:3px;direction:ltr">${o.phone||''}</div>
+      <div style="font-size:11px;opacity:.95;margin-top:3px;max-width:100%;word-break:break-word">${o.pickup||''}</div>
+      ${o.seatNote?`<div style="background:rgba(255,255,255,.25);border-radius:3px;font-size:11px;font-weight:700;padding:2px 5px;margin-top:3px;max-width:100%;word-break:break-word">📝${o.seatNote}</div>`:''}
+      ${isR?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:3px">↩عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:3px">⚠فوجين</div>':'')}`
+      :`<div style="font-size:11px;color:#b0bec5;margin-top:18px">فارغ</div>`}
     </div>`;
   }
-  const AISLE=`<div style="width:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:8px;writing-mode:vertical-rl;font-family:'Cairo',sans-serif">ممر</div>`;
+  const AISLE=`<div style="width:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:9px;writing-mode:vertical-rl;font-family:'Cairo',sans-serif">ممر</div>`;
   function mkRow(a,b,c,d){return `<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${mkSeat(b)}${mkSeat(a)}${AISLE}${mkSeat(c)}${mkSeat(d)}</div>`;}
 
   let rows='';let sc=1;
   for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=mkRow(s[0],s[1],s[2],s[3]);}
-  rows+=`<div style="border-top:1px dashed #cbd5e1;margin:3px 0"></div>`;
-  const WC_WIDE=`<div style="width:168px;flex-shrink:0;background:#e8f4fd;border:1.5px solid #5dade2;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:105px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:22px">🚻</span><span style="font-size:10px;font-weight:900;color:#1a5276">حمام</span></div>`;
-  const DOOR_WIDE=`<div style="width:168px;flex-shrink:0;background:#fffbeb;border:1.5px dashed #d97706;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:105px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:22px">🚪</span><span style="font-size:10px;font-weight:900;color:#b7770d">باب</span></div>`;
+  rows+=`<div style="border-top:1px dashed #cbd5e1;margin:4px 0"></div>`;
+  const WC_WIDE=`<div style="width:504px;flex-shrink:0;background:#e8f4fd;border:2px solid #5dade2;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:130px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:32px">🚻</span><span style="font-size:14px;font-weight:900;color:#1a5276">حمام</span></div>`;
+  const DOOR_WIDE=`<div style="width:504px;flex-shrink:0;background:#fffbeb;border:2px dashed #d97706;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:130px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:32px">🚪</span><span style="font-size:14px;font-weight:900;color:#b7770d">باب</span></div>`;
   rows+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${WC_WIDE}${AISLE}${mkSeat(sc)}${mkSeat(sc+1)}</div>`;
   sc+=2;
   rows+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${DOOR_WIDE}${AISLE}${mkSeat(sc)}${mkSeat(sc+1)}</div>`;
@@ -2902,38 +2902,48 @@ function printBusLayout(cn,busIdx){
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;font-size:11px;padding:8px}
-.no-print{display:flex;gap:8px;margin-bottom:10px}
-.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
-table{width:100%;border-collapse:collapse;font-size:10px}
-th{background:#1a5276;color:#fff;padding:4px 7px;text-align:right;font-weight:700}
-td{padding:3px 7px;border-bottom:1px solid #e2e8f0;text-align:right}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;font-size:12px;padding:10px}
+.no-print{display:flex;gap:8px;margin-bottom:12px}
+.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;padding:10px 14px;border-radius:10px;background:linear-gradient(135deg,#eaf3fb,#f0f8f4);border:1.5px solid #d6eaf8}
+.hdr-right{flex:1;min-width:0}
+.hdr-left{flex-shrink:0;text-align:left;padding-right:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#1a5276;color:#fff;padding:8px 10px;text-align:right;font-weight:700;font-size:12px}
+td{padding:7px 10px;border-bottom:1px solid #e2e8f0;text-align:right;font-size:12px}
+tbody tr:nth-child(even){background:#f7fafc}
+tbody tr:hover{background:#eaf3fb}
+tbody tr.ret{background:#f9f0ff}
+tfoot td{background:#e8f4fd;font-weight:800;border-top:2px solid #1a5276}
 @media print{
-  @page{margin:6mm;size:A4 portrait}
+  @page{margin:8mm;size:A4 landscape}
   body{padding:0}
   .no-print{display:none!important}
   .pg2{page-break-before:always}
 }
 </style></head><body>
 <div class="no-print"><button onclick="window.print()">🖨️ طباعة / PDF</button></div>
-<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;padding-bottom:5px;border-bottom:2px solid #d6eaf8">
-  <div>
-    <div style="font-size:14px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
-    <div style="font-size:11px;font-weight:700;color:#117a65;margin-top:1px">🚌 ${busName} · ${conv.label}</div>
-    <div style="font-size:9px;color:#4a6278;margin-top:1px">دخول: ${conv.checkin} (9-11ص) | خروج: ${conv.checkout} (5-7ص)</div>
+<div class="hdr">
+  <div class="hdr-right">
+    <div style="font-size:17px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
+    <div style="font-size:13px;font-weight:700;color:#117a65;margin-top:3px">🚌 ${busName} · ${conv.label}</div>
+    <div style="font-size:11px;color:#4a6278;margin-top:3px">دخول: ${conv.checkin} (9-11ص) | خروج: ${conv.checkout} (5-7ص)</div>
   </div>
-  <div style="text-align:left;font-size:9px;color:#555;line-height:1.7">
-    <div style="font-weight:800;color:#1a5276;font-size:11px">المحجوز: ${totalOcc} / 49</div>
-    <div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
+  <div class="hdr-left">
+    <div style="font-weight:900;color:#1a5276;font-size:15px">المحجوز: ${totalOcc} / 49</div>
+    <div style="font-size:11px;color:#555;margin-top:3px">${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
   </div>
 </div>
-<div style="background:#f8fafc;border:1.5px solid #d6eaf8;border-radius:8px;padding:8px;margin-bottom:6px">
-  <div style="background:#1a5276;color:#fff;text-align:center;padding:4px;border-radius:5px;font-size:10px;font-weight:900;margin-bottom:6px;font-family:'Cairo',sans-serif">🚗 سائق</div>
+<div style="background:#f8fafc;border:1.5px solid #d6eaf8;border-radius:10px;padding:10px;margin-bottom:8px">
+  <div style="background:#1a5276;color:#fff;text-align:center;padding:6px;border-radius:6px;font-size:12px;font-weight:900;margin-bottom:8px;font-family:'Cairo',sans-serif">🚗 سائق</div>
   ${rows}
 </div>
 <div class="pg2">
-  <div style="font-size:12px;font-weight:900;color:#1a5276;margin-bottom:5px">📊 جدول الركاب التفصيلي</div>
-  <table><thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>المتبقي</th><th>ملاحظات</th></tr></thead><tbody>${tRows}</tbody></table>
+  <div style="font-size:15px;font-weight:900;color:#1a5276;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid #d6eaf8">📋 جدول الركاب التفصيلي</div>
+  <table>
+    <thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>المتبقي</th><th>ملاحظات الكرسي</th></tr></thead>
+    <tbody>${tRows}</tbody>
+  </table>
 </div>
 </body></html>`;
 
@@ -2958,12 +2968,12 @@ function downloadBusPDF(cn,busIdx){
   const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
   const setts=(typeof settings!=='undefined'?settings:{})||{};
   function msp(sn){
-    if(!sn)return `<div style="width:66px;height:84px;flex-shrink:0"></div>`;
+    if(!sn)return `<div style="width:250px;height:130px;flex-shrink:0"></div>`;
     const isRet=!!occ2[sn];const o=isRet?occ2[sn]:occ[sn];
     const col=isRet?'#7d3c98':(o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#eef2f7');
     const txtCol=o?'#fff':'#aaa';const brd=o?(isRet?'2px solid #f9e79f':'1.5px solid '+col):'1.5px dashed #ccd4de';
-    const nm=o?o.name.split(' ').slice(0,2).join(' '):'';
-    return `<div style="width:66px;height:84px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:6px;padding:3px 2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:10px;font-weight:900;opacity:${o?.9:.4}">${sn}</div>${o?`<div style="font-size:9px;font-weight:800;line-height:1.2;margin-top:1px;word-break:break-all">${nm}</div><div style="font-size:8px;opacity:.85;margin-top:1px">${(o.phone||'').slice(-8)}</div><div style="font-size:8px;opacity:.85">${(o.pickup||'').slice(0,8)}</div>${o.seatNote?`<div style="background:rgba(255,255,255,.22);color:#fff;border-radius:2px;font-size:7px;font-weight:700;padding:1px 3px;margin-top:1px;word-break:break-all;line-height:1.2">${o.seatNote.slice(0,18)}</div>`:''}${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">فوجين</div>':'')}`:`<div style="font-size:8px;color:#bbb;margin-top:8px">فارغ</div>`}</div>`;
+    const nm=o?o.name:'';
+    return `<div style="width:250px;height:130px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:14px;font-weight:900;opacity:${o?.9:.4}">${sn}</div>${o?`<div style="font-size:12px;font-weight:800;line-height:1.3;margin-top:4px;word-break:break-word;max-width:100%">${nm}</div><div style="font-size:11px;opacity:.95;margin-top:3px;direction:ltr">${o.phone||''}</div><div style="font-size:11px;opacity:.95;margin-top:3px;word-break:break-word;max-width:100%">${o.pickup||''}</div>${o.seatNote?`<div style="background:rgba(255,255,255,.22);color:#fff;border-radius:2px;font-size:11px;font-weight:700;padding:2px 5px;margin-top:3px;word-break:break-word;line-height:1.3;max-width:100%">📝${o.seatNote}</div>`:''}${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:3px">عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:3px">فوجين</div>':'')}`:`<div style="font-size:11px;color:#bbb;margin-top:18px">فارغ</div>`}</div>`;
   }
   const AI=`<div style="width:14px;flex-shrink:0"></div>`;
   function br(a,b,c,d){return `<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${msp(a)}${msp(b)}${AI}${msp(c)}${msp(d)}</div>`;}
