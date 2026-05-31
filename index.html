@@ -297,7 +297,7 @@ textarea{resize:vertical;min-height:60px}
 .b-pu{background:var(--pul);color:var(--pu)}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th{text-align:right;padding:10px 13px;border-bottom:2px solid var(--prl);color:var(--pr);font-weight:700;font-size:14px;background:var(--sf2);white-space:nowrap}
-td{padding:10px 13px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;white-space:wrap}
+td{padding:10px 13px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f5f8fc}
 .tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd)}
@@ -344,7 +344,7 @@ tr:hover td{background:#f5f8fc}
 .bus-driver{width:54px;height:32px;background:var(--pr);color:#fff;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin:0 auto .45rem}
 .bus-row{display:flex;gap:5px;align-items:stretch;justify-content:center;margin-bottom:5px}
 .bus-aisle{width:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--tx3)}
-.seat{width:200px;min-height:180px;border-radius:var(--r);border:2px solid var(--bd2);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:pointer;background:var(--sf);padding:10px 8px;transition:all .15s;flex-shrink:0;user-select:none}
+.seat{width:250px;min-height:180px;border-radius:var(--r);border:2px solid var(--bd2);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:pointer;background:var(--sf);padding:10px 8px;transition:all .15s;flex-shrink:0;user-select:none}
 .seat.empty{border-style:dashed}
 .seat.empty:hover{border-color:var(--pr);background:var(--prl)}
 .seat.taken{cursor:grab;border-color:transparent}
@@ -389,11 +389,11 @@ tr:hover td{background:#f5f8fc}
   table{width:100%!important;font-size:12px!important}
   .tbl-wrap{overflow:visible!important}
   .stat{break-inside:avoid}
-  .seat{width:250px!important;min-height:130px!important;font-size:18px!important}
+  .seat{width:130px!important;min-height:115px!important;font-size:12px!important}
   .sname{font-size:14px!important}
-  .sphone{font-size:18px!important}
-  .splace{font-size:18px!important}
-  .snum{font-size:18px!important}
+  .sphone{font-size:12px!important}
+  .splace{font-size:11px!important}
+  .snum{font-size:12px!important}
   .seat.empty .snum{font-size:25px!important}
   .bus-wrap{overflow:visible!important}
   .bus-row{flex-wrap:nowrap!important}
@@ -1138,7 +1138,7 @@ tr:hover td{background:#f5f8fc}
 // ============================================================
 // ALL CONSTANTS - defined first, no conflicts
 // ============================================================
-const EGYPT_CITIES={'القاهرة':['القاهرة','مدينة نصر','مصر الجديدة','المعادي','الزمالك','شبرا','عين شمس','حلوان','التجمع الخامس','المقطم','6 أكتوبر'],'الجيزة':['الجيزة','الدقي','المهندسين','الشيخ زايد','فيصل','إمبابة'],'الإسكندرية':['الإسكندرية','سيدي بشر','المنتزه','العجمي','العامرية','برج العرب'],'الغربية':['طنطا','المحلة الكبرى','كفر الزيات','زفتى','السنطة'],'المنوفية':['شبين الكوم','منوف','أشمون','قويسنا','بركة السبع'],'الدقهلية':['المنصورة','طلخا','ميت غمر','أجا','المنزلة','بلقاس'],'الشرقية':['الزقازيق','العاشر من رمضان','بلبيس','أبو كبير','فاقوس'],'الإسماعيلية':['الإسماعيلية','فايد','القنطرة'],'بورسعيد':['بورسعيد'],'السويس':['السويس','عتاقة'],'دمياط':['دمياط','رأس البر'],'كفر الشيخ':['كفر الشيخ','دسوق','فوه','بلطيم'],'البحيرة':['دمنهور','كفر الدوار','رشيد'],'مطروح':['مرسى مطروح','الضبعة','العلمين','سيوة','الحمام','رأس الحكمة'],'أسوان':['أسوان','كوم أمبو'],'الأقصر':['الأقصر','إسنا'],'قنا':['قنا','نجع حمادي','دشنا'],'سوهاج':['سوهاج','أخميم','طهطا'],'أسيوط':['أسيوط','ديروط','القوصية'],'المنيا':['المنيا','ملوي','سمالوط','مغاغة'],'بني سويف':['بني سويف','ناصر','ببا'],'الفيوم':['الفيوم','طامية'],'شمال سيناء':['العريش','رفح'],'جنوب سيناء':['شرم الشيخ','دهب','طابا'],'البحر الأحمر':['الغردقة','سفاجا','مرسى علم'],'الوادي الجديد':['الخارجة','الداخلة']};
+const EGYPT_CITIES={'— بدون نقل —':['بدون نقل'],'القاهرة':['القاهرة','مدينة نصر','مصر الجديدة','المعادي','الزمالك','شبرا','عين شمس','حلوان','التجمع الخامس','المقطم','6 أكتوبر','الهايكستيب','مصطفى محمود','العباسية','باب الشعرية','السيدة زينب','السيدة عائشة','الدراسة','روض الفرج','الوايلي','الأميرية','المطرية','عين شمس الجديدة','الشروق','بدر','المعصرة','طره','حلوان الجديدة','القطامية','الرحاب','مدينتي'],'الجيزة':['الجيزة','الدقي','المهندسين','الشيخ زايد','فيصل','إمبابة','أوسيم','كرداسة','العياط','البدرشين','الحوامدية','أبو النمرس','الصف','أطفيح'],'الغربية':['طنطا','المحلة الكبرى','كفر الزيات','زفتى','السنطة','بسيون','قطور','سمنود','المنزلة-الغربية','الزاوية','شبرا بخوم','ميت أبو علي'],'المنوفية':['شبين الكوم','منوف','أشمون','قويسنا','بركة السبع','الشهداء','تلا','السادات','مياح','الباجور'],'الإسكندرية':['الإسكندرية','سيدي بشر','المنتزه','العجمي','العامرية','برج العرب','أبو قير','الدخيلة','كرموز','اللبان','محرم بك','سيدي جابر','الرمل','المندرة','العصافرة'],'الدقهلية':['المنصورة','طلخا','ميت غمر','أجا','المنزلة','بلقاس','دكرنس','السنبلاوين','ميت سلسيل','شربين','نبروه','المطرية-الدقهلية'],'الشرقية':['الزقازيق','العاشر من رمضان','بلبيس','أبو كبير','فاقوس','ههيا','الإبراهيمية','منيا القمح','كفر صقر','ديرب نجم'],'الإسماعيلية':['الإسماعيلية','فايد','القنطرة','أبو صوير','القصاصين'],'بورسعيد':['بورسعيد','بور فؤاد'],'السويس':['السويس','عتاقة','الأربعين','فيصل-السويس'],'دمياط':['دمياط','رأس البر','الزرقا','فارسكور','كفر سعد'],'كفر الشيخ':['كفر الشيخ','دسوق','فوه','بلطيم','سيدي سالم','قلين','الرياض-كفر الشيخ','بيلا','مطوبس'],'البحيرة':['دمنهور','كفر الدوار','رشيد','إيتاي البارود','حوش عيسى','شبراخيت','المحمودية','أبو حمص','وادي النطرون'],'مطروح':['مرسى مطروح','الضبعة','العلمين','سيوة','الحمام','رأس الحكمة','النجيلة','سيدي براني','السلوم'],'أسوان':['أسوان','كوم أمبو','إدفو','نصر النوبة'],'الأقصر':['الأقصر','إسنا','الأقصر الجديدة'],'قنا':['قنا','نجع حمادي','دشنا','قفط','أبو تشت'],'سوهاج':['سوهاج','أخميم','طهطا','المراغة','جرجا','دار السلام'],'أسيوط':['أسيوط','ديروط','القوصية','أبنوب','أبو تيج','منفلوط','الغنايم'],'المنيا':['المنيا','ملوي','سمالوط','مغاغة','بني مزار','العدوة','ديرمواس'],'بني سويف':['بني سويف','ناصر','ببا','الفشن','إهناسيا','نزلة عبد النبي'],'الفيوم':['الفيوم','طامية','سنورس','يوسف الصديق','إطسا'],'شمال سيناء':['العريش','رفح','الشيخ زويد','بئر العبد'],'جنوب سيناء':['شرم الشيخ','دهب','طابا','نويبع','سانت كاترين'],'البحر الأحمر':['الغردقة','سفاجا','مرسى علم','الشلاتين','القصير'],'الوادي الجديد':['الخارجة','الداخلة','الفرافرة','بهارية']};
 const APTS={'403':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'404':{desc:'غرفتين · تكيف',type:'double',seats:4},'503':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'601':{desc:'غرفة · مكيفة',type:'single',seats:2},'602':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'603':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'604':{desc:'غرفتين · تكيف',type:'double',seats:4},'704':{desc:'غرفتين · مراوح',type:'double',seats:4},'801':{desc:'غرفة · مكيفة',type:'single',seats:2},'802':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'803':{desc:'غرفتين · ترى البحر',type:'double',seats:4},'804':{desc:'غرفتين · مراوح',type:'double',seats:4},'902':{desc:'غرفتين · ترى البحر · تكيف صالة',type:'double',seats:4},'904':{desc:'غرفتين · ترى البحر',type:'double',seats:4}};
 
 // ====== شقق إضافية (Extra Apartments) ======
@@ -2164,9 +2164,10 @@ function aptP(ci,type){return(PRICE_MAP[ci]||{single:9400,double:12800})[type]}
 
 function populateCities(){
   const sel=document.getElementById('f-pickup'),cur=sel.value;
-  sel.innerHTML='<option value="">--</option>';
+  sel.innerHTML='';
   Object.entries(EGYPT_CITIES).forEach(([g,cs])=>{const og=document.createElement('optgroup');og.label=g;cs.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;og.appendChild(o)});sel.appendChild(og)});
   if(cur)sel.value=cur;
+  else sel.value='بدون نقل';
 }
 function populateSalesReps(){
   const sel=document.getElementById('f-sales-rep');if(!sel)return;
@@ -2845,214 +2846,100 @@ function printBusLayout(cn,busIdx){
   busIdx=busIdx||0;
   const conv=getConv(cn);if(!conv)return;
   const busName=getBusNames(cn)[busIdx]||'الباص '+(busIdx+1);
+  const setts=(typeof settings!=='undefined'?settings:{})||{};
   const allBks=activeBookings().filter(b=>b.convoy===cn&&effSeats(b)>0);
   const bks=allBks.filter(b=>(b.busIdx===undefined?0:b.busIdx)===busIdx);
   const returnClients=activeBookings().filter(b=>b.convoy2===cn&&effSeats(b)>0);
+  const fname=`قائمة_${busName}_${conv.label}_${new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')}`.replace(/\s+/g,'_');
 
-  // نبني HTML الطباعة دايماً من البيانات مباشرةً (مش من الـ DOM)
-  const occ={};
-  bks.forEach(b=>{(b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',seatNote:b.seatNote||'',isDouble:b.convoy2!=null};});});
-  const occ2={};
-  returnClients.forEach(b=>{(b.seatAssign2||[]).forEach(sa=>{if(sa.seatNum)occ2[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',fromConvoy:b.convoy};});});
-  const byPickup={};
-  bks.forEach(b=>{const p=b.pickup||'غير محدد';if(!byPickup[p])byPickup[p]=[];
-    (b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)byPickup[p].push({seatNum:sa.seatNum,name:b.name,phone:b.phone||'',seatNote:b.seatNote||''});});
-  });
+  // ألوان العملاء
   const COLORS=['#1a5276','#117a65','#7d3c98','#c0392b','#d68910','#1abc9c','#e67e22','#2980b9','#8e44ad','#27ae60'];
-  const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
-  const setts=(typeof settings!=='undefined'?settings:{})||{};
+  const occ={};
+  bks.forEach(b=>{(b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',seatNote:b.seatNote||'',isDouble:b.convoy2!=null,col:COLORS[bks.indexOf(b)%COLORS.length]};});});
+  const occ2={};
+  returnClients.forEach(b=>{(b.seatAssign2||[]).forEach(sa=>{if(sa.seatNum)occ2[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||''};});});
 
-  // === بناء خلية كرسي — حجم مناسب للطباعة ===
-  function makeSeat(sn){
-    if(!sn)return `<div style="width:115px;height:115px;flex-shrink:0"></div>`;
-    const isRet=!!occ2[sn];
-    const o=isRet?occ2[sn]:occ[sn];
-    const col=isRet?'#7d3c98':(o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#f0f4f8');
-    const txtCol=o?'#fff':'#b0bec5';
-    const brd=o?(isRet?'3px solid #f9e79f':'2px solid '+col):'2px dashed #ccd4de';
-    const nameParts=o?o.name.split(' ').slice(0,2).join(' '):'';
-    return `<div style="width:115px;height:115px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:8px;padding:6px 5px 5px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden">
-      <div style="font-size:18px;font-weight:900;line-height:1;opacity:${o?1:.3}">${sn}</div>
-      ${o?`<div style="font-size:13px;font-weight:800;line-height:1.3;margin-top:4px;word-break:break-word;max-width:100%">${nameParts}</div>
-      <div style="font-size:11px;font-weight:600;opacity:.9;margin-top:3px;direction:ltr">${(o.phone||'').slice(-10)}</div>
-      <div style="font-size:11px;font-weight:700;opacity:.9;margin-top:2px">${(o.pickup||'').slice(0,10)}</div>
-      ${o.seatNote?`<div style="background:rgba(255,255,255,.25);color:#fff;border-radius:3px;font-size:10px;font-weight:700;padding:1px 4px;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\u{1F4DD} ${o.seatNote.slice(0,14)}</div>`:''}
-      ${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:2px">\u21A9 عودة</div>':
-        (o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:2px">\u26A0 فوجين</div>':'')}`
-      :`<div style="font-size:13px;color:#b0bec5;margin-top:18px;font-weight:600">فارغ</div>`}
+  // بناء خلية كرسي - حجم مكبّر للطباعة (80x105px)
+  function mkSeat(sn){
+    if(!sn)return `<div style="width:80px;height:105px;flex-shrink:0"></div>`;
+    const isR=!!occ2[sn];
+    const o=isR?occ2[sn]:occ[sn];
+    const bg=isR?'#7d3c98':(o?o.col:'#f0f4f8');
+    const tc=o?'#fff':'#b0bec5';
+    const br=o?(isR?'2px solid #f9e79f':'2px solid '+bg):'1.5px dashed #ccd4de';
+    const nm=o?o.name.split(' ').slice(0,2).join(' '):'';
+    return `<div style="width:80px;height:105px;flex-shrink:0;background:${bg};color:${tc};border:${br};border-radius:7px;padding:5px 4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+      <div style="font-size:13px;font-weight:900;opacity:${o?1:.35};line-height:1">${sn}</div>
+      ${o?`<div style="font-size:11px;font-weight:800;line-height:1.25;margin-top:3px;word-break:break-word;max-width:100%">${nm}</div>
+      <div style="font-size:10px;opacity:.9;margin-top:2px;direction:ltr">${(o.phone||'').slice(-10)}</div>
+      <div style="font-size:10px;opacity:.9;margin-top:2px;overflow:hidden;white-space:nowrap;max-width:100%">${(o.pickup||'').slice(0,10)}</div>
+      ${o.seatNote?`<div style="background:rgba(255,255,255,.25);border-radius:3px;font-size:9px;font-weight:700;padding:1px 3px;margin-top:2px;max-width:100%;overflow:hidden;white-space:nowrap">📝${o.seatNote.slice(0,12)}</div>`:''}
+      ${isR?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:9px;font-weight:900;padding:0 3px;margin-top:2px">↩عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:9px;font-weight:900;padding:0 3px;margin-top:2px">⚠فوجين</div>':'')}`
+      :`<div style="font-size:10px;color:#b0bec5;margin-top:14px">فارغ</div>`}
     </div>`;
   }
+  const AISLE=`<div style="width:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:8px;writing-mode:vertical-rl;font-family:'Cairo',sans-serif">ممر</div>`;
+  function mkRow(a,b,c,d){return `<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${mkSeat(b)}${mkSeat(a)}${AISLE}${mkSeat(c)}${mkSeat(d)}</div>`;}
 
-  const AISLE=`<div style="width:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:9px;writing-mode:vertical-rl;text-orientation:mixed;font-family:'Cairo',sans-serif">ممر</div>`;
-
-  function buildRow(a,b,c,d){
-    return `<div style="display:flex;align-items:stretch;gap:5px;margin-bottom:5px;justify-content:center">
-      ${makeSeat(a)}${makeSeat(b)}${AISLE}${makeSeat(c)}${makeSeat(d)}
-    </div>`;
-  }
-
-  let rows='';
-  let sc=1;
-
-  // صفوف 1-5 (كراسي 1-20)
-  for(let r=0;r<5;r++){
-    const s=[sc,sc+1,sc+2,sc+3]; sc+=4;
-    rows+=buildRow(s[1],s[0],s[2],s[3]);
-  }
-
-  // حمام + 2 كرسي (صف 6)
-  const WC=`<div style="width:115px;height:115px;flex-shrink:0;background:#e8f4fd;border:2px solid #5dade2;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;gap:4px"><span style="font-size:32px">🚻</span><span style="font-size:13px;font-weight:900;color:#1a5276">حمام</span></div>`;
-  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">
-    ${makeSeat(sc)}${WC}${AISLE}${makeSeat(sc+2)}${makeSeat(sc+3)}
-  </div>`;
-
-  // باب + 2 كرسي (صف 7)
-  const DOOR=`<div style="width:115px;height:115px;flex-shrink:0;background:#fffbeb;border:2px dashed #d97706;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;gap:4px"><span style="font-size:32px">🚪</span><span style="font-size:13px;font-weight:900;color:#b7770d">باب</span></div>`;
-  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">
-    ${makeSeat(sc+1)}${DOOR}${AISLE}${makeSeat(sc+4)}${makeSeat(sc+5)}
-  </div>`;
-  sc+=6;
-
-  // صفوف 8-12 (كراسي 25-44)
-  for(let r=0;r<5;r++){
-    const s=[sc,sc+1,sc+2,sc+3]; sc+=4;
-    rows+=buildRow(s[1],s[0],s[2],s[3]);
-  }
-
-  // الكنبة الخلفية
-  rows+=`<div style="border-top:2px dashed #cbd5e1;margin-top:5px;padding-top:5px">
-    <div style="text-align:center;font-size:10px;font-weight:900;color:#475569;margin-bottom:4px;font-family:'Cairo',sans-serif">🛋 الكنبة الخلفية</div>
-    <div style="display:flex;gap:5px;justify-content:center">
-      ${[45,46,47,48,49].map(s=>makeSeat(s)).join('')}
-    </div>
-  </div>`;
-
-  // دليل الألوان
-  const legend=bks.map((b,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;background:${COLORS[i%COLORS.length]};color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'Cairo',sans-serif">${b.name.split(' ').slice(0,2).join(' ')} · ${b.pickup||'—'}${b.convoy2?' ⚠فوجين':''}</span>`).join('')
-    + returnClients.map(b=>`<span style="display:inline-flex;align-items:center;gap:3px;background:#7d3c98;border:1.5px solid #f9e79f;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'Cairo',sans-serif">↩ ${b.name.split(' ').slice(0,2).join(' ')} عودة</span>`).join('');
-
-  // قائمة الركاب حسب التجمع
-  const pickupList=Object.entries(byPickup).sort((a,b)=>a[0].localeCompare(b[0])).map(([place,seats])=>`
-    <div style="margin-bottom:.4rem;padding:.4rem .7rem;background:#f0f4f8;border-radius:6px;border-right:3px solid #117a65;font-family:'Cairo',sans-serif">
-      <div style="font-weight:800;color:#117a65;font-size:12px;margin-bottom:3px">📍 ${place} — ${seats.length} مقعد</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px">${seats.map(s=>`<span style="background:#fff;border:1px solid #bcd8f0;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">
-        <span style="color:#1a5276;font-weight:900">${s.seatNum}</span> — ${s.name.split(' ').slice(0,2).join(' ')}${s.phone?' · '+s.phone:''}${s.seatNote?' · '+s.seatNote:''}</span>`).join('')}
-      </div>
-    </div>`).join('');
-
-  const returnList=returnClients.length?`
-    <div style="margin-top:.4rem;padding:.4rem .7rem;background:#f4ecf7;border-radius:6px;border-right:3px solid #7d3c98;font-family:'Cairo',sans-serif">
-      <div style="font-weight:800;color:#7d3c98;font-size:12px;margin-bottom:3px">↩ راجعين مع هذا الباص</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px">${returnClients.map(b=>{
-        const seats2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).join('،');
-        return `<span style="background:#fff;border:1px solid #dcc8f0;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700"><span style="color:#7d3c98;font-weight:900">${seats2||'—'}</span> — ${b.name}</span>`;
-      }).join('')}</div>
-    </div>`:'' ;
+  let rows='';let sc=1;
+  for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=mkRow(s[0],s[1],s[2],s[3]);}
+  rows+=`<div style="border-top:1px dashed #cbd5e1;margin:3px 0"></div>`;
+  const WC_WIDE=`<div style="width:168px;flex-shrink:0;background:#e8f4fd;border:1.5px solid #5dade2;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:105px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:22px">🚻</span><span style="font-size:10px;font-weight:900;color:#1a5276">حمام</span></div>`;
+  const DOOR_WIDE=`<div style="width:168px;flex-shrink:0;background:#fffbeb;border:1.5px dashed #d97706;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:105px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:22px">🚪</span><span style="font-size:10px;font-weight:900;color:#b7770d">باب</span></div>`;
+  rows+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${WC_WIDE}${AISLE}${mkSeat(sc)}${mkSeat(sc+1)}</div>`;
+  sc+=2;
+  rows+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${DOOR_WIDE}${AISLE}${mkSeat(sc)}${mkSeat(sc+1)}</div>`;
+  sc+=2;
+  rows+=`<div style="border-top:1px dashed #cbd5e1;margin:3px 0"></div>`;
+  for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=mkRow(s[0],s[1],s[2],s[3]);}
+  rows+=`<div style="border-top:2px dashed #cbd5e1;margin-top:5px;padding-top:5px"><div style="text-align:center;font-size:10px;font-weight:900;color:#475569;margin-bottom:4px;font-family:'Cairo',sans-serif">🛋 الكنبة الخلفية</div><div style="display:flex;gap:4px;justify-content:center">${[45,46,47,48,49].map(s=>mkSeat(s)).join('')}</div></div>`;
 
   // جدول الركاب
-  const tableRows=bks.map((b,i)=>{
-    const seats=(b.seatAssign||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');
-    const remAmt=b.remaining||0;
-    return `<tr style="background:${i%2===0?'#f8fafc':'#fff'}">
-      <td>${i+1}</td>
-      <td style="font-weight:700">${b.name}${b.convoy2?' <span style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:8px;font-weight:900;padding:0 4px">فوجين</span>':''}</td>
-      <td>${b.phone||'—'}</td>
-      <td>${b.pickup||'—'}</td>
-      <td style="font-weight:800;color:#117a65">${seats||'—'}</td>
-      <td style="font-weight:800;color:${remAmt>0?'#c0392b':'#117a65'}">${remAmt>0?remAmt.toLocaleString()+' ج':'✓ مكتمل'}</td>
-      <td style="color:#555">${b.seatNote||'—'}</td>
-    </tr>`;
-  }).join('') + returnClients.map(b=>{
-    const seats2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');
-    return `<tr style="background:#f9f0ff">
-      <td style="color:#7d3c98">↩</td>
-      <td style="font-weight:700;color:#7d3c98">${b.name} <span style="background:#7d3c98;color:#fff;border-radius:2px;font-size:8px;font-weight:900;padding:0 4px">عودة</span></td>
-      <td>${b.phone||'—'}</td>
-      <td>${b.pickup||'—'}</td>
-      <td style="font-weight:800;color:#7d3c98">${seats2||'—'}</td>
-      <td>—</td>
-      <td style="color:#555">${b.seatNote||'—'}</td>
-    </tr>`;
-  }).join('');
+  const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
+  const tRows=bks.map((b,i)=>{const seats=(b.seatAssign||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');const rem=b.remaining||0;return `<tr style="background:${i%2===0?'#f8fafc':'#fff'}"><td>${i+1}</td><td style="font-weight:700">${b.name}${b.convoy2?' <span style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:8px;font-weight:900;padding:0 3px">فوجين</span>':''}</td><td>${b.phone||'—'}</td><td>${b.pickup||'—'}</td><td style="font-weight:800;color:#117a65">${seats||'—'}</td><td style="font-weight:800;color:${rem>0?'#c0392b':'#117a65'}">${rem>0?rem.toLocaleString()+' ج':'✓'}</td><td>${b.seatNote||'—'}</td></tr>`;}).join('')+returnClients.map(b=>{const s2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');return `<tr style="background:#f9f0ff"><td style="color:#7d3c98">↩</td><td style="font-weight:700;color:#7d3c98">${b.name}</td><td>${b.phone||'—'}</td><td>${b.pickup||'—'}</td><td style="font-weight:800;color:#7d3c98">${s2||'—'}</td><td>—</td><td>${b.seatNote||'—'}</td></tr>`;}).join('');
 
-  const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
-<title>قائمة الباص — ${busName} — ${conv.label}</title>
+  const hPdf=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>${fname}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;font-size:11px}
-@media screen{body{padding:12px}}
+body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;font-size:11px;padding:8px}
+.no-print{display:flex;gap:8px;margin-bottom:10px}
+.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{background:#1a5276;color:#fff;padding:4px 7px;text-align:right;font-weight:700}
+td{padding:3px 7px;border-bottom:1px solid #e2e8f0;text-align:right}
 @media print{
-  @page{margin:8mm;size:A4 landscape}
-  body{font-size:11px}
+  @page{margin:6mm;size:A4 portrait}
+  body{padding:0}
   .no-print{display:none!important}
   .pg2{page-break-before:always}
-  /* الكراسي تحافظ على حجمها بالكامل */
-  .bus-box{overflow:visible!important;page-break-inside:avoid}
-  /* منع أي wrap في صفوف الباص */
-  .bus-box>div[style*="display:flex"]{flex-wrap:nowrap!important}
-  /* الصفحة الأولى كاملة تتطبع بدون قص */
-  .page1{overflow:visible!important}
 }
-.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid #d6eaf8}
-.bus-box{background:#f8fafc;border:1.5px solid #d6eaf8;border-radius:10px;padding:10px;margin-bottom:8px}
-.driver-bar{background:#1a5276;color:#fff;text-align:center;padding:5px;border-radius:6px;font-size:12px;font-weight:900;margin-bottom:8px;font-family:'Cairo',sans-serif}
-.legend-box{padding:5px 8px;background:#f8fafc;border-radius:6px;border:1px solid #dce6f0;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px}
-table{width:100%;border-collapse:collapse;font-size:10px}
-th{background:#1a5276;color:#fff;padding:5px 8px;text-align:right;font-weight:700;font-size:10px}
-td{padding:4px 8px;border-bottom:1px solid #e2e8f0;text-align:right}
-.sec-title{font-size:13px;font-weight:900;color:#1a5276;margin-bottom:6px}
-.no-print{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
-</style>
-</head><body>
-<div class="no-print">
-  <button onclick="window.print()">🖨 طباعة</button>
-</div>
-
-<!-- ===== صفحة 1: الهيدر + خريطة الباص + دليل الألوان ===== -->
-<div class="page1">
-<div class="hdr">
+</style></head><body>
+<div class="no-print"><button onclick="window.print()">🖨️ طباعة / PDF</button></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;padding-bottom:5px;border-bottom:2px solid #d6eaf8">
   <div>
-    <div style="font-size:16px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
-    <div style="font-size:12px;font-weight:700;color:#117a65;margin-top:2px">🚌 ${busName} · ${conv.label}</div>
-    <div style="font-size:10px;color:#4a6278;margin-top:1px">دخول: ${conv.checkin} (9-11ص) | خروج: ${conv.checkout} (5-7ص)</div>
+    <div style="font-size:14px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div>
+    <div style="font-size:11px;font-weight:700;color:#117a65;margin-top:1px">🚌 ${busName} · ${conv.label}</div>
+    <div style="font-size:9px;color:#4a6278;margin-top:1px">دخول: ${conv.checkin} (9-11ص) | خروج: ${conv.checkout} (5-7ص)</div>
   </div>
-  <div style="text-align:left;font-size:10px;color:#555;line-height:1.7">
-    <div style="font-weight:800;color:#1a5276;font-size:12px">المحجوز: ${totalOcc} / 49</div>
+  <div style="text-align:left;font-size:9px;color:#555;line-height:1.7">
+    <div style="font-weight:800;color:#1a5276;font-size:11px">المحجوز: ${totalOcc} / 49</div>
     <div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>
   </div>
 </div>
-
-<div class="bus-box">
-  <div class="driver-bar">🚗 سائق</div>
+<div style="background:#f8fafc;border:1.5px solid #d6eaf8;border-radius:8px;padding:8px;margin-bottom:6px">
+  <div style="background:#1a5276;color:#fff;text-align:center;padding:4px;border-radius:5px;font-size:10px;font-weight:900;margin-bottom:6px;font-family:'Cairo',sans-serif">🚗 سائق</div>
   ${rows}
 </div>
-
-<div class="legend-box">${legend||'<span style="color:#999;font-size:10px">لا يوجد حجوزات</span>'}</div>
-
-<!-- قائمة التجمعات -->
-<div class="sec-title">📋 الركاب حسب نقطة التجمع</div>
-${pickupList||'<div style="color:#999;font-size:11px;margin-bottom:8px">لا يوجد مقاعد محجوزة</div>'}
-${returnList}
-</div>
-
-<!-- ===== صفحة 2: الجدول التفصيلي ===== -->
 <div class="pg2">
-<div class="sec-title" style="margin-top:4px">📊 جدول الركاب التفصيلي</div>
-<table>
-  <thead><tr>
-    <th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>المتبقي</th><th>ملاحظات</th>
-  </tr></thead>
-  <tbody>${tableRows}</tbody>
-</table>
+  <div style="font-size:12px;font-weight:900;color:#1a5276;margin-bottom:5px">📊 جدول الركاب التفصيلي</div>
+  <table><thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>المتبقي</th><th>ملاحظات</th></tr></thead><tbody>${tRows}</tbody></table>
 </div>
-
-<script>window.onload=()=>setTimeout(()=>window.print(),600)<\/script>
 </body></html>`;
 
-  openHtmlPrint(h,'تقرير','#1a5276','قائمة_'+busName.replace(/\s+/g,'_')+'_'+conv.label.replace(/\s+/g,'_'));
+  openHtmlPrint(hPdf, '🚌 قائمة '+busName+' · '+conv.label, '#1a5276', fname);
 }
+
 
 function downloadBusPDF(cn,busIdx){
   busIdx=busIdx||0;
@@ -3071,21 +2958,21 @@ function downloadBusPDF(cn,busIdx){
   const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
   const setts=(typeof settings!=='undefined'?settings:{})||{};
   function msp(sn){
-    if(!sn)return `<div style="width:66px;height:72px;flex-shrink:0"></div>`;
+    if(!sn)return `<div style="width:66px;height:84px;flex-shrink:0"></div>`;
     const isRet=!!occ2[sn];const o=isRet?occ2[sn]:occ[sn];
     const col=isRet?'#7d3c98':(o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#eef2f7');
     const txtCol=o?'#fff':'#aaa';const brd=o?(isRet?'2px solid #f9e79f':'1.5px solid '+col):'1.5px dashed #ccd4de';
     const nm=o?o.name.split(' ').slice(0,2).join(' '):'';
-    return `<div style="width:66px;height:84px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:6px;padding:3px 2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden"><div style="font-size:10px;font-weight:900;opacity:${o?.9:.4}">${sn}</div>${o?`<div style="font-size:9px;font-weight:800;line-height:1.2;margin-top:1px;word-break:break-all">${nm}</div><div style="font-size:8px;opacity:.85;margin-top:1px">${(o.phone||'').slice(-8)}</div><div style="font-size:8px;opacity:.85">${(o.pickup||'').slice(0,8)}</div>${o.seatNote?`<div style="background:rgba(255,255,255,.22);color:#fff;border-radius:2px;font-size:7px;font-weight:700;padding:1px 3px;margin-top:1px;word-break:break-all;line-height:1.2">${o.seatNote.slice(0,18)}</div>`:''}${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">فوجين</div>':'')}`:`<div style="font-size:8px;color:#bbb;margin-top:8px">فارغ</div>`}</div>`;
+    return `<div style="width:66px;height:84px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:6px;padding:3px 2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:10px;font-weight:900;opacity:${o?.9:.4}">${sn}</div>${o?`<div style="font-size:9px;font-weight:800;line-height:1.2;margin-top:1px;word-break:break-all">${nm}</div><div style="font-size:8px;opacity:.85;margin-top:1px">${(o.phone||'').slice(-8)}</div><div style="font-size:8px;opacity:.85">${(o.pickup||'').slice(0,8)}</div>${o.seatNote?`<div style="background:rgba(255,255,255,.22);color:#fff;border-radius:2px;font-size:7px;font-weight:700;padding:1px 3px;margin-top:1px;word-break:break-all;line-height:1.2">${o.seatNote.slice(0,18)}</div>`:''}${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:7px;font-weight:900;padding:0 3px;margin-top:1px">فوجين</div>':'')}`:`<div style="font-size:8px;color:#bbb;margin-top:8px">فارغ</div>`}</div>`;
   }
   const AI=`<div style="width:14px;flex-shrink:0"></div>`;
   function br(a,b,c,d){return `<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${msp(a)}${msp(b)}${AI}${msp(c)}${msp(d)}</div>`;}
   let rows='';let sc=1;
   for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=br(s[1],s[0],s[2],s[3]);}
-  const WC=`<div style="width:66px;height:72px;flex-shrink:0;background:#e8f4fd;border:1.5px solid #5dade2;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚻</span><span style="font-size:9px;font-weight:900;color:#1a5276">حمام</span></div>`;
-  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${msp(sc)}${WC}${AI}${msp(sc+2)}${msp(sc+3)}</div>`;
-  const DOOR=`<div style="width:66px;height:72px;flex-shrink:0;background:#fffbeb;border:1.5px dashed #d97706;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚪</span><span style="font-size:9px;font-weight:900;color:#b7770d">باب</span></div>`;
-  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${msp(sc+1)}${DOOR}${AI}${msp(sc+4)}${msp(sc+5)}</div>`;sc+=6;
+  const WC_W=`<div style="width:111px;flex-shrink:0;background:#e8f4fd;border:1.5px solid #5dade2;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70px;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚻</span><span style="font-size:9px;font-weight:900;color:#1a5276">حمام</span></div>`;
+  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${WC_W}${AI}${msp(sc)}${msp(sc+1)}</div>`;sc+=2;
+  const DR_W=`<div style="width:111px;flex-shrink:0;background:#fffbeb;border:1.5px dashed #d97706;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70px;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚪</span><span style="font-size:9px;font-weight:900;color:#b7770d">باب</span></div>`;
+  rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${DR_W}${AI}${msp(sc)}${msp(sc+1)}</div>`;sc+=2;
   for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=br(s[1],s[0],s[2],s[3]);}
   rows+=`<div style="border-top:2px dashed #cbd5e1;margin-top:5px;padding-top:5px"><div style="text-align:center;font-size:10px;font-weight:900;color:#475569;margin-bottom:4px;font-family:'Cairo',sans-serif">🛋 الكنبة الخلفية</div><div style="display:flex;gap:3px;justify-content:center">${[45,46,47,48,49].map(s=>msp(s)).join('')}</div></div>`;
   const leg=bks.map((b,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;background:${COLORS[i%COLORS.length]};color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'Cairo',sans-serif">${b.name.split(' ').slice(0,2).join(' ')} · ${b.pickup||'—'}${b.convoy2?' ⚠فوجين':''}</span>`).join('')+returnClients.map(b=>`<span style="display:inline-flex;align-items:center;gap:3px;background:#7d3c98;border:1.5px solid #f9e79f;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;font-family:'Cairo',sans-serif">↩ ${b.name.split(' ').slice(0,2).join(' ')} عودة</span>`).join('');
@@ -3093,13 +2980,13 @@ function downloadBusPDF(cn,busIdx){
   const retL=returnClients.length?`<div style="margin-top:.4rem;padding:.4rem .7rem;background:#f4ecf7;border-radius:6px;border-right:3px solid #7d3c98;font-family:'Cairo',sans-serif"><div style="font-weight:800;color:#7d3c98;font-size:12px;margin-bottom:3px">↩ راجعين مع هذا الباص</div><div style="display:flex;flex-wrap:wrap;gap:4px">${returnClients.map(b=>{const s2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).join('،');return `<span style="background:#fff;border:1px solid #dcc8f0;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700"><span style="color:#7d3c98;font-weight:900">${s2||'—'}</span> — ${b.name}</span>`;}).join('')}</div></div>`:'' ;
   const tRows=bks.map((b,i)=>{const seats=(b.seatAssign||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');const rem=b.remaining||0;return `<tr style="background:${i%2===0?'#f8fafc':'#fff'}"><td>${i+1}</td><td style="font-weight:700">${b.name}${b.convoy2?' <span style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:8px;font-weight:900;padding:0 4px">فوجين</span>':''}</td><td>${b.phone||'—'}</td><td>${b.pickup||'—'}</td><td style="font-weight:800;color:#117a65">${seats||'—'}</td><td style="font-weight:800;color:${rem>0?'#c0392b':'#117a65'}">${rem>0?rem.toLocaleString()+' ج':'✓ مكتمل'}</td><td style="color:#555">${b.seatNote||'—'}</td></tr>`;}).join('')+returnClients.map(b=>{const s2=(b.seatAssign2||[]).filter(sa=>sa.seatNum).map(sa=>sa.seatNum).sort((a,z)=>a-z).join('،');return `<tr style="background:#f9f0ff"><td style="color:#7d3c98">↩</td><td style="font-weight:700;color:#7d3c98">${b.name} <span style="background:#7d3c98;color:#fff;border-radius:2px;font-size:8px;font-weight:900;padding:0 4px">عودة</span></td><td>${b.phone||'—'}</td><td>${b.pickup||'—'}</td><td style="font-weight:800;color:#7d3c98">${s2||'—'}</td><td>—</td><td style="color:#555">${b.seatNote||'—'}</td></tr>`;}).join('');
   const fname=`قائمة_${busName}_${conv.label}_${new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')}`.replace(/\s+/g,'_');
-  const hPdf=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>${fname}</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;font-size:11px;padding:10px}@media print{@page{margin:5mm;size:A4 portrait}body{font-size:10px;padding:0}.pg2{page-break-before:always}.no-print{display:none!important}}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid #d6eaf8}.bus-box{background:#f8fafc;border:1.5px solid #d6eaf8;border-radius:10px;padding:10px;margin-bottom:8px}.driver-bar{background:#1a5276;color:#fff;text-align:center;padding:5px;border-radius:6px;font-size:12px;font-weight:900;margin-bottom:8px;font-family:'Cairo',sans-serif}.legend-box{padding:5px 8px;background:#f8fafc;border-radius:6px;border:1px solid #dce6f0;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px}table{width:100%;border-collapse:collapse;font-size:10px}th{background:#1a5276;color:#fff;padding:5px 8px;text-align:right;font-weight:700;font-size:10px}td{padding:4px 8px;border-bottom:1px solid #e2e8f0;text-align:right}.sec-title{font-size:13px;font-weight:900;color:#1a5276;margin-bottom:6px}.no-print{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}.no-print button.green{background:#117a65}.hint{font-size:11px;color:#666;margin-bottom:10px;padding:7px 12px;background:#f0f4f8;border-radius:6px;border-right:3px solid #1a5276}</style></head><body>
+  const hPdf=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>${fname}</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body{font-family:'Cairo',Arial,sans-serif;direction:rtl;color:#1a2535;background:#fff;font-size:11px;padding:10px}@media print{@page{margin:5mm;size:A4 portrait}body{font-size:11px!important;padding:0}.pg2{page-break-before:always}.no-print{display:none!important}.bus-row-flex>div[style]{width:115px!important;min-width:115px!important;max-width:115px!important;height:115px!important;min-height:115px!important;max-height:115px!important;flex-shrink:0!important}}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid #d6eaf8}.bus-box{background:#f8fafc;border:1.5px solid #d6eaf8;border-radius:10px;padding:10px;margin-bottom:8px}.driver-bar{background:#1a5276;color:#fff;text-align:center;padding:5px;border-radius:6px;font-size:12px;font-weight:900;margin-bottom:8px;font-family:'Cairo',sans-serif}.legend-box{padding:5px 8px;background:#f8fafc;border-radius:6px;border:1px solid #dce6f0;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px}table{width:100%;border-collapse:collapse;font-size:10px}th{background:#1a5276;color:#fff;padding:5px 8px;text-align:right;font-weight:700;font-size:10px}td{padding:4px 8px;border-bottom:1px solid #e2e8f0;text-align:right}.sec-title{font-size:13px;font-weight:900;color:#1a5276;margin-bottom:6px}.no-print{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}.no-print button{background:#1a5276;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}.no-print button.green{background:#117a65}.hint{font-size:11px;color:#666;margin-bottom:10px;padding:7px 12px;background:#f0f4f8;border-radius:6px;border-right:3px solid #1a5276}</style></head><body>
 <div class="no-print">
   <button onclick="window.print()">🖨️ طباعة</button>
   <button class="green" onclick="doPdfSave()">💾 حفظ PDF</button>
 </div>
 <div class="hint no-print">💡 لحفظ PDF: اضغط "حفظ PDF" أو "طباعة" ← اختار <strong>Save as PDF / حفظ كـ PDF</strong> من الطابعة</div>
-<div class="hdr"><div><div style="font-size:16px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div><div style="font-size:12px;font-weight:700;color:#117a65;margin-top:2px">🚌 ${busName} · ${conv.label}</div><div style="font-size:10px;color:#4a6278;margin-top:1px">دخول: ${conv.checkin} (9-11ص) | خروج: ${conv.checkout} (5-7ص)</div></div><div style="text-align:left;font-size:10px;color:#555;line-height:1.7"><div style="font-weight:800;color:#1a5276;font-size:12px">المحجوز: ${totalOcc} / 49</div><div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="bus-box"><div class="driver-bar">🚗 سائق</div>${rows}</div><div class="legend-box">${leg||'<span style="color:#999;font-size:10px">لا يوجد حجوزات</span>'}</div><div class="sec-title">📋 الركاب حسب نقطة التجمع</div>${pkl||'<div style="color:#999;font-size:11px;margin-bottom:8px">لا يوجد مقاعد محجوزة</div>'}${retL}<div class="pg2"><div class="sec-title" style="margin-top:4px">📊 جدول الركاب التفصيلي</div><table><thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>المتبقي</th><th>ملاحظات</th></tr></thead><tbody>${tRows}</tbody></table></div>
+<div class="hdr"><div><div style="font-size:16px;font-weight:900;color:#1a5276">${setts.name||'مصيف مطروح 2026'}</div><div style="font-size:12px;font-weight:700;color:#117a65;margin-top:2px">🚌 ${busName} · ${conv.label}</div><div style="font-size:10px;color:#4a6278;margin-top:1px">دخول: ${conv.checkin} (9-11ص) | خروج: ${conv.checkout} (5-7ص)</div></div><div style="text-align:left;font-size:10px;color:#555;line-height:1.7"><div style="font-weight:800;color:#1a5276;font-size:12px">المحجوز: ${totalOcc} / 49</div><div>${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="bus-box"><div class="driver-bar">🚗 سائق</div>${rows}</div><div class="pg2"><div class="sec-title" style="margin-top:4px">📊 جدول الركاب التفصيلي</div><table><thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>التجمع</th><th>المقاعد</th><th>المتبقي</th><th>ملاحظات</th></tr></thead><tbody>${tRows}</tbody></table></div>
 <script>
 function doPdfSave(){
   // Try modern showSaveFilePicker with PDF mime (Chrome 86+)
