@@ -2861,31 +2861,31 @@ function printBusLayout(cn,busIdx){
 
   // بناء خلية كرسي - حجم مكبّر للطباعة (80x105px)
   function mkSeat(sn){
-    if(!sn)return `<div style="width:250px;height:130px;flex-shrink:0"></div>`;
+    if(!sn)return `<div style="width:250px;height:250px;flex-shrink:0"></div>`;
     const isR=!!occ2[sn];
     const o=isR?occ2[sn]:occ[sn];
     const bg=isR?'#7d3c98':(o?o.col:'#f0f4f8');
     const tc=o?'#fff':'#b0bec5';
     const br=o?(isR?'2px solid #f9e79f':'2px solid '+bg):'1.5px dashed #ccd4de';
     const nm=o?o.name:'';
-    return `<div style="width:250px;height:130px;flex-shrink:0;background:${bg};color:${tc};border:${br};border-radius:7px;padding:6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-      <div style="font-size:14px;font-weight:900;opacity:${o?1:.35};line-height:1">${sn}</div>
-      ${o?`<div style="font-size:12px;font-weight:800;line-height:1.3;margin-top:4px;word-break:break-word;max-width:100%">${nm}</div>
-      <div style="font-size:11px;opacity:.95;margin-top:3px;direction:ltr">${o.phone||''}</div>
-      <div style="font-size:11px;opacity:.95;margin-top:3px;max-width:100%;word-break:break-word">${o.pickup||''}</div>
-      ${o.seatNote?`<div style="background:rgba(255,255,255,.25);border-radius:3px;font-size:11px;font-weight:700;padding:2px 5px;margin-top:3px;max-width:100%;word-break:break-word">📝${o.seatNote}</div>`:''}
-      ${isR?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:3px">↩عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:3px">⚠فوجين</div>':'')}`
-      :`<div style="font-size:11px;color:#b0bec5;margin-top:18px">فارغ</div>`}
+    return `<div style="width:250px;height:250px;flex-shrink:0;background:${bg};color:${tc};border:${br};border-radius:7px;padding:10px 12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+      <div style="font-size:21px;font-weight:900;opacity:${o?1:.35};line-height:1">${sn}</div>
+      ${o?`<div style="font-size:18px;font-weight:900;line-height:1.3;margin-top:6px;word-break:break-word;max-width:100%">${nm}</div>
+      <div style="font-size:17px;font-weight:900;opacity:.95;margin-top:5px;direction:ltr">${o.phone||''}</div>
+      <div style="font-size:17px;font-weight:900;opacity:.95;margin-top:5px;max-width:100%;word-break:break-word">${o.pickup||''}</div>
+      ${o.seatNote?`<div style="background:rgba(255,255,255,.25);border-radius:3px;font-size:16px;font-weight:900;padding:3px 6px;margin-top:5px;max-width:100%;word-break:break-word">📝${o.seatNote}</div>`:''}
+      ${isR?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:15px;font-weight:900;padding:2px 6px;margin-top:5px">↩عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:15px;font-weight:900;padding:2px 6px;margin-top:5px">⚠فوجين</div>':'')}`
+      :`<div style="font-size:17px;font-weight:900;color:#b0bec5;margin-top:25px">فارغ</div>`}
     </div>`;
   }
   const AISLE=`<div style="width:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:9px;writing-mode:vertical-rl;font-family:'Cairo',sans-serif">ممر</div>`;
-  function mkRow(a,b,c,d){return `<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${mkSeat(b)}${mkSeat(a)}${AISLE}${mkSeat(c)}${mkSeat(d)}</div>`;}
+  function mkRow(a,b,c,d){return `<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${mkSeat(a)}${mkSeat(b)}${AISLE}${mkSeat(c)}${mkSeat(d)}</div>`;}
 
   let rows='';let sc=1;
   for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=mkRow(s[0],s[1],s[2],s[3]);}
   rows+=`<div style="border-top:1px dashed #cbd5e1;margin:4px 0"></div>`;
-  const WC_WIDE=`<div style="width:504px;flex-shrink:0;background:#e8f4fd;border:2px solid #5dade2;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:130px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:32px">🚻</span><span style="font-size:14px;font-weight:900;color:#1a5276">حمام</span></div>`;
-  const DOOR_WIDE=`<div style="width:504px;flex-shrink:0;background:#fffbeb;border:2px dashed #d97706;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:130px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:32px">🚪</span><span style="font-size:14px;font-weight:900;color:#b7770d">باب</span></div>`;
+  const WC_WIDE=`<div style="width:504px;flex-shrink:0;background:#e8f4fd;border:2px solid #5dade2;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:250px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:32px">🚻</span><span style="font-size:14px;font-weight:900;color:#1a5276">حمام</span></div>`;
+  const DOOR_WIDE=`<div style="width:504px;flex-shrink:0;background:#fffbeb;border:2px dashed #d97706;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:250px;font-family:'Cairo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact"><span style="font-size:32px">🚪</span><span style="font-size:14px;font-weight:900;color:#b7770d">باب</span></div>`;
   rows+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${WC_WIDE}${AISLE}${mkSeat(sc)}${mkSeat(sc+1)}</div>`;
   sc+=2;
   rows+=`<div style="display:flex;align-items:stretch;gap:4px;margin-bottom:4px;justify-content:center">${DOOR_WIDE}${AISLE}${mkSeat(sc)}${mkSeat(sc+1)}</div>`;
@@ -2916,10 +2916,11 @@ tbody tr:hover{background:#eaf3fb}
 tbody tr.ret{background:#f9f0ff}
 tfoot td{background:#e8f4fd;font-weight:800;border-top:2px solid #1a5276}
 @media print{
-  @page{margin:8mm;size:A4 landscape}
-  body{padding:0}
+  @page{margin:5mm;size:A3 landscape}
+  body{padding:0;zoom:1;-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .no-print{display:none!important}
   .pg2{page-break-before:always}
+  *{font-size:inherit!important}
 }
 </style></head><body>
 <div class="no-print"><button onclick="window.print()">🖨️ طباعة / PDF</button></div>
@@ -2968,17 +2969,17 @@ function downloadBusPDF(cn,busIdx){
   const totalOcc=Object.keys(occ).length+Object.keys(occ2).length;
   const setts=(typeof settings!=='undefined'?settings:{})||{};
   function msp(sn){
-    if(!sn)return `<div style="width:250px;height:130px;flex-shrink:0"></div>`;
+    if(!sn)return `<div style="width:250px;height:250px;flex-shrink:0"></div>`;
     const isRet=!!occ2[sn];const o=isRet?occ2[sn]:occ[sn];
     const col=isRet?'#7d3c98':(o?COLORS[bks.findIndex(b=>(b.seatAssign||[]).some(sa=>sa.seatNum===sn))%COLORS.length]:'#eef2f7');
     const txtCol=o?'#fff':'#aaa';const brd=o?(isRet?'2px solid #f9e79f':'1.5px solid '+col):'1.5px dashed #ccd4de';
     const nm=o?o.name:'';
-    return `<div style="width:250px;height:130px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:14px;font-weight:900;opacity:${o?.9:.4}">${sn}</div>${o?`<div style="font-size:12px;font-weight:800;line-height:1.3;margin-top:4px;word-break:break-word;max-width:100%">${nm}</div><div style="font-size:11px;opacity:.95;margin-top:3px;direction:ltr">${o.phone||''}</div><div style="font-size:11px;opacity:.95;margin-top:3px;word-break:break-word;max-width:100%">${o.pickup||''}</div>${o.seatNote?`<div style="background:rgba(255,255,255,.22);color:#fff;border-radius:2px;font-size:11px;font-weight:700;padding:2px 5px;margin-top:3px;word-break:break-word;line-height:1.3;max-width:100%">📝${o.seatNote}</div>`:''}${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:3px">عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:10px;font-weight:900;padding:1px 5px;margin-top:3px">فوجين</div>':'')}`:`<div style="font-size:11px;color:#bbb;margin-top:18px">فارغ</div>`}</div>`;
+    return `<div style="width:250px;height:250px;flex-shrink:0;background:${col};color:${txtCol};border:${brd};border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-family:'Cairo',sans-serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:21px;font-weight:900;opacity:${o?.9:.4}">${sn}</div>${o?`<div style="font-size:18px;font-weight:900;line-height:1.3;margin-top:6px;word-break:break-word;max-width:100%">${nm}</div><div style="font-size:17px;font-weight:900;opacity:.95;margin-top:5px;direction:ltr">${o.phone||''}</div><div style="font-size:17px;font-weight:900;opacity:.95;margin-top:5px;word-break:break-word;max-width:100%">${o.pickup||''}</div>${o.seatNote?`<div style="background:rgba(255,255,255,.22);color:#fff;border-radius:2px;font-size:16px;font-weight:900;padding:3px 6px;margin-top:5px;word-break:break-word;line-height:1.3;max-width:100%">📝${o.seatNote}</div>`:''}${isRet?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:15px;font-weight:900;padding:2px 6px;margin-top:5px">عودة</div>':(o.isDouble?'<div style="background:#f9e79f;color:#7d3c98;border-radius:2px;font-size:15px;font-weight:900;padding:2px 6px;margin-top:5px">فوجين</div>':'')}`:`<div style="font-size:17px;font-weight:900;color:#bbb;margin-top:25px">فارغ</div>`}</div>`;
   }
   const AI=`<div style="width:14px;flex-shrink:0"></div>`;
   function br(a,b,c,d){return `<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${msp(a)}${msp(b)}${AI}${msp(c)}${msp(d)}</div>`;}
   let rows='';let sc=1;
-  for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=br(s[1],s[0],s[2],s[3]);}
+  for(let r=0;r<5;r++){const s=[sc,sc+1,sc+2,sc+3];sc+=4;rows+=br(s[0],s[1],s[2],s[3]);}
   const WC_W=`<div style="width:111px;flex-shrink:0;background:#e8f4fd;border:1.5px solid #5dade2;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70px;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚻</span><span style="font-size:9px;font-weight:900;color:#1a5276">حمام</span></div>`;
   rows+=`<div style="display:flex;align-items:stretch;gap:3px;margin-bottom:3px;justify-content:center">${WC_W}${AI}${msp(sc)}${msp(sc+1)}</div>`;sc+=2;
   const DR_W=`<div style="width:111px;flex-shrink:0;background:#fffbeb;border:1.5px dashed #d97706;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70px;font-family:'Cairo',sans-serif;gap:1px"><span style="font-size:18px">🚪</span><span style="font-size:9px;font-weight:900;color:#b7770d">باب</span></div>`;
@@ -3174,7 +3175,7 @@ function renderBusLayout(cn,busIdx){
     // عرض RTL: b a | ممر | c d  (أي: ممر_يمين, نافذة_يمين | ممر | ممر_شمال, نافذة_شمال)
     const [a,b,c,d]=seats;
     const aisle=aisleInner||`<div class="bus-aisle">│</div>`;
-    return `<div class="bus-row">${ms(b)}${ms(a)}${aisle}${ms(c)}${ms(d)}</div>`;
+    return `<div class="bus-row">${ms(a)}${ms(b)}${aisle}${ms(c)}${ms(d)}</div>`;
   }
 
   let sc=1;
@@ -3193,7 +3194,7 @@ function renderBusLayout(cn,busIdx){
     <span style="font-size:14px;font-weight:800;color:var(--pr)">WC</span>
   </div>`;
   const AISLE_THIN=`<div class="bus-aisle">│</div>`;
-  busHtml+=`<div class="bus-row">${WC_MERGED}${AISLE_THIN}${ms(sc)}${ms(sc+1)}</div>`;
+  busHtml+=`<div class="bus-row">${WC_MERGED}${AISLE_THIN}${ms(sc+1)}${ms(sc)}</div>`;
   sc+=2;
 
   // صف 7: يمين = باب (merge كرسيين)، شمال = 23، 24
@@ -3201,7 +3202,7 @@ function renderBusLayout(cn,busIdx){
     <span style="font-size:32px">🚪</span>
     <span style="font-size:14px;font-weight:800;color:var(--wn)">Door</span>
   </div>`;
-  busHtml+=`<div class="bus-row">${DOOR_MERGED}${AISLE_THIN}${ms(sc)}${ms(sc+1)}</div>`;
+  busHtml+=`<div class="bus-row">${DOOR_MERGED}${AISLE_THIN}${ms(sc+1)}${ms(sc)}</div>`;
   sc+=2;
 
   // فاصل بصري بعد المنطقة الخاصة
