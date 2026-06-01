@@ -414,6 +414,7 @@ tr:hover td{background:#f5f8fc}
   <div class="step"><strong>2. Settings → API</strong>انسخ الـ Project URL والـ anon key</div>
   <div class="step"><strong>3. SQL Editor</strong>شغّل ملف supabase_setup.sql</div>
   <div class="step"><strong>4. للتحديث الجديد (فوجين)</strong>شغّل: <code style="font-size:10px">ALTER TABLE mtr_bookings ADD COLUMN IF NOT EXISTS convoy2 integer; ALTER TABLE mtr_bookings ADD COLUMN IF NOT EXISTS seat_assign2 jsonb DEFAULT '[]';</code></div>
+  <div class="step"><strong>5. للتحديث الجديد (جهة التحصيل)</strong>شغّل: <code style="font-size:10px">ALTER TABLE mtr_bookings ADD COLUMN IF NOT EXISTS collect_via text;</code></div>
   <div class="cfg-err" id="cfg-err"></div>
   <div class="cfg-ok" id="cfg-ok"></div>
   <div class="fg"><label>Project URL</label><input type="text" id="sb-url" placeholder="https://xxxx.supabase.co"></div>
@@ -1817,7 +1818,7 @@ async function initApp(){
 }
 
 // Mappers
-function mB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',phone2:r.phone2||'',pickup:r.pickup||'',convoy:r.convoy,convoy2:r.convoy2||null,checkin:r.checkin||'',checkout:r.checkout||'',apts:r.apts||[],aptPrices:r.apt_prices||{},aptsTotal:r.apts_total||0,apts2:r.apts2||[],aptPrices2:r.apt_prices2||{},seats:r.seats||0,extraSeats:r.extra_seats||0,seatDiscount:r.seat_discount||0,seatPrice:r.seat_price||0,seatDiscAmt:r.seat_disc_amt||0,intSeats:r.int_seats||0,intSeatPrice:r.int_seat_price||0,intTotal:r.int_total||0,transferFee:r.transfer_fee||0,transferFeeNote:r.transfer_fee_note||'',disc:r.disc||0,total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],notes:r.notes||'',seatNote:r.seat_note||'',seatAssign:r.seat_assign||[],seatAssign2:r.seat_assign2||[],mgrSnap:r.mgr_snap||{},createdBy:r.created_by||'',partyType:r.party_type||'client',supplierId:r.supplier_id||null,discReason:r.disc_reason||'',adults:r.adults||0,children:r.children||0,status:r.status||'active',lastEditBy:r.last_edit_by||'',lastEditAt:r.last_edit_at||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):'',busIdx:r.bus_idx||0}}function mA(r){return{id:r.id,type:r.type||'',op:r.op||'in',amount:r.amount||0,date:r.entry_date||'',desc:r.description||'',clientName:r.client_name||'',category:r.category||'',bookingRef:r.booking_ref||'',bookingPayRef:r.booking_pay_ref||'',counterParty:r.booking_pay_ref||'',supplierId:r.supplier_id||null}}
+function mB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',phone2:r.phone2||'',pickup:r.pickup||'',convoy:r.convoy,convoy2:r.convoy2||null,checkin:r.checkin||'',checkout:r.checkout||'',apts:r.apts||[],aptPrices:r.apt_prices||{},aptsTotal:r.apts_total||0,apts2:r.apts2||[],aptPrices2:r.apt_prices2||{},seats:r.seats||0,extraSeats:r.extra_seats||0,seatDiscount:r.seat_discount||0,seatPrice:r.seat_price||0,seatDiscAmt:r.seat_disc_amt||0,intSeats:r.int_seats||0,intSeatPrice:r.int_seat_price||0,intTotal:r.int_total||0,transferFee:r.transfer_fee||0,transferFeeNote:r.transfer_fee_note||'',disc:r.disc||0,total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],notes:r.notes||'',seatNote:r.seat_note||'',seatAssign:r.seat_assign||[],seatAssign2:r.seat_assign2||[],mgrSnap:r.mgr_snap||{},createdBy:r.created_by||'',partyType:r.party_type||'client',supplierId:r.supplier_id||null,discReason:r.disc_reason||'',adults:r.adults||0,children:r.children||0,status:r.status||'active',lastEditBy:r.last_edit_by||'',lastEditAt:r.last_edit_at||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):'',busIdx:r.bus_idx||0,collectVia:r.collect_via||''}}function mA(r){return{id:r.id,type:r.type||'',op:r.op||'in',amount:r.amount||0,date:r.entry_date||'',desc:r.description||'',clientName:r.client_name||'',category:r.category||'',bookingRef:r.booking_ref||'',bookingPayRef:r.booking_pay_ref||'',counterParty:r.booking_pay_ref||'',supplierId:r.supplier_id||null}}
 function mL(r){return{id:r.id,ts:r.created_at?new Date(r.created_at).toLocaleString('ar-EG'):'',user:r.user_name||'',username:r.username||'',action:r.action||'',type:r.log_type||'',detail:r.detail||''}}
 function mHB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',phone2:r.phone2||'',dest:r.destination||'',hotelId:r.hotel_id||null,hotelName:r.hotel_name||'',checkin:r.checkin||'',checkout:r.checkout||'',nights:r.nights||0,roomType:r.room_type||'single',rooms:r.rooms||1,pricePerNight:r.price_per_night||0,adults:r.adults||0,children:r.children||0,disc:r.disc||0,discReason:r.disc_reason||'',total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],status:r.status||'pending',notes:r.notes||'',salesRep:r.sales_rep||'',createdBy:r.created_by||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):''}}
 function mS(r){
@@ -2679,6 +2680,7 @@ function viewClient(id){
         <button class="btn btn-p btn-sm" onclick="printReceipt(${b.id})">إيصال</button>
         ${canDo('edit_booking')?`<button class="btn btn-s btn-sm" onclick="addPayTo(${b.id})">+ دفعة</button>`:''}
         ${canDo('edit_booking')?`<button class="btn btn-sm" onclick="editBooking(${b.id})" style="background:var(--wnl);color:var(--wn);border-color:var(--wn)">✏ تعديل</button>`:''}
+        <button class="btn btn-sm" onclick="showCollectViaModal(${b.id})" style="background:var(--acl);color:var(--ac);border-color:var(--ac)" title="تغيير جهة التحصيل">${(()=>{const v=b.collectVia;if(!v)return(effSeats(b)>0?"🚌 باص":"🏢 برج");if(v==="bus")return"🚌 باص";if(v==="building")return"🏢 برج";if(v.startsWith("supplier_")){const s=suppliers.find(x=>x.id===parseInt(v.replace("supplier_","")));return"🤝 "+(s?.name||"مورد");}return"🔄 تحصيل";})()}} ← تغيير</button>
         ${canDo('delete_booking')?`<button class="btn btn-d btn-sm" onclick="delBooking(${b.id})">حذف</button>`:''}
       </div>
     </div>
@@ -2745,6 +2747,77 @@ async function delBooking(id){
     await addLog(`حذف حجز: ${b?.name} - فوج ${b?.convoy} (${b?.checkin||''})${delPays?' مع '+approvedPays.length+' دفعة معتمدة':''}`, 'del', `شقق: ${(b?.apts||[]).join('، ')||'-'} · إجمالي: ${(b?.total||0).toLocaleString()} ج`);
     showClList();
   }catch(e){alert('فشل: '+e.message)}
+}
+function showCollectViaModal(id){
+  const b=bookings.find(x=>x.id===id);if(!b)return;
+  const cur=b.collectVia||((effSeats(b)>0)?'bus':'building');
+  const supOpts=suppliers.map(s=>`<option value="supplier_${s.id}" ${cur==='supplier_'+s.id?'selected':''}>${s.name}</option>`).join('');
+  const html=`<div id="cvm-overlay" onclick="if(event.target===this)this.remove()" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div style="background:var(--sf);border-radius:14px;padding:1.5rem;width:min(420px,92vw);box-shadow:0 8px 40px rgba(0,0,0,.3);direction:rtl;font-family:inherit">
+    <div style="font-size:16px;font-weight:800;color:var(--pr);margin-bottom:1rem">🔄 جهة التحصيل — ${b.name}</div>
+    <div style="margin-bottom:1rem">
+      <label style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:6px;display:block">اختار جهة التحصيل</label>
+      <select id="cvm-sel" style="width:100%;padding:9px 10px;border-radius:8px;border:1.5px solid var(--bd2);font-size:13px;font-family:inherit;background:var(--sf);color:var(--tx)" onchange="onCvmSelChange()">
+        <option value="bus" ${cur==='bus'?'selected':''}>🚌 باص</option>
+        <option value="building" ${cur==='building'?'selected':''}>🏢 برج</option>
+        ${supOpts?`<optgroup label="🤝 الموردين">${supOpts}</optgroup>`:''}
+        <option value="new_supplier">➕ إضافة مورد جديد...</option>
+      </select>
+    </div>
+    <div id="cvm-new-sup" style="display:none;margin-bottom:1rem;background:var(--sf2);border-radius:8px;padding:.875rem;border:1px solid var(--bd)">
+      <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:.6rem">بيانات المورد الجديد</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem">
+        <input id="cvm-sup-name" placeholder="اسم المورد *" style="padding:8px 10px;border-radius:7px;border:1.5px solid var(--bd2);font-size:13px;font-family:inherit;background:var(--sf);color:var(--tx)">
+        <input id="cvm-sup-phone" placeholder="رقم الهاتف (اختياري)" style="padding:8px 10px;border-radius:7px;border:1.5px solid var(--bd2);font-size:13px;font-family:inherit;background:var(--sf);color:var(--tx);direction:ltr;text-align:right">
+        <input id="cvm-sup-notes" placeholder="ملاحظات (اختياري)" style="padding:8px 10px;border-radius:7px;border:1.5px solid var(--bd2);font-size:13px;font-family:inherit;background:var(--sf);color:var(--tx)">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:.5rem">
+      <button onclick="document.getElementById('cvm-overlay').remove()" style="background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--tx)">إلغاء</button>
+      <button onclick="saveCollectVia(${id})" style="background:var(--pr);color:#fff;border:none;border-radius:7px;padding:7px 22px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">💾 حفظ</button>
+    </div>
+  </div></div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+function onCvmSelChange(){
+  const v=document.getElementById('cvm-sel')?.value;
+  const nd=document.getElementById('cvm-new-sup');
+  if(nd)nd.style.display=v==='new_supplier'?'block':'none';
+}
+async function saveCollectVia(id){
+  const b=bookings.find(x=>x.id===id);if(!b)return;
+  const sel=document.getElementById('cvm-sel');if(!sel)return;
+  let val=sel.value;
+  if(val==='new_supplier'){
+    const nm=(document.getElementById('cvm-sup-name')?.value||'').trim();
+    if(!nm){alert('اكتب اسم المورد');return;}
+    const ph=(document.getElementById('cvm-sup-phone')?.value||'').trim();
+    const nt=(document.getElementById('cvm-sup-notes')?.value||'').trim();
+    try{
+      const res=await sbFetch('mtr_suppliers','POST',{name:nm,phone:ph,notes:nt},'');
+      const newSup=res&&res[0]?res[0]:{id:Date.now(),name:nm,phone:ph,notes:nt};
+      suppliers.push(newSup);
+      val='supplier_'+newSup.id;
+      if(b.remaining>0){
+        await sbFetch('mtr_acc','POST',{type:nm,op:'expense',amount:b.remaining,entry_date:new Date().toISOString().split('T')[0],description:`تحصيل فوج ${b.convoy} - ${b.name}`,client_name:b.name,category:'',booking_ref:String(b.id),booking_pay_ref:'collect_via',supplier_id:newSup.id},'');
+      }
+    }catch(e){alert('فشل إضافة المورد: '+e.message);return;}
+  } else if(val.startsWith('supplier_')){
+    const sid=parseInt(val.replace('supplier_',''));
+    const prevSid=b.collectVia?.startsWith('supplier_')?parseInt(b.collectVia.replace('supplier_','')):null;
+    if(sid!==prevSid&&b.remaining>0){
+      const sup=suppliers.find(s=>s.id===sid);
+      if(sup){
+        await sbFetch('mtr_acc','POST',{type:sup.name,op:'expense',amount:b.remaining,entry_date:new Date().toISOString().split('T')[0],description:`تحصيل فوج ${b.convoy} - ${b.name}`,client_name:b.name,category:'',booking_ref:String(b.id),booking_pay_ref:'collect_via',supplier_id:sid},'');
+      }
+    }
+  }
+  try{
+    await sbFetch('mtr_bookings','PATCH',{collect_via:val},`?id=eq.${id}`);
+    b.collectVia=val;
+    document.getElementById('cvm-overlay')?.remove();
+    viewClient(id);
+  }catch(e){alert('فشل الحفظ: '+e.message)}
 }
 function showClList(){document.getElementById('cl-list').style.display='block';document.getElementById('cl-det').style.display='none';renderClients()}
 
@@ -3224,10 +3297,10 @@ function renderBusLayout(cn,busIdx){
   // Add return clients to legend
   if(returnClients.length){busHtml+=`<div class="bus-legend" style="margin-top:4px">${returnClients.map(b=>`<span style="color:var(--pu)"><span class="ldot" style="background:var(--pu)"></span>${b.name.split(' ').slice(0,2).join(' ')} ↩راجع · ${b.pickup||'-'}</span>`).join('')}</div>`;}
   busHtml+=`<div style="font-size:11px;text-align:center;color:var(--tx3);margin-top:.5rem">اسحب من البركة → مقعد · اسحب مقعد → نقل · دبل كليك على أي مقعد → إلغاء التخصيص (يشمل كراسي العودة 🟣)</div></div>`;
-  const stickyPool=poolHtml?`<div id="bus-pool-sticky" style="position:fixed;bottom:0;right:0;left:0;z-index:999;background:var(--sf);border-top:2px solid var(--bd2);box-shadow:0 -4px 20px rgba(0,0,0,.15)"><div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 1rem;border-bottom:1px solid var(--bd);cursor:pointer" onclick="const b=document.getElementById(\pool-body);const arr=document.getElementById(\pool-arr);if(b.style.display===\none){b.style.display=\block;arr.textContent=\▼}else{b.style.display=\none;arr.textContent=\▲}"><span style="font-weight:800;color:var(--pr);font-size:13px">🎫 ينتظرون تخصيص — اسحب للمقعد</span><span id="pool-arr" style="font-size:13px;color:var(--tx2)">▼</span></div><div id="pool-body" style="max-height:35vh;overflow-y:auto;padding:.5rem 1rem">${poolHtml}</div></div>`:'';const bottomPad=poolHtml?`<div style="height:40vh"></div>`:'';document.getElementById('bus-layout').innerHTML=busHtml+bottomPad+stickyPool;
-  // Add print + PDF buttons after render
+  const stickyPool=poolHtml?`<div id="bus-pool-sticky" style="position:fixed;bottom:0;right:0;left:0;z-index:999;background:var(--sf);border-top:2px solid var(--bd2);box-shadow:0 -4px 20px rgba(0,0,0,.15)"><div id="pool-header" style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;cursor:pointer;user-select:none" onclick="togglePool()"><span style="font-weight:800;color:var(--pr);font-size:13px">🎫 ينتظرون تخصيص — اسحب للمقعد</span><span id="pool-arr" style="font-size:18px;color:var(--tx2);font-weight:900">▼</span></div><div id="pool-body" style="max-height:35vh;overflow-y:auto;padding:.5rem 1rem">${poolHtml}</div></div>`:'';const bottomPad=`<div id="bus-bottom-pad" style="height:${poolHtml?'42vh':'0'}"></div>`;document.getElementById('bus-layout').innerHTML=busHtml+bottomPad+stickyPool;
+  // Add print + PDF buttons — inside bottom pad so they stay above sticky pool
   const btnWrap=document.createElement('div');
-  btnWrap.style.cssText='margin-top:.75rem;display:flex;gap:8px;flex-wrap:wrap;';
+  btnWrap.style.cssText='padding:1rem 0 .5rem 0;display:flex;gap:8px;flex-wrap:wrap;';
   const printBusBtn=document.createElement('button');
   printBusBtn.className='btn btn-p';
   printBusBtn.textContent='🖨 طباعة قائمة '+busName;
@@ -3238,7 +3311,25 @@ function renderBusLayout(cn,busIdx){
   pdfBusBtn.onclick=()=>downloadBusPDF(cn,busIdx);
   btnWrap.appendChild(printBusBtn);
   btnWrap.appendChild(pdfBusBtn);
-  document.getElementById('bus-layout').appendChild(btnWrap);
+  const pad=document.getElementById('bus-bottom-pad');
+  if(pad){pad.style.display='flex';pad.style.alignItems='flex-start';pad.prepend(btnWrap);}
+  else{document.getElementById('bus-layout').appendChild(btnWrap);}
+}
+function togglePool(){
+  const body=document.getElementById('pool-body');
+  const arr=document.getElementById('pool-arr');
+  const pad=document.getElementById('bus-bottom-pad');
+  if(!body)return;
+  const collapsed=body.style.display==='none';
+  if(collapsed){
+    body.style.display='block';
+    arr.textContent='▼';
+    if(pad)pad.style.height='42vh';
+  } else {
+    body.style.display='none';
+    arr.textContent='▲';
+    if(pad)pad.style.height='3rem';
+  }
 }
 async function busDrop(e,cn,toSn){
   e.preventDefault();
@@ -5548,8 +5639,16 @@ function renderClosing(){
     aptNet:rows.reduce((s,r)=>s+r.aptNet,0),disc:rows.reduce((s,r)=>s+r.disc,0),
     total:rows.reduce((s,r)=>s+r.total,0),paid:rows.reduce((s,r)=>s+r.paid,0),
     remaining:rows.reduce((s,r)=>s+r.remaining,0)};
-  const collBus=rows.filter(r=>r.remaining>0&&r.hasTransport);
-  const collBuilding=rows.filter(r=>r.remaining>0&&!r.hasTransport);
+  const getVia=r=>{
+    if(r.b.collectVia)return r.b.collectVia;
+    return r.hasTransport?'bus':'building';
+  };
+  const collBus=rows.filter(r=>r.remaining>0&&getVia(r)==='bus');
+  const collBuilding=rows.filter(r=>r.remaining>0&&getVia(r)==='building');
+  const collSupplier=rows.filter(r=>r.remaining>0&&getVia(r).startsWith('supplier_'));
+  // Group by supplier
+  const supGroups={};
+  collSupplier.forEach(r=>{const key=getVia(r);if(!supGroups[key])supGroups[key]=[];supGroups[key].push(r);});
   const n=v=>(v||0).toLocaleString('ar-EG');
   const hs=c=>`background:${c};color:#fff;padding:11px 13px;text-align:right;font-size:12px;font-weight:800;white-space:nowrap;border-bottom:2px solid rgba(0,0,0,.15)`;
   const ts=`border-bottom:1.5px solid #e8eef5;padding:9px 12px;text-align:right;font-size:13px;vertical-align:middle`;
@@ -5607,8 +5706,13 @@ function renderClosing(){
       </table></div></div>`;
   }
   const mainTbl=mkTable(rows,'تقفيلة الفوج','#1a5276','#e8f4fd');
-  const busColl=mkTable(collBus,'تحصيلات في الباص (لهم نقل)','#d68910','#fef9e7');
-  const bldColl=mkTable(collBuilding,'تحصيلات في البرج (بدون نقل)','#c0392b','#fdf2f0');
+  const busColl=mkTable(collBus,'تحصيلات في الباص','#d68910','#fef9e7');
+  const bldColl=mkTable(collBuilding,'تحصيلات في البرج','#c0392b','#fdf2f0');
+  const collSupplierTbl=Object.entries(supGroups).map(([key,data])=>{
+    const sid=parseInt(key.replace('supplier_',''));
+    const sup=suppliers.find(s=>s.id===sid);
+    return mkTable(data,'تحصيلات عند المورد: '+(sup?.name||'مورد'),'#3c4fa8','#e8f0fe');
+  }).join('');
   const allOk=!collBus.length&&!collBuilding.length?
     `<div style="background:var(--acl);border:1px solid var(--ac);border-radius:var(--r);padding:.875rem;font-weight:700;color:var(--ac);margin-top:1rem">✓ لا توجد تحصيلات متبقية</div>`:'';
   out.innerHTML=`
@@ -5636,6 +5740,10 @@ function renderClosing(){
       <button class="btn btn-sm" onclick="exportClosingTableExcel('bld')" style="background:var(--gdl);color:var(--gd);border-color:var(--gd)">📥 Excel البرج</button>
       <button class="btn btn-sm" onclick="exportClosingTablePDF('bld')" style="background:var(--dnl);color:var(--dn);border-color:var(--dn)">📄 PDF البرج</button>
     </div><div id="closing-bld">${bldColl}</div>`:''}
+    ${collSupplierTbl?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:.5rem;margin-bottom:.75rem">
+      <button class="btn btn-sm" onclick="printOneTable('closing-sup')" style="background:#e8f0fe;color:#3c4fa8;border-color:#3c4fa8">🖨 طباعة تحصيلات المورد</button>
+      <button class="btn btn-sm" onclick="exportClosingTableExcel('sup')" style="background:var(--gdl);color:var(--gd);border-color:var(--gd)">📥 Excel المورد</button>
+    </div><div id="closing-sup">${collSupplierTbl}</div>`:''}
     ${allOk}`;
 }
 
