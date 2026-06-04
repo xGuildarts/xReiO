@@ -2620,7 +2620,7 @@ function initRealtime(){
       })
       .subscribe((status)=>{
         const d=document.getElementById('sdot'),t=document.getElementById('stxt');
-        if(status==='SUBSCRIBED'){if(d)d.className='sdot rt';if(t)t.textContent='مباشر 🟢';}
+        if(status==='SUBSCRIBED'){if(d)d.className='sdot rt';if(t)t.textContent='Live... 🟢';}
         else if(status==='CHANNEL_ERROR'){if(d)d.className='sdot e';if(t)t.textContent='خطأ Realtime';}
         else if(status==='TIMED_OUT'){if(d)d.className='sdot e';if(t)t.textContent='انتهت مهلة Realtime';}
       });
