@@ -2598,7 +2598,7 @@ function getBusCount(cn){return getBusNames(cn).length;}
 // ============================================================
 const SB_URL_KEY='mtr_sb_url',SB_KEY_KEY='mtr_sb_key';
 function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'}}
-function setSyncing(v){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot'+(v?' s':'');if(t)t.textContent=v?'جاري المزامنة...':'متصل ✓'}
+function setSyncing(v){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot'+(v?' s':'');if(t)t.textContent=v?'Loading...':'Connected ✓'}
 function setSyncErr(){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot e';if(t)t.textContent='خطأ في الاتصال'}
 // ===== SUPABASE REALTIME =====
 let _supaClient=null,_realtimeChannel=null;
@@ -2620,7 +2620,7 @@ function initRealtime(){
       })
       .subscribe((status)=>{
         const d=document.getElementById('sdot'),t=document.getElementById('stxt');
-        if(status==='SUBSCRIBED'){if(d)d.className='sdot rt';if(t)t.textContent='Live... 🟢';}
+        if(status==='SUBSCRIBED'){if(d)d.className='sdot rt';if(t)t.textContent='...Live 🟢';}
         else if(status==='CHANNEL_ERROR'){if(d)d.className='sdot e';if(t)t.textContent='خطأ Realtime';}
         else if(status==='TIMED_OUT'){if(d)d.className='sdot e';if(t)t.textContent='انتهت مهلة Realtime';}
       });
@@ -2696,8 +2696,8 @@ function startPollingFallback(){
 // ===== Offline / Online Detection =====
 (function initOfflineDetect(){
   const banner=document.getElementById('offline-banner');
-  function goOffline(){if(banner)banner.style.display='flex';const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(d){d.className='sdot e';}if(t)t.textContent='غير متصل بالإنترنت';}
-  function goOnline(){if(banner)banner.style.display='none';const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(d){d.className='sdot';}if(t)t.textContent='متصل ✓';}
+  function goOffline(){if(banner)banner.style.display='flex';const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(d){d.className='sdot e';}if(t)t.textContent='Check You Internet';}
+  function goOnline(){if(banner)banner.style.display='none';const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(d){d.className='sdot';}if(t)t.textContent='Connceted ✓';}
   window.addEventListener('offline',goOffline);
   window.addEventListener('online',goOnline);
   if(!navigator.onLine)goOffline();
