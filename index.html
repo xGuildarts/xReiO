@@ -1181,6 +1181,15 @@ tr:hover td{background:#f5f8fc}
         <div class="fg"><label>الاسم الكامل <span class="req">*</span></label><input type="text" id="nu-name" placeholder="الاسم بالعربي"></div>
       </div>
       <div class="fg" style="max-width:280px"><label>الدور</label><select id="nu-role"></select></div>
+      <div style="background:var(--acl);border:1px solid var(--ac);border-radius:var(--r);padding:10px 14px;margin-bottom:.75rem">
+        <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:8px">📲 إعدادات الإشعارات الخارجية (اختياري)</div>
+        <div class="g3">
+          <div class="fg" style="margin-bottom:0"><label style="font-size:12px">واتساب (رقم دولي مثال: 201012345678)</label><input type="text" id="nu-whatsapp" placeholder="201012345678" style="font-size:13px"></div>
+          <div class="fg" style="margin-bottom:0"><label style="font-size:12px">Callmebot API Key</label><input type="text" id="nu-callmebot" placeholder="من callmebot.com" style="font-size:13px"></div>
+          <div class="fg" style="margin-bottom:0"><label style="font-size:12px">Telegram Chat ID</label><input type="text" id="nu-telegram" placeholder="رقم الـ Chat ID" style="font-size:13px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--ac);margin-top:6px">واتساب: الموظف يبعت "I allow callmebot to send me messages" لـ +34644597291 · تيليجرام: يكلم @userinfobot</div>
+      </div>
       <button class="btn btn-p" onclick="addUser()">➕ إضافة</button>
     </div>
   </div>
@@ -1305,6 +1314,13 @@ tr:hover td{background:#f5f8fc}
           <option value="120">ساعتين</option>
           <option value="1440">يوم كامل</option>
         </select>
+      </div>
+      <div class="fg">
+        <label>📲 إبعت إشعار لـ <span style="font-size:11px;color:var(--tx3);font-weight:400">(اختياري — لو السيستيم مقفول)</span></label>
+        <div id="tm-notify-users" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);min-height:40px">
+          <span style="font-size:12px;color:var(--tx3);align-self:center" id="tm-notify-empty">جاري التحميل...</span>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:4px">بيتبعت على واتساب / تيليجرام لو الموظف ضايف بياناته</div>
       </div>
     </div>
     <div style="padding:12px 22px 18px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--bd)">
@@ -2598,7 +2614,7 @@ function getBusCount(cn){return getBusNames(cn).length;}
 // ============================================================
 const SB_URL_KEY='mtr_sb_url',SB_KEY_KEY='mtr_sb_key';
 function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'}}
-function setSyncing(v){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot'+(v?' s':'');if(t)t.textContent=v?'Loading...':'Connected ✓'}
+function setSyncing(v){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot'+(v?' s':'');if(t)t.textContent=v?'جاري المزامنة...':'متصل ✓'}
 function setSyncErr(){const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;d.className='sdot e';if(t)t.textContent='خطأ في الاتصال'}
 // ===== SUPABASE REALTIME =====
 let _supaClient=null,_realtimeChannel=null;
@@ -2620,7 +2636,7 @@ function initRealtime(){
       })
       .subscribe((status)=>{
         const d=document.getElementById('sdot'),t=document.getElementById('stxt');
-        if(status==='SUBSCRIBED'){if(d)d.className='sdot rt';if(t)t.textContent='...Live 🟢';}
+        if(status==='SUBSCRIBED'){if(d)d.className='sdot rt';if(t)t.textContent='مباشر 🟢';}
         else if(status==='CHANNEL_ERROR'){if(d)d.className='sdot e';if(t)t.textContent='خطأ Realtime';}
         else if(status==='TIMED_OUT'){if(d)d.className='sdot e';if(t)t.textContent='انتهت مهلة Realtime';}
       });
@@ -2696,8 +2712,8 @@ function startPollingFallback(){
 // ===== Offline / Online Detection =====
 (function initOfflineDetect(){
   const banner=document.getElementById('offline-banner');
-  function goOffline(){if(banner)banner.style.display='flex';const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(d){d.className='sdot e';}if(t)t.textContent='Check You Internet';}
-  function goOnline(){if(banner)banner.style.display='none';const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(d){d.className='sdot';}if(t)t.textContent='Connceted ✓';}
+  function goOffline(){if(banner)banner.style.display='flex';const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(d){d.className='sdot e';}if(t)t.textContent='غير متصل بالإنترنت';}
+  function goOnline(){if(banner)banner.style.display='none';const d=document.getElementById('sdot'),t=document.getElementById('stxt');if(d){d.className='sdot';}if(t)t.textContent='متصل ✓';}
   window.addEventListener('offline',goOffline);
   window.addEventListener('online',goOnline);
   if(!navigator.onLine)goOffline();
@@ -3183,11 +3199,18 @@ async function addUser(){
   if(!r){alert('اختر دور للمستخدم أولاً');return;}
   if(p.length<4){alert('كلمة المرور يجب أن تكون 4 أحرف على الأقل');return;}
   if(users.find(x=>x.username===u)){alert('اسم المستخدم موجود بالفعل');return;}
+  const wa=(document.getElementById('nu-whatsapp')?.value||'').trim();
+  const cb=(document.getElementById('nu-callmebot')?.value||'').trim();
+  const tg=(document.getElementById('nu-telegram')?.value||'').trim();
   try{
-    const res=await sbFetch('mtr_users','POST',{username:u,password:p,name:n,role:r},'');
+    const payload={username:u,password:p,name:n,role:r};
+    if(wa)payload.whatsapp_phone=wa;
+    if(cb)payload.callmebot_apikey=cb;
+    if(tg)payload.telegram_chat_id=tg;
+    const res=await sbFetch('mtr_users','POST',payload,'');
     if(res&&res[0])users.push(res[0]);
     addLog('إضافة مستخدم: '+n,'add','اسم المستخدم: '+u+' · الدور: '+getRoleLabel(r));
-    ['nu-user','nu-pass','nu-name'].forEach(id=>document.getElementById(id).value='');
+    ['nu-user','nu-pass','nu-name','nu-whatsapp','nu-callmebot','nu-telegram'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     renderUsers();
     alert('✓ تم إضافة المستخدم بنجاح');
   }catch(e){alert('فشل: '+e.message)}
@@ -7208,6 +7231,15 @@ window.renderUsers=function(){
         ${u.username!=='admin'?`<button class="btn btn-d btn-sm" onclick="removeUser(${u.id})">حذف</button>`:'<span class="badge b-pu">محمي</span>'}
       </div>
       <div style="background:var(--sf2);border-radius:var(--r);padding:.65rem"><div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:4px">الصلاحيات:</div><div style="line-height:2.2">${permsHtml}</div></div>
+      <div style="background:var(--acl);border:1px solid var(--ac);border-radius:var(--r);padding:8px 12px;margin-top:8px">
+        <div style="font-size:11px;font-weight:800;color:var(--ac);margin-bottom:6px">📲 إعدادات الإشعارات</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fg" style="margin-bottom:0;flex:1;min-width:160px"><label style="font-size:11px">واتساب (رقم دولي)</label><input type="text" value="${u.whatsapp_phone||''}" placeholder="201012345678" style="font-size:12px;padding:4px 8px" onchange="saveUserNotifyField(${u.id},'whatsapp_phone',this.value)"></div>
+          <div class="fg" style="margin-bottom:0;flex:1;min-width:140px"><label style="font-size:11px">Callmebot API Key</label><input type="text" value="${u.callmebot_apikey||''}" placeholder="API Key" style="font-size:12px;padding:4px 8px" onchange="saveUserNotifyField(${u.id},'callmebot_apikey',this.value)"></div>
+          <div class="fg" style="margin-bottom:0;flex:1;min-width:140px"><label style="font-size:11px">Telegram Chat ID</label><input type="text" value="${u.telegram_chat_id||''}" placeholder="Chat ID" style="font-size:12px;padding:4px 8px" onchange="saveUserNotifyField(${u.id},'telegram_chat_id',this.value)"></div>
+        </div>
+        <div style="font-size:10px;color:var(--ac);margin-top:4px">${u.whatsapp_phone&&u.callmebot_apikey?'✅ واتساب جاهز':'⚠️ واتساب: محتاج رقم + API Key'} ${u.telegram_chat_id?' · ✅ تيليجرام جاهز':' · ⚠️ تيليجرام: محتاج Chat ID'}</div>
+      </div>
     </div>`;
   }).join('');
 };
@@ -10093,5 +10125,159 @@ function _fmtDT(d){
 
 // تحميل التاسكات بعد login
 (function(){const orig=window.loginUser;window.loginUser=function(f){orig(f);loadTasks();};})();
+
+// ══════════════════════════════════════════════════
+// EXTERNAL NOTIFICATIONS SYSTEM
+// واتساب (Callmebot) + تيليجرام + Web Push
+// ══════════════════════════════════════════════════
+
+// حفظ بيانات الإشعارات لموظف موجود
+async function saveUserNotifyField(uid, field, value){
+  try{
+    await sbFetch('mtr_users','PATCH',{[field]:value.trim()||null},`?id=eq.${uid}`);
+    const u=users.find(x=>x.id===uid);
+    if(u)u[field]=value.trim()||null;
+    showToast('success','💾','تم الحفظ');
+  }catch(e){showToast('error','❌','فشل الحفظ: '+e.message);}
+}
+
+// بناء قائمة الموظفين في modal التاسك
+function _buildNotifyUsersList(selectedIds=[]){
+  const wrap=document.getElementById('tm-notify-users');
+  const empty=document.getElementById('tm-notify-empty');
+  if(!wrap)return;
+  const notifiable=users.filter(u=>(u.whatsapp_phone&&u.callmebot_apikey)||u.telegram_chat_id);
+  if(!notifiable.length){
+    if(empty){empty.style.display='';empty.textContent='لا يوجد موظفين بإعدادات إشعارات — أضفها من إدارة المستخدمين';}
+    return;
+  }
+  if(empty)empty.style.display='none';
+  wrap.innerHTML=notifiable.map(u=>{
+    const haWa=u.whatsapp_phone&&u.callmebot_apikey;
+    const haTg=!!u.telegram_chat_id;
+    const sel=selectedIds.includes(u.id);
+    return `<label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid ${sel?'var(--pr)':'var(--bd2)'};background:${sel?'var(--prl)':'var(--sf)'};color:${sel?'var(--pr)':'var(--tx2)'};font-weight:${sel?'700':'400'};transition:all .15s"><input type="checkbox" value="${u.id}" ${sel?'checked':''} style="display:none" onchange="_onNotifyUserToggle()">${u.name}${haWa?' <span title="واتساب">📱</span>':''}${haTg?' <span title="تيليجرام">✈️</span>':''}</label>`;
+  }).join('');
+}
+
+function _onNotifyUserToggle(){
+  const sel=_getSelectedNotifyIds();
+  _buildNotifyUsersList(sel);
+}
+
+function _getSelectedNotifyIds(){
+  const wrap=document.getElementById('tm-notify-users');
+  if(!wrap)return[];
+  return [...wrap.querySelectorAll('input[type=checkbox]:checked')].map(cb=>parseInt(cb.value));
+}
+
+// تعديل openTaskModal لبناء قائمة الموظفين
+(function(){
+  const _orig=openTaskModal;
+  window.openTaskModal=function(editId=null){
+    _orig(editId);
+    setTimeout(()=>{
+      const selIds=editId?(tasks.find(t=>t.id===editId)?.notifyUserIds||[]):[];
+      _buildNotifyUsersList(selIds);
+    },50);
+  };
+})();
+
+// تعديل _mapTask لقراءة notify_user_ids
+(function(){
+  const _orig=_mapTask;
+  window._mapTask=function(r){
+    const t=_orig(r);
+    t.notifyUserIds=Array.isArray(r.notify_user_ids)?r.notify_user_ids:[];
+    return t;
+  };
+})();
+
+// تعديل saveTask لحفظ notify_user_ids
+(function(){
+  const _orig=saveTask;
+  window.saveTask=async function(){
+    const notifyIds=_getSelectedNotifyIds();
+    const _origSbFetch=window.sbFetch;
+    window.sbFetch=function(table,method,payload,qs){
+      if(table==='mtr_tasks'&&(method==='POST'||method==='PATCH')&&payload)payload.notify_user_ids=notifyIds;
+      return _origSbFetch(table,method,payload,qs);
+    };
+    await _orig();
+    window.sbFetch=_origSbFetch;
+  };
+})();
+
+// إرسال واتساب عبر Callmebot
+async function _sendWhatsapp(phone,apikey,text){
+  const url=`https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(text)}&apikey=${encodeURIComponent(apikey)}`;
+  try{await fetch(url,{mode:'no-cors'});}catch(e){console.warn('WA fail',e);}
+}
+
+// إرسال تيليجرام
+async function _sendTelegram(chatId,text){
+  const botToken=(settings?.telegram_bot_token||'').trim();
+  if(!botToken)return;
+  try{await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text})});}
+  catch(e){console.warn('TG fail',e);}
+}
+
+// Web Push - local notifications
+async function _initWebPush(){
+  if(!('Notification' in window))return;
+  try{await Notification.requestPermission();}catch(e){}
+}
+
+function _sendLocalNotification(title,body){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  try{new Notification(title,{body,icon:'/favicon.ico',tag:'task-reminder',requireInteraction:true});}catch(e){}
+}
+
+// تعديل _checkReminders لإرسال الإشعارات الخارجية
+const _notifiedTaskIds=new Set();
+(function(){
+  const _orig=_checkReminders;
+  window._checkReminders=function(){
+    _updateTasksBadge();
+    const now=new Date();
+    tasks.forEach(t=>{
+      if(t.status!=='open'||!t.remindAt)return;
+      if(t.snoozedUntil&&t.snoozedUntil>now)return;
+      const triggerTime=new Date(t.remindAt.getTime()-(t.remindBeforeMin*60000));
+      if(triggerTime>now)return;
+      const key=`${t.id}_${triggerTime.getTime()}`;
+      if(_notifiedTaskIds.has(key))return;
+      _notifiedTaskIds.add(key);
+      const isOverdue=t.remindAt<now;
+      const msg=`🔔 تنبيه تاسك
+📋 ${t.title}${t.clientName?'\n👤 '+t.clientName:''}${t.notes?'\n📝 '+t.notes.slice(0,100):''}\n⏰ ${_fmtDT(t.remindAt)}${isOverdue?' ⚠️ متأخر':''}`;
+      if(t.notifyUserIds&&t.notifyUserIds.length){
+        t.notifyUserIds.forEach(uid=>{
+          const u=users.find(x=>x.id===uid);
+          if(!u)return;
+          if(u.whatsapp_phone&&u.callmebot_apikey)_sendWhatsapp(u.whatsapp_phone,u.callmebot_apikey,msg);
+          if(u.telegram_chat_id)_sendTelegram(u.telegram_chat_id,msg);
+        });
+      }
+      _sendLocalNotification('تنبيه: '+t.title,t.clientName||t.notes||'');
+    });
+    if(_activeReminderTask)return;
+    const due=tasks.find(t=>{
+      if(t.status!=='open'||!t.remindAt)return false;
+      if(t.snoozedUntil&&t.snoozedUntil>new Date())return false;
+      return new Date(t.remindAt.getTime()-(t.remindBeforeMin*60000))<=new Date();
+    });
+    if(due)_showReminderPopup(due);
+  };
+})();
+
+// تشغيل Web Push بعد الـ login
+(function(){
+  const orig2=window.loginUser;
+  window.loginUser=function(f){orig2(f);_initWebPush();};
+})();
+
+// ملاحظة: لو هتستخدم تيليجرام، شغّل في Supabase:
+// ALTER TABLE mtr_settings ADD COLUMN IF NOT EXISTS telegram_bot_token text;
 
 </script>
