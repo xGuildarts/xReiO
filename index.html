@@ -308,6 +308,12 @@ body.dark .cfg-ok{background:var(--acl);color:var(--ac);border-color:var(--ac)}
 .card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:1rem;margin-bottom:.75rem}
 .ctitle{font-size:14px;font-weight:700;color:var(--pr);margin-bottom:.75rem;display:flex;align-items:center;gap:7px}
 .ctitle::before{content:'';display:inline-block;width:4px;height:17px;background:var(--pr);border-radius:2px;flex-shrink:0}
+/* Collapsible cards */
+.card.collapsible>.ctitle{cursor:pointer;user-select:none;justify-content:space-between}
+.card.collapsible>.ctitle::after{content:'▲';font-size:11px;color:var(--tx3);margin-right:auto;margin-left:0;transition:transform .25s;flex-shrink:0}
+.card.collapsible.collapsed>.ctitle::after{transform:rotate(180deg)}
+.card.collapsible>.card-body{overflow:hidden;transition:max-height .3s ease,opacity .25s ease;max-height:4000px;opacity:1}
+.card.collapsible.collapsed>.card-body{max-height:0!important;opacity:0;pointer-events:none}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
 .g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -538,6 +544,19 @@ tr:hover td{background:#f5f8fc}
 <div class="main" id="main-area">
 <!-- DASH -->
 <div id="dash" class="sec active">
+  <!-- تنبيه التاسكات المتأخرة -->
+  <div id="dash-tasks-alert" style="display:none;margin-bottom:.75rem;background:linear-gradient(135deg,#fdedec,#fef9e7);border:1.5px solid var(--dn);border-radius:14px;padding:10px 16px;cursor:pointer;transition:.15s" onclick="showTab('tasks')">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:24px">🔔</span>
+        <div>
+          <div style="font-size:13px;font-weight:900;color:var(--dn)" id="dash-tasks-alert-title">تاسكات تحتاج متابعة</div>
+          <div style="font-size:11px;color:var(--tx2);margin-top:2px" id="dash-tasks-alert-body"></div>
+        </div>
+      </div>
+      <span style="font-size:11px;color:var(--pr);font-weight:700;background:var(--prl);padding:4px 12px;border-radius:20px">عرض التاسكات ←</span>
+    </div>
+  </div>
   <!-- لوحة تذكيرات المتبقيات -->
   <div id="dash-alerts" style="margin-bottom:.875rem;display:none">
     <div style="background:var(--sf);border-radius:14px;border:1.5px solid var(--dn);overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06)">
@@ -569,13 +588,15 @@ tr:hover td{background:#f5f8fc}
     </div>
   </div>
   <div class="g5" id="dash-stats" style="margin-bottom:.875rem"></div>
-  <div class="card" style="margin-bottom:.875rem">
+  <div class="card collapsible" id="card-convoy-stats" style="margin-bottom:.875rem">
     <div class="ctitle">📊 نسبة التحصيل — مقارنة الأفواج</div>
-    <div id="dash-convoy-stats" style="display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.5rem"></div>
+    <div class="card-body">
+      <div id="dash-convoy-stats" style="display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.5rem"></div>
+    </div>
   </div>
-  <div class="card"><div class="ctitle">آخر الحجوزات</div>
+  <div class="card collapsible" id="card-dash-recent"><div class="ctitle">آخر الحجوزات</div><div class="card-body">
     <div class="tbl-wrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>باص</th><th>مكان الركوب</th><th>المسؤول</th><th>الإجمالي</th><th>المتبقي</th><th>الحالة</th><th></th></tr></thead><tbody id="dash-tbl"></tbody></table></div>
-  </div>
+  </div></div>
 </div>
 <!-- ADD -->
 <div id="add" class="sec"><div class="card"><div class="ctitle">حجز جديد</div>
@@ -871,8 +892,9 @@ tr:hover td{background:#f5f8fc}
 </div>
 
 <!-- SCHEDULE -->
-<div id="sched" class="sec"><div class="card"><div class="ctitle">جدول الأفواج · موسم 2026</div>
-  <div class="tbl-wrap"><table><thead><tr><th>الدخول</th><th>دخول</th><th>خروج</th><th>سعر صافي</th><th>المحجوزة</th><th>المتاحة</th><th>الباص</th><th>داخلي</th><th>إيراد الفوج</th><th>الحجوزات</th><th>الشقق المحجوزة</th><th>شقق متاحة</th></tr></thead><tbody id="sched-tbl"></tbody></table></div>
+<div id="sched" class="sec"><div class="card collapsible" id="card-sched"><div class="ctitle">جدول الأفواج · موسم 2026</div>
+  <div class="card-body"><div class="tbl-wrap"><table><thead><tr><th>الدخول</th><th>دخول</th><th>خروج</th><th>سعر صافي</th><th>المحجوزة</th><th>المتاحة</th><th>الباص</th><th>داخلي</th><th>إيراد الفوج</th><th>الحجوزات</th><th>الشقق المحجوزة</th><th>شقق متاحة</th></tr></thead><tbody id="sched-tbl"></tbody></table></div>
+  </div>
 </div></div>
 <!-- HOTELS -->
 <div id="hotels" class="sec">
@@ -1147,17 +1169,22 @@ tr:hover td{background:#f5f8fc}
       <button class="btn" onclick="printRpt()">طباعة</button>
     </div>
   </div>
-  <div id="rpt-out"></div>
+  <div class="card collapsible" id="card-rpt-out" style="display:none">
+    <div class="ctitle">نتيجة التقرير</div>
+    <div class="card-body"><div id="rpt-out"></div></div>
+  </div>
 </div></div>
 <!-- LOG -->
-<div id="log" class="sec"><div class="card"><div class="ctitle">سجل النشاط <span class="badge b-pu" style="font-size:10px"> GM Only </span></div>
-  <div style="display:flex;gap:7px;margin-bottom:.75rem;flex-wrap:wrap">
-    <input type="text" id="log-q" placeholder="ابحث في السجل..." style="max-width:220px" oninput="renderLog()">
-    <select id="log-tf" onchange="renderLog()" style="max-width:130px"><option value="">كل الأنواع</option><option value="add">إضافة</option><option value="del">حذف</option><option value="edit">تعديل</option><option value="login">دخول</option></select>
-    <select id="log-user-f" onchange="renderLog()" style="max-width:160px"><option value="">كل المستخدمين</option></select>
-    <button class="btn btn-sm" onclick="document.getElementById('log-q').value='';document.getElementById('log-tf').value='';document.getElementById('log-user-f').value='';renderLog()">مسح الفلتر</button>
+<div id="log" class="sec"><div class="card collapsible" id="card-log"><div class="ctitle">سجل النشاط <span class="badge b-pu" style="font-size:10px"> GM Only </span></div>
+  <div class="card-body">
+    <div style="display:flex;gap:7px;margin-bottom:.75rem;flex-wrap:wrap">
+      <input type="text" id="log-q" placeholder="ابحث في السجل..." style="max-width:220px" oninput="renderLog()">
+      <select id="log-tf" onchange="renderLog()" style="max-width:130px"><option value="">كل الأنواع</option><option value="add">إضافة</option><option value="del">حذف</option><option value="edit">تعديل</option><option value="login">دخول</option></select>
+      <select id="log-user-f" onchange="renderLog()" style="max-width:160px"><option value="">كل المستخدمين</option></select>
+      <button class="btn btn-sm" onclick="document.getElementById('log-q').value='';document.getElementById('log-tf').value='';document.getElementById('log-user-f').value='';renderLog()">مسح الفلتر</button>
+    </div>
+    <div id="log-list"></div>
   </div>
-  <div id="log-list"></div>
 </div></div>
 <!-- USERS -->
 <div id="users" class="sec">
@@ -1181,15 +1208,6 @@ tr:hover td{background:#f5f8fc}
         <div class="fg"><label>الاسم الكامل <span class="req">*</span></label><input type="text" id="nu-name" placeholder="الاسم بالعربي"></div>
       </div>
       <div class="fg" style="max-width:280px"><label>الدور</label><select id="nu-role"></select></div>
-      <div style="background:var(--acl);border:1px solid var(--ac);border-radius:var(--r);padding:10px 14px;margin-bottom:.75rem">
-        <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:8px">📲 إعدادات الإشعارات الخارجية (اختياري)</div>
-        <div class="g3">
-          <div class="fg" style="margin-bottom:0"><label style="font-size:12px">واتساب (رقم دولي مثال: 201012345678)</label><input type="text" id="nu-whatsapp" placeholder="201012345678" style="font-size:13px"></div>
-          <div class="fg" style="margin-bottom:0"><label style="font-size:12px">Callmebot API Key</label><input type="text" id="nu-callmebot" placeholder="من callmebot.com" style="font-size:13px"></div>
-          <div class="fg" style="margin-bottom:0"><label style="font-size:12px">Telegram Chat ID</label><input type="text" id="nu-telegram" placeholder="رقم الـ Chat ID" style="font-size:13px"></div>
-        </div>
-        <div style="font-size:11px;color:var(--ac);margin-top:6px">واتساب: الموظف يبعت "I allow callmebot to send me messages" لـ +34644597291 · تيليجرام: يكلم @userinfobot</div>
-      </div>
       <button class="btn btn-p" onclick="addUser()">➕ إضافة</button>
     </div>
   </div>
@@ -1314,13 +1332,6 @@ tr:hover td{background:#f5f8fc}
           <option value="120">ساعتين</option>
           <option value="1440">يوم كامل</option>
         </select>
-      </div>
-      <div class="fg">
-        <label>📲 إبعت إشعار لـ <span style="font-size:11px;color:var(--tx3);font-weight:400">(اختياري — لو السيستيم مقفول)</span></label>
-        <div id="tm-notify-users" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);min-height:40px">
-          <span style="font-size:12px;color:var(--tx3);align-self:center" id="tm-notify-empty">جاري التحميل...</span>
-        </div>
-        <div style="font-size:11px;color:var(--tx3);margin-top:4px">بيتبعت على واتساب / تيليجرام لو الموظف ضايف بياناته</div>
       </div>
     </div>
     <div style="padding:12px 22px 18px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--bd)">
@@ -2972,7 +2983,7 @@ function applyPerms(){
   const isViewer=role==='viewer'&&!currentUser?.custom_perms?.length;
   
   // Tabs visible per role
-  const alwaysShow=['dash','clients','sched'];
+  const alwaysShow=['dash','clients','sched','tasks'];
   const showTabs=[...alwaysShow];
   if(!isViewer) showTabs.push('add'); // viewer can't add bookings
   if(perms.includes('view_bus')||perms.includes('view_bus')) showTabs.push('bus');
@@ -3199,18 +3210,11 @@ async function addUser(){
   if(!r){alert('اختر دور للمستخدم أولاً');return;}
   if(p.length<4){alert('كلمة المرور يجب أن تكون 4 أحرف على الأقل');return;}
   if(users.find(x=>x.username===u)){alert('اسم المستخدم موجود بالفعل');return;}
-  const wa=(document.getElementById('nu-whatsapp')?.value||'').trim();
-  const cb=(document.getElementById('nu-callmebot')?.value||'').trim();
-  const tg=(document.getElementById('nu-telegram')?.value||'').trim();
   try{
-    const payload={username:u,password:p,name:n,role:r};
-    if(wa)payload.whatsapp_phone=wa;
-    if(cb)payload.callmebot_apikey=cb;
-    if(tg)payload.telegram_chat_id=tg;
-    const res=await sbFetch('mtr_users','POST',payload,'');
+    const res=await sbFetch('mtr_users','POST',{username:u,password:p,name:n,role:r},'');
     if(res&&res[0])users.push(res[0]);
     addLog('إضافة مستخدم: '+n,'add','اسم المستخدم: '+u+' · الدور: '+getRoleLabel(r));
-    ['nu-user','nu-pass','nu-name','nu-whatsapp','nu-callmebot','nu-telegram'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['nu-user','nu-pass','nu-name'].forEach(id=>document.getElementById(id).value='');
     renderUsers();
     alert('✓ تم إضافة المستخدم بنجاح');
   }catch(e){alert('فشل: '+e.message)}
@@ -3312,7 +3316,7 @@ function showTab(t){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   const sc=document.getElementById(t);if(sc)sc.classList.add('active');
   // Only render if tab is dirty (data changed) or always-fresh tabs
-  const alwaysFresh=['add','mgr','locks','prices','bulk-voucher','users','sched'];
+  const alwaysFresh=['add','mgr','locks','prices','bulk-voucher','users','sched','tasks'];
   const needRender=alwaysFresh.includes(t)||_dirtyTabs.has(t);
   if(!needRender)return;
   _dirtyTabs.delete(t);
@@ -3364,6 +3368,8 @@ function _renderDashImmediate(){
     <div class="stat red"><div class="stat-label">الخصومات</div><div class="stat-val">${discs.toLocaleString()} ج</div></div>`;
   setTimeout(renderDashCharts, 50);
   renderDashAlerts();
+  renderDashTasksAlert();
+  setTimeout(initCollapsibleCards,100);
   // ===== إحصائيات التحصيل per فوج =====
   const convStatsEl=document.getElementById('dash-convoy-stats');
   if(convStatsEl){
@@ -3394,7 +3400,8 @@ function _renderDashImmediate(){
   }
   const tb=document.getElementById('dash-tbl');
   if(!bookings.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--tx3);padding:2rem">لا توجد حجوزات</td></tr>';return;}
-  tb.innerHTML=bookings.slice(0,15).map(b=>`<tr>
+  const recentBks=[...bookings].sort((a,b)=>b.id-a.id).slice(0,25);
+  tb.innerHTML=recentBks.map(b=>`<tr>
     <td class="lnk" onclick="viewClient(${b.id})">${b.name}${b.partyType==='supplier'?'<span class="badge b-pu" style="margin-right:4px;font-size:9px">مورد</span>':''}${b.convoy2?'<span class="badge" style="background:var(--wnl);color:var(--wn);border:1px solid var(--wn);margin-right:3px;font-size:15px">⚠ فوجين</span>':''}</td>
     <td style="font-size:11px">${b.phone||'-'}</td>
     <td>${(b.apts||[]).map(a=>`<span class="badge b-bl" style="margin:1px">${a}</span>`).join('')}${(b.apts2||[]).length?'<span style="color:var(--wn);font-size:9px;margin:0 2px">+</span>'+(b.apts2||[]).map(a=>`<span class="badge b-wn" style="margin:1px;font-size:10px">${a}</span>`).join(''):''}</td>
@@ -3863,6 +3870,12 @@ function viewClient(id){
       ${b.discReason?`<div style="background:var(--wnl);border-radius:var(--r);padding:.5rem .75rem;margin-bottom:.5rem;font-size:13px"><span style="font-weight:700;color:var(--wn)">سبب الخصم: </span>${b.discReason}</div>`:''}
       ${b.notes?`<div style="background:var(--sf2);border-radius:var(--r);padding:.5rem .75rem;font-size:13px;line-height:1.8"><span style="font-weight:700;color:var(--pr)">ملاحظات: </span>${b.notes}</div>`:''}
     `:''}
+    <div class="hr"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+      <div class="ctitle" style="font-size:12px;margin:0">📋 التاسكات المرتبطة</div>
+      <button class="btn btn-sm" onclick="addTaskForClient(${b.id})" style="background:var(--pul);color:var(--pu);border-color:var(--pu);font-size:11px">＋ تاسك جديد</button>
+    </div>
+    <div id="cl-det-tasks">${_renderClientTasks(b.id)}</div>
   </div>`;
 }
 async function addPayTo(id){
@@ -5075,6 +5088,9 @@ function genReport(){
   const to=document.getElementById('rpt-to')?.value||'';
   const filter=document.getElementById('rpt-filter')?.value||'';
   const out=document.getElementById('rpt-out');if(!out)return;
+  // إظهار بطاقة النتيجة
+  const rptCard=document.getElementById('card-rpt-out');
+  if(rptCard){rptCard.style.display='block';rptCard.classList.remove('collapsed');setTimeout(initCollapsibleCards,50);}
   function inR(d){return!d||(!from||d>=from)&&(!to||d<=to)}
   let html='',title='',total=0,count=0;
   const allBks=bookings,allAcc=accEntries;
@@ -5595,7 +5611,7 @@ function editBooking(id){
       <div class="fg"><label>رقم آخر</label><input type="tel" id="edit-phone2" value="${b.phone2||''}" placeholder="اختياري" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,11)"></div>
     </div>
     <div class="g2">
-    <div class="fg"><label>الفوج</label><select id="edit-convoy">${
+    <div class="fg"><label>الفوج</label><select id="edit-convoy" onchange="onEditConvChg(${id})">${
       CONVOYS.map(c=>`<option value="${c.num}" data-ci="${c.checkin}" data-co="${c.checkout}" ${c.num===b.convoy?'selected':''}>${c.label}</option>`).join('')
     }</select></div>
     <div class="fg"><label>مكان الركوب</label><select id="edit-pickup" style="max-width:300px">${
@@ -5944,6 +5960,55 @@ function clearEditApts(bookingId){
   if(rows)rows.innerHTML='<span style="font-size:12px;color:var(--tx3)">لا توجد شقق — سيتم الحفظ كحجز نقل فقط</span>';
   // إعادة حساب الإجمالي
   if(typeof updateEditTotal==='function') updateEditTotal(bookingId);
+}
+
+function onEditConvChg(bookingId){
+  const b=bookings.find(x=>x.id===bookingId);if(!b)return;
+  const newCn=parseInt(document.getElementById('edit-convoy')?.value)||0;
+  if(!newCn)return;
+
+  // إعادة ضبط الشقق المختارة (مسح القديمة)
+  editSelApts[bookingId]=[];
+
+  // إعادة بناء grid الشقق
+  const grid=document.getElementById('edit-apt-grid');
+  if(grid){
+    const bkd=bookedApts(newCn,bookingId);
+    grid.innerHTML=APT_LIST.filter(a=>{
+      const apt=APTS[a];if(!apt._extra)return true;
+      const convs=apt.convoys;if(!convs||!convs.length)return false;
+      return convs.some(v=>parseInt(v)===newCn);
+    }).map(a=>{
+      const isBooked=bkd.includes(a);
+      return`<button type="button" id="edit-ab-${a}" class="ab ${isBooked?'bkd':'av'}" onclick="toggleEditApt('${a}',${bookingId})" ${isBooked?'disabled':''}>${a}<br><span style="font-size:9px;opacity:.7">${APTS[a].type==='single'?'غرفة':'غرفتين'}</span></button>`;
+    }).join('');
+  }
+
+  // تحديث شريط الشقق المختارة
+  const selBar=document.getElementById('edit-sel-bar');
+  if(selBar)selBar.innerHTML='<span style="font-size:11px;color:var(--tx3);align-self:center">لم تختر شقة بعد</span>';
+
+  // تحديث الباص للفوج الجديد
+  const busSel=document.getElementById('edit-bus-sel');
+  if(busSel){
+    const buses=getBusNames(newCn);
+    busSel.innerHTML=buses.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
+  }
+
+  // تحديث قائمة الفوج الثاني (يستثني الفوج الجديد)
+  const conv2Sel=document.getElementById('edit-convoy2');
+  if(conv2Sel){
+    conv2Sel.innerHTML=`<option value="">-- بدون فوج ثاني --</option>`+
+      CONVOYS.filter(cv=>cv.num!==newCn).map(cv=>`<option value="${cv.num}">${cv.label}</option>`).join('');
+    // مسح شقق الفوج الثاني
+    editSelApts2[bookingId]=[];
+    const wrap2=document.getElementById('edit-conv2-apt-wrap');
+    if(wrap2)wrap2.style.display='none';
+    const info2=document.getElementById('edit-conv2-info');
+    if(info2)info2.textContent='';
+  }
+
+  calcEditTotal(bookingId);
 }
 
 function onEditConv2Chg(bookingId){
@@ -7231,15 +7296,6 @@ window.renderUsers=function(){
         ${u.username!=='admin'?`<button class="btn btn-d btn-sm" onclick="removeUser(${u.id})">حذف</button>`:'<span class="badge b-pu">محمي</span>'}
       </div>
       <div style="background:var(--sf2);border-radius:var(--r);padding:.65rem"><div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:4px">الصلاحيات:</div><div style="line-height:2.2">${permsHtml}</div></div>
-      <div style="background:var(--acl);border:1px solid var(--ac);border-radius:var(--r);padding:8px 12px;margin-top:8px">
-        <div style="font-size:11px;font-weight:800;color:var(--ac);margin-bottom:6px">📲 إعدادات الإشعارات</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
-          <div class="fg" style="margin-bottom:0;flex:1;min-width:160px"><label style="font-size:11px">واتساب (رقم دولي)</label><input type="text" value="${u.whatsapp_phone||''}" placeholder="201012345678" style="font-size:12px;padding:4px 8px" onchange="saveUserNotifyField(${u.id},'whatsapp_phone',this.value)"></div>
-          <div class="fg" style="margin-bottom:0;flex:1;min-width:140px"><label style="font-size:11px">Callmebot API Key</label><input type="text" value="${u.callmebot_apikey||''}" placeholder="API Key" style="font-size:12px;padding:4px 8px" onchange="saveUserNotifyField(${u.id},'callmebot_apikey',this.value)"></div>
-          <div class="fg" style="margin-bottom:0;flex:1;min-width:140px"><label style="font-size:11px">Telegram Chat ID</label><input type="text" value="${u.telegram_chat_id||''}" placeholder="Chat ID" style="font-size:12px;padding:4px 8px" onchange="saveUserNotifyField(${u.id},'telegram_chat_id',this.value)"></div>
-        </div>
-        <div style="font-size:10px;color:var(--ac);margin-top:4px">${u.whatsapp_phone&&u.callmebot_apikey?'✅ واتساب جاهز':'⚠️ واتساب: محتاج رقم + API Key'} ${u.telegram_chat_id?' · ✅ تيليجرام جاهز':' · ⚠️ تيليجرام: محتاج Chat ID'}</div>
-      </div>
     </div>`;
   }).join('');
 };
@@ -10123,161 +10179,84 @@ function _fmtDT(d){
   return d.toLocaleDateString('ar-EG',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
 }
 
-// تحميل التاسكات بعد login
-(function(){const orig=window.loginUser;window.loginUser=function(f){orig(f);loadTasks();};})();
-
-// ══════════════════════════════════════════════════
-// EXTERNAL NOTIFICATIONS SYSTEM
-// واتساب (Callmebot) + تيليجرام + Web Push
-// ══════════════════════════════════════════════════
-
-// حفظ بيانات الإشعارات لموظف موجود
-async function saveUserNotifyField(uid, field, value){
-  try{
-    await sbFetch('mtr_users','PATCH',{[field]:value.trim()||null},`?id=eq.${uid}`);
-    const u=users.find(x=>x.id===uid);
-    if(u)u[field]=value.trim()||null;
-    showToast('success','💾','تم الحفظ');
-  }catch(e){showToast('error','❌','فشل الحفظ: '+e.message);}
+// تنبيه التاسكات في الـ Dashboard
+function renderDashTasksAlert(){
+  const el=document.getElementById('dash-tasks-alert');
+  if(!el)return;
+  if(typeof tasks==='undefined'||!tasks.length){el.style.display='none';return;}
+  const now=new Date();
+  const overdue=tasks.filter(t=>t.status==='open'&&t.remindAt&&t.remindAt<now);
+  const dueSoon=tasks.filter(t=>t.status==='open'&&t.remindAt&&t.remindAt>=now&&(t.remindAt-now)<3600000*24);
+  const openNoDate=tasks.filter(t=>t.status==='open'&&!t.remindAt);
+  if(!overdue.length&&!dueSoon.length&&!openNoDate.length){el.style.display='none';return;}
+  el.style.display='block';
+  const title=document.getElementById('dash-tasks-alert-title');
+  const body=document.getElementById('dash-tasks-alert-body');
+  let parts=[];
+  if(overdue.length)parts.push(`<span style="color:var(--dn);font-weight:700">⚠ ${overdue.length} متأخر</span>`);
+  if(dueSoon.length)parts.push(`<span style="color:var(--wn);font-weight:700">🔜 ${dueSoon.length} اليوم</span>`);
+  if(openNoDate.length)parts.push(`<span style="color:var(--tx2)">${openNoDate.length} مفتوح</span>`);
+  if(title)title.innerHTML=`🔔 ${tasks.filter(t=>t.status==='open').length} تاسك مفتوح`;
+  if(body)body.innerHTML=parts.join(' &nbsp;·&nbsp; ')+(overdue.length?`<br><span style="font-size:10px;color:var(--dn)">${overdue.map(t=>'• '+t.title).slice(0,3).join(' &nbsp; ')}</span>`:'');
 }
 
-// بناء قائمة الموظفين في modal التاسك
-function _buildNotifyUsersList(selectedIds=[]){
-  const wrap=document.getElementById('tm-notify-users');
-  const empty=document.getElementById('tm-notify-empty');
-  if(!wrap)return;
-  const notifiable=users.filter(u=>(u.whatsapp_phone&&u.callmebot_apikey)||u.telegram_chat_id);
-  if(!notifiable.length){
-    if(empty){empty.style.display='';empty.textContent='لا يوجد موظفين بإعدادات إشعارات — أضفها من إدارة المستخدمين';}
-    return;
-  }
-  if(empty)empty.style.display='none';
-  wrap.innerHTML=notifiable.map(u=>{
-    const haWa=u.whatsapp_phone&&u.callmebot_apikey;
-    const haTg=!!u.telegram_chat_id;
-    const sel=selectedIds.includes(u.id);
-    return `<label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid ${sel?'var(--pr)':'var(--bd2)'};background:${sel?'var(--prl)':'var(--sf)'};color:${sel?'var(--pr)':'var(--tx2)'};font-weight:${sel?'700':'400'};transition:all .15s"><input type="checkbox" value="${u.id}" ${sel?'checked':''} style="display:none" onchange="_onNotifyUserToggle()">${u.name}${haWa?' <span title="واتساب">📱</span>':''}${haTg?' <span title="تيليجرام">✈️</span>':''}</label>`;
+// عرض تاسكات العميل في صفحة تفاصيله
+function _renderClientTasks(bookingId){
+  if(typeof tasks==='undefined')return '<div style="color:var(--tx3);font-size:12px;padding:8px">جاري التحميل...</div>';
+  const clientTasks=tasks.filter(t=>t.bookingId===bookingId);
+  if(!clientTasks.length)return '<div style="color:var(--tx3);font-size:12px;padding:8px 0">لا توجد تاسكات لهذا العميل</div>';
+  const now=new Date();
+  return clientTasks.map(t=>{
+    const isDone=t.status==='done';
+    const isOverdue=!isDone&&t.remindAt&&t.remindAt<now;
+    let bg='var(--sf2)',brd='var(--bd)';
+    if(isOverdue){bg='var(--dnl)';brd='var(--dn)';}
+    else if(isDone){bg='var(--sf2)';}
+    const esc=s=>(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div style="background:${bg};border:1px solid ${brd};border-radius:9px;padding:9px 12px;margin-bottom:7px;${isDone?'opacity:.6':''}">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <input type="checkbox" ${isDone?'checked':''} onchange="${isDone?`reopenTask(${t.id});setTimeout(()=>{const d=document.getElementById('cl-det-tasks');if(d)d.innerHTML=_renderClientTasks(${bookingId});},300)`:`markTaskDone(${t.id});setTimeout(()=>{const d=document.getElementById('cl-det-tasks');if(d)d.innerHTML=_renderClientTasks(${bookingId});},300)`}" style="width:16px;height:16px;cursor:pointer;accent-color:var(--ac)">
+        <span style="flex:1;font-size:13px;font-weight:700;color:${isDone?'var(--tx3)':'var(--tx)'};${isDone?'text-decoration:line-through':''}">${esc(t.title)}</span>
+        ${t.remindAt?`<span style="font-size:10px;color:${isOverdue?'var(--dn)':'var(--tx3)'};font-weight:${isOverdue?'700':'400'}">⏰ ${_fmtDT(t.remindAt)}</span>`:''}
+        ${isOverdue?`<span class="badge b-rd" style="font-size:9px">متأخر</span>`:''}
+        ${isDone?`<span class="badge b-gr" style="font-size:9px">✅</span>`:''}
+        <button onclick="openTaskModal(${t.id})" class="btn btn-sm" style="font-size:10px;padding:2px 8px">✏</button>
+      </div>
+      ${t.notes?`<div style="font-size:11px;color:var(--tx2);margin-top:5px;margin-right:24px;line-height:1.5">${esc(t.notes)}</div>`:''}
+    </div>`;
   }).join('');
 }
 
-function _onNotifyUserToggle(){
-  const sel=_getSelectedNotifyIds();
-  _buildNotifyUsersList(sel);
+// تحديث عرض تاسكات العميل بعد أي تعديل من داخل صفحة العميل
+// ============================================================
+// COLLAPSIBLE CARDS
+// ============================================================
+function toggleCard(cardEl){
+  if(!cardEl)return;
+  const key='collapse_'+cardEl.id;
+  const isCollapsed=cardEl.classList.toggle('collapsed');
+  if(cardEl.id)localStorage.setItem(key,isCollapsed?'1':'0');
 }
-
-function _getSelectedNotifyIds(){
-  const wrap=document.getElementById('tm-notify-users');
-  if(!wrap)return[];
-  return [...wrap.querySelectorAll('input[type=checkbox]:checked')].map(cb=>parseInt(cb.value));
+function initCollapsibleCards(){
+  document.querySelectorAll('.card.collapsible').forEach(card=>{
+    // استرجاع الحالة المحفوظة
+    const key='collapse_'+card.id;
+    const saved=card.id?localStorage.getItem(key):null;
+    if(saved==='1')card.classList.add('collapsed');
+    // ربط الكليك على الـ ctitle
+    const title=card.querySelector(':scope>.ctitle');
+    if(title){
+      title.removeEventListener('click',title._collapseHandler||null);
+      title._collapseHandler=()=>toggleCard(card);
+      title.addEventListener('click',title._collapseHandler);
+    }
+  });
 }
+// تحميل بعد كل render
+document.addEventListener('DOMContentLoaded',initCollapsibleCards);
 
-// تعديل openTaskModal لبناء قائمة الموظفين
-(function(){
-  const _orig=openTaskModal;
-  window.openTaskModal=function(editId=null){
-    _orig(editId);
-    setTimeout(()=>{
-      const selIds=editId?(tasks.find(t=>t.id===editId)?.notifyUserIds||[]):[];
-      _buildNotifyUsersList(selIds);
-    },50);
-  };
-})();
+// تحميل التاسكات بعد login
+(function(){const orig=window.loginUser;window.loginUser=function(f){orig(f);loadTasks();};})();
 
-// تعديل _mapTask لقراءة notify_user_ids
-(function(){
-  const _orig=_mapTask;
-  window._mapTask=function(r){
-    const t=_orig(r);
-    t.notifyUserIds=Array.isArray(r.notify_user_ids)?r.notify_user_ids:[];
-    return t;
-  };
-})();
-
-// تعديل saveTask لحفظ notify_user_ids
-(function(){
-  const _orig=saveTask;
-  window.saveTask=async function(){
-    const notifyIds=_getSelectedNotifyIds();
-    const _origSbFetch=window.sbFetch;
-    window.sbFetch=function(table,method,payload,qs){
-      if(table==='mtr_tasks'&&(method==='POST'||method==='PATCH')&&payload)payload.notify_user_ids=notifyIds;
-      return _origSbFetch(table,method,payload,qs);
-    };
-    await _orig();
-    window.sbFetch=_origSbFetch;
-  };
-})();
-
-// إرسال واتساب عبر Callmebot
-async function _sendWhatsapp(phone,apikey,text){
-  const url=`https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(text)}&apikey=${encodeURIComponent(apikey)}`;
-  try{await fetch(url,{mode:'no-cors'});}catch(e){console.warn('WA fail',e);}
-}
-
-// إرسال تيليجرام
-async function _sendTelegram(chatId,text){
-  const botToken=(settings?.telegram_bot_token||'').trim();
-  if(!botToken)return;
-  try{await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text})});}
-  catch(e){console.warn('TG fail',e);}
-}
-
-// Web Push - local notifications
-async function _initWebPush(){
-  if(!('Notification' in window))return;
-  try{await Notification.requestPermission();}catch(e){}
-}
-
-function _sendLocalNotification(title,body){
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
-  try{new Notification(title,{body,icon:'/favicon.ico',tag:'task-reminder',requireInteraction:true});}catch(e){}
-}
-
-// تعديل _checkReminders لإرسال الإشعارات الخارجية
-const _notifiedTaskIds=new Set();
-(function(){
-  const _orig=_checkReminders;
-  window._checkReminders=function(){
-    _updateTasksBadge();
-    const now=new Date();
-    tasks.forEach(t=>{
-      if(t.status!=='open'||!t.remindAt)return;
-      if(t.snoozedUntil&&t.snoozedUntil>now)return;
-      const triggerTime=new Date(t.remindAt.getTime()-(t.remindBeforeMin*60000));
-      if(triggerTime>now)return;
-      const key=`${t.id}_${triggerTime.getTime()}`;
-      if(_notifiedTaskIds.has(key))return;
-      _notifiedTaskIds.add(key);
-      const isOverdue=t.remindAt<now;
-      const msg=`🔔 تنبيه تاسك
-📋 ${t.title}${t.clientName?'\n👤 '+t.clientName:''}${t.notes?'\n📝 '+t.notes.slice(0,100):''}\n⏰ ${_fmtDT(t.remindAt)}${isOverdue?' ⚠️ متأخر':''}`;
-      if(t.notifyUserIds&&t.notifyUserIds.length){
-        t.notifyUserIds.forEach(uid=>{
-          const u=users.find(x=>x.id===uid);
-          if(!u)return;
-          if(u.whatsapp_phone&&u.callmebot_apikey)_sendWhatsapp(u.whatsapp_phone,u.callmebot_apikey,msg);
-          if(u.telegram_chat_id)_sendTelegram(u.telegram_chat_id,msg);
-        });
-      }
-      _sendLocalNotification('تنبيه: '+t.title,t.clientName||t.notes||'');
-    });
-    if(_activeReminderTask)return;
-    const due=tasks.find(t=>{
-      if(t.status!=='open'||!t.remindAt)return false;
-      if(t.snoozedUntil&&t.snoozedUntil>new Date())return false;
-      return new Date(t.remindAt.getTime()-(t.remindBeforeMin*60000))<=new Date();
-    });
-    if(due)_showReminderPopup(due);
-  };
-})();
-
-// تشغيل Web Push بعد الـ login
-(function(){
-  const orig2=window.loginUser;
-  window.loginUser=function(f){orig2(f);_initWebPush();};
-})();
-
-// ملاحظة: لو هتستخدم تيليجرام، شغّل في Supabase:
-// ALTER TABLE mtr_settings ADD COLUMN IF NOT EXISTS telegram_bot_token text;
 
 </script>
