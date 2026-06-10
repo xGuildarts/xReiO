@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -1312,6 +1313,12 @@ tr:hover td{background:#f5f8fc}
             <option value="low">🟢 منخفضة</option>
           </select>
         </div>
+      </div>
+      <div class="fg">
+        <label>👷 تخصيص لـ</label>
+        <select id="tm-assigned-to">
+          <option value="">— بدون تخصيص —</option>
+        </select>
       </div>
       <div class="g2">
         <div class="fg">
@@ -10058,10 +10065,13 @@ function _exportConvAccExcel(){
     snoozed_until   timestamptz,
     done_at         timestamptz,
     created_by      text DEFAULT '',
+    assigned_to     text DEFAULT '',
     created_at      timestamptz DEFAULT now()
   );
   ALTER TABLE mtr_tasks ENABLE ROW LEVEL SECURITY;
   CREATE POLICY "allow_all_mtr_tasks" ON mtr_tasks FOR ALL USING (true) WITH CHECK (true);
+  -- لو التيبل موجود بالفعل، نفّذ السطر ده بس:
+  -- ALTER TABLE mtr_tasks ADD COLUMN IF NOT EXISTS assigned_to text DEFAULT '';
 */
 let tasks=[];
 let _taskReminderInterval=null;
@@ -10084,7 +10094,8 @@ function _mapTask(r){
     remindBeforeMin:r.remind_before_min||30,status:r.status||'open',
     snoozedUntil:r.snoozed_until?new Date(r.snoozed_until):null,
     doneAt:r.done_at?new Date(r.done_at):null,
-    createdBy:r.created_by||'',createdAt:r.created_at?new Date(r.created_at):new Date()};
+    createdBy:r.created_by||'',assignedTo:r.assigned_to||'',
+    createdAt:r.created_at?new Date(r.created_at):new Date()};
 }
 
 function openTaskModal(editId=null){
@@ -10096,6 +10107,23 @@ function openTaskModal(editId=null){
     const o=document.createElement('option');
     o.value=b.id;o.textContent=`${b.name} (فوج ${b.convoy})`;sel.appendChild(o);
   });
+  // populate assigned_to dropdown - admin only
+  const assignSel=document.getElementById('tm-assigned-to');
+  const isAdmin=currentUser?.role==='admin';
+  if(assignSel){
+    if(isAdmin){
+      assignSel.innerHTML='<option value="">— بدون تخصيص —</option>';
+      (users||[]).forEach(u=>{
+        const o=document.createElement('option');
+        o.value=u.username||u.name;
+        o.textContent=u.name+' ('+({admin:'GM',bookings:'حجوزات',accounts:'محاسب',operations:'عمليات',viewer:'مشاهد'}[u.role]||u.role)+')';
+        assignSel.appendChild(o);
+      });
+      assignSel.closest('.fg').style.display='';
+    }else{
+      assignSel.closest('.fg').style.display='none';
+    }
+  }
   if(editId){
     const t=tasks.find(x=>x.id===editId);if(!t)return;
     document.getElementById('task-modal-title').textContent='تعديل التاسك';
@@ -10104,6 +10132,7 @@ function openTaskModal(editId=null){
     document.getElementById('tm-client').value=t.bookingId||'';
     document.getElementById('tm-priority').value=t.priority;
     document.getElementById('tm-remind-before').value=t.remindBeforeMin;
+    if(assignSel&&isAdmin)assignSel.value=t.assignedTo||'';
     if(t.remindAt){
       const loc=new Date(t.remindAt.getTime()-(t.remindAt.getTimezoneOffset()*60000));
       const iso=loc.toISOString();
@@ -10118,6 +10147,7 @@ function openTaskModal(editId=null){
     document.getElementById('tm-remind-before').value='30';
     document.getElementById('tm-date').value='';
     document.getElementById('tm-time').value='09:00';
+    if(assignSel&&isAdmin)assignSel.value='';
   }
   setTimeout(()=>document.getElementById('tm-title').focus(),100);
 }
@@ -10145,7 +10175,8 @@ async function saveTask(){
   btn.disabled=true;btn.textContent='جاري الحفظ...';
   try{
     const payload={title,notes,booking_id:bookingId,client_name:clientName,priority,
-      remind_at:remindAt,remind_before_min:remindBeforeMin,created_by:currentUser?.name||''};
+      remind_at:remindAt,remind_before_min:remindBeforeMin,created_by:currentUser?.name||'',
+      assigned_to:currentUser?.role==='admin'?(document.getElementById('tm-assigned-to')?.value||''):(currentUser?.username||currentUser?.name||'')};
     if(_editingTaskId){
       const res=await sbFetch('mtr_tasks','PATCH',payload,`?id=eq.${_editingTaskId}`);
       if(res&&res[0]){const idx=tasks.findIndex(x=>x.id===_editingTaskId);if(idx>=0)tasks[idx]=_mapTask(res[0]);}
@@ -10186,15 +10217,19 @@ async function deleteTask(id){
 }
 
 function renderTasks(){
+  const isAdmin=currentUser?.role==='admin';
+  const myUsername=currentUser?.username||currentUser?.name||'';
   const statusF=document.getElementById('tasks-filter-status')?.value||'open';
   const clientF=document.getElementById('tasks-filter-client')?.value||'';
   const clientSel=document.getElementById('tasks-filter-client');
+  // filter tasks visible to current user
+  const visibleTasks=isAdmin?tasks:tasks.filter(t=>!t.assignedTo||t.assignedTo===myUsername);
   if(clientSel){
     const cur=clientSel.value;
-    const names=[...new Set(tasks.map(t=>t.clientName).filter(Boolean))].sort();
+    const names=[...new Set(visibleTasks.map(t=>t.clientName).filter(Boolean))].sort();
     clientSel.innerHTML='<option value="">كل العملاء</option>'+names.map(n=>`<option value="${n}"${n===cur?' selected':''}>${n}</option>`).join('');
   }
-  let filtered=tasks.filter(t=>{
+  let filtered=visibleTasks.filter(t=>{
     const stMatch=statusF==='all'?true:statusF==='done'?t.status==='done':t.status==='open';
     return stMatch&&(!clientF||t.clientName===clientF);
   });
@@ -10209,7 +10244,7 @@ function renderTasks(){
     if(pa!==pb)return pa-pb;
     return(b.createdAt?.getTime()||0)-(a.createdAt?.getTime()||0);
   });
-  const overdueCount=tasks.filter(t=>t.status==='open'&&t.remindAt&&t.remindAt<now).length;
+  const overdueCount=visibleTasks.filter(t=>t.status==='open'&&t.remindAt&&t.remindAt<now).length;
   const banner=document.getElementById('tasks-overdue-banner');
   const bannerTxt=document.getElementById('tasks-overdue-text');
   if(banner){banner.style.display=overdueCount?'flex':'none';if(bannerTxt&&overdueCount)bannerTxt.textContent=`${overdueCount} تاسك متأخر — يحتاج متابعة فورية`;}
@@ -10231,21 +10266,26 @@ function renderTasks(){
     const remBadge=t.remindAt?`<span style="font-size:11px;padding:2px 8px;border-radius:12px;font-weight:700;background:${isOverdue?'var(--dn)':isSoon?'var(--wn)':'var(--prl)'};color:${isOverdue||isSoon?'#fff':'var(--pr)'}">⏰ ${_fmtDT(t.remindAt)}</span>`:'';
     const clBadge=t.clientName?`<span class="badge b-bl" style="font-size:10px">👤 ${t.clientName}</span>`:'';
     const stBadge=isDone?`<span class="badge b-gr" style="font-size:10px">✅ منتهي</span>`:isOverdue?`<span class="badge b-rd" style="font-size:10px">⚠ متأخر</span>`:isSoon?`<span class="badge b-wn" style="font-size:10px">🔜 قريباً</span>`:'';
+    // show assigned user badge (admin sees who's assigned)
+    const assignedUser=t.assignedTo?(users||[]).find(u=>u.username===t.assignedTo||u.name===t.assignedTo):null;
+    const assignBadge=isAdmin&&t.assignedTo?`<span class="badge b-pu" style="font-size:10px">👷 ${assignedUser?.name||t.assignedTo}</span>`:'';
     const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // control buttons: admin or the assigned user can edit/delete/complete
+    const canControl=isAdmin||(t.assignedTo===myUsername)||(!t.assignedTo);
     return `<div style="background:${bg};border:1.5px solid ${brd};border-radius:12px;padding:14px 16px;margin-bottom:10px;${isDone?'opacity:.6':''}">
       <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
-        <div style="padding-top:2px"><input type="checkbox" ${isDone?'checked':''} onchange="${isDone?`reopenTask(${t.id})`:`markTaskDone(${t.id})`}" style="width:18px;height:18px;cursor:pointer;accent-color:var(--ac)"></div>
+        <div style="padding-top:2px"><input type="checkbox" ${isDone?'checked':''} ${canControl?'':"disabled title='ليس لديك صلاحية'"} onchange="${isDone?`reopenTask(${t.id})`:`markTaskDone(${t.id})`}" style="width:18px;height:18px;cursor:${canControl?'pointer':'not-allowed'};accent-color:var(--ac)"></div>
         <div style="flex:1;min-width:180px">
           <div style="font-size:14px;font-weight:800;color:${isDone?'var(--tx3)':'var(--tx)'};${isDone?'text-decoration:line-through':''};margin-bottom:4px">${esc(t.title)}</div>
           ${t.notes?`<div style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.6;white-space:pre-wrap">${esc(t.notes)}</div>`:''}
-          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">${remBadge}${clBadge}${stBadge}<span style="font-size:10px;font-weight:700;color:var(--tx3)">${priLabel}</span></div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">${remBadge}${clBadge}${stBadge}${assignBadge}<span style="font-size:10px;font-weight:700;color:var(--tx3)">${priLabel}</span></div>
           ${isDone&&t.doneAt?`<div style="font-size:10px;color:var(--tx3);margin-top:4px">تم الإغلاق: ${_fmtDT(t.doneAt)}</div>`:''}
         </div>
         <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
-          ${!isDone?`<button class="btn btn-sm" onclick="openTaskModal(${t.id})" style="font-size:11px">✏</button>`:''}
-          ${!isDone?`<button class="btn btn-s btn-sm" onclick="markTaskDone(${t.id})" style="font-size:11px">✅ تم</button>`:''}
-          ${isDone?`<button class="btn btn-sm" onclick="reopenTask(${t.id})" style="font-size:11px">↩ فتح</button>`:''}
-          <button class="btn btn-d btn-sm" onclick="deleteTask(${t.id})" style="font-size:11px">🗑</button>
+          ${canControl&&!isDone?`<button class="btn btn-sm" onclick="openTaskModal(${t.id})" style="font-size:11px">✏</button>`:''}
+          ${canControl&&!isDone?`<button class="btn btn-s btn-sm" onclick="markTaskDone(${t.id})" style="font-size:11px">✅ تم</button>`:''}
+          ${canControl&&isDone?`<button class="btn btn-sm" onclick="reopenTask(${t.id})" style="font-size:11px">↩ فتح</button>`:''}
+          ${canControl?`<button class="btn btn-d btn-sm" onclick="deleteTask(${t.id})" style="font-size:11px">🗑</button>`:''}
         </div>
       </div>
     </div>`;
@@ -10253,7 +10293,10 @@ function renderTasks(){
 }
 
 function _updateTasksBadge(){
-  const open=tasks.filter(t=>t.status==='open');
+  const isAdmin=currentUser?.role==='admin';
+  const myUsername=currentUser?.username||currentUser?.name||'';
+  const myTasks=isAdmin?tasks:tasks.filter(t=>!t.assignedTo||t.assignedTo===myUsername);
+  const open=myTasks.filter(t=>t.status==='open');
   const overdue=open.filter(t=>t.remindAt&&t.remindAt<new Date());
   const btn=document.getElementById('tab-tasks');
   if(!btn)return;
@@ -10270,9 +10313,12 @@ function _startReminderLoop(){
 function _checkReminders(){
   _updateTasksBadge();
   if(_activeReminderTask)return;
+  const isAdmin=currentUser?.role==='admin';
+  const myUsername=currentUser?.username||currentUser?.name||'';
   const now=new Date();
   const due=tasks.find(t=>{
     if(t.status!=='open'||!t.remindAt)return false;
+    if(!isAdmin&&t.assignedTo&&t.assignedTo!==myUsername)return false;
     if(t.snoozedUntil&&t.snoozedUntil>now)return false;
     return new Date(t.remindAt.getTime()-(t.remindBeforeMin*60000))<=now;
   });
