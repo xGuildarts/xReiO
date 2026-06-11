@@ -3,6 +3,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -3992,7 +3993,7 @@ function viewClient(id){
       <div style="display:flex;gap:5px;flex-wrap:wrap">
         <button class="btn btn-p btn-sm" onclick="printReceipt(${b.id})">إيصال</button>
         <button class="btn btn-sm" style="background:var(--prl);color:var(--pr);border-color:var(--pr)" onclick="genClientLink(${b.id})" title="نسخ رابط كشف حساب العميل">🔗 رابط العميل</button>
-        ${b.phone?`<a href="https://wa.me/2${b.phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('السلام عليكم '+b.name+'، متبقي حجزك '+b.remaining.toLocaleString()+' ج — مصيف مطروح 2026 🏖️')}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;border-color:#25D366;text-decoration:none;display:inline-flex;align-items:center;gap:4px">💬 واتساب</a>`:''}        ${canDo('edit_booking')?`<button class="btn btn-s btn-sm" onclick="addPayTo(${b.id})">+ دفعة</button>`:''}
+        ${b.phone?`<a href="https://wa.me/2${b.phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('السلام عليكم ورحمة الله وبركاته 🌹\nأ/ '+b.name+'\nاخبار حضرتك يارب تكون بخير دايما ان شاءالله 🤍\nمع حضرتك احمد من حسابات شركة ادريسكا للسياحة 😊\nكنا محتاجين سداد من المتبقى على حضرتك 🙏\nالمتبقى : '+b.remaining.toLocaleString()+' ج\nنتمنى لحضرتك رحلة سعيده معانا ان شاءالله ❤️')}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;border-color:#25D366;text-decoration:none;display:inline-flex;align-items:center;gap:4px">💬 واتساب</a>`:''}        ${canDo('edit_booking')?`<button class="btn btn-s btn-sm" onclick="addPayTo(${b.id})">+ دفعة</button>`:''}
         ${canDo('edit_booking')?`<button class="btn btn-sm" onclick="editBooking(${b.id})" style="background:var(--wnl);color:var(--wn);border-color:var(--wn)">✏ تعديل</button>`:''}
         <button class="btn btn-sm" onclick="showCollectViaModal(${b.id})" style="background:var(--acl);color:var(--ac);border-color:var(--ac)" title="تغيير جهة التحصيل">${(()=>{const v=b.collectVia;if(!v)return(effSeats(b)>0?"🚌 باص":"🏢 برج");if(v==="bus")return"🚌 باص";if(v==="building")return"🏢 برج";if(v.startsWith("supplier_")){const s=suppliers.find(x=>x.id===parseInt(v.replace("supplier_","")));return"🤝 "+(s?.name||"مورد");}return"🔄 تحصيل";})()}} ← تغيير</button>
         ${canDo('delete_booking')?`<button class="btn btn-d btn-sm" onclick="delBooking(${b.id})">حذف</button>`:''}
