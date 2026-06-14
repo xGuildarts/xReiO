@@ -5242,9 +5242,9 @@ function renderAccs(){
     }));
   }
   const pe=document.getElementById('acc-pending');
-  pe.innerHTML=pend.length?`<div class="card" style="border-color:var(--wn);margin-bottom:.875rem"><div class="ctitle" style="color:var(--wn)">مدفوعات في انتظار الاعتماد (${pend.length} · ${pend.reduce((s,p)=>s+p.amount,0).toLocaleString()} ج)</div>
-    <div class="warn-box">هذه الدفعات مسجلة في الحجوزات ولم تُعتمد في الحسابات بعد.</div>
-    <div class="tbl-wrap"><table><thead><tr><th>العميل</th><th>التاريخ</th><th>المبلغ</th><th>طريقة الدفع</th><th>ملاحظة</th><th></th></tr></thead><tbody>
+  pe.innerHTML=pend.length?`<div class="card" style="border-color:var(--wn);margin-bottom:.875rem"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.5rem"><div class="ctitle" style="color:var(--wn);margin:0">مدفوعات في انتظار الاعتماد (${pend.length} · ${pend.reduce((s,p)=>s+p.amount,0).toLocaleString()} ج)</div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="approveAllPending()" style="background:var(--ac);border-color:var(--ac);color:#fff;font-weight:700;font-size:12px">✅ اعتماد الكل</button><button class="btn btn-sm" onclick="const tb=document.getElementById(\'pend-tbl-wrap\');const arr=document.getElementById(\'pend-arr\');if(tb.style.display===\'none\'){tb.style.display=\'\';arr.textContent=\'▲\';}else{tb.style.display=\'none\';arr.textContent=\'▼\';}" style="font-size:11px"><span id="pend-arr">▲</span> إخفاء</button></div></div>
+    <div class="warn-box" style="margin-bottom:.5rem">هذه الدفعات مسجلة في الحجوزات ولم تُعتمد في الحسابات بعد.</div>
+    <div id="pend-tbl-wrap"><div class="tbl-wrap"><table><thead><tr><th>العميل</th><th>التاريخ</th><th>المبلغ</th><th>طريقة الدفع</th><th>ملاحظة</th><th></th></tr></thead><tbody>
     ${pend.map(p=>{const safeRef=String(p.ref).replace(/[^a-z0-9]/gi,'_');return`<tr id="pend-row-${safeRef}">
       <td style="font-weight:700">${p.clientName}</td>
       <td><input type="date" id="pend-date-${safeRef}" value="${p.date||''}" style="font-size:11px;padding:3px 5px;border:1px solid var(--bd);border-radius:5px;background:var(--sf);color:var(--tx);width:130px"></td>
@@ -5283,7 +5283,8 @@ function renderAccDetail(key){
   let running=0;const rows=sorted.map(e=>{running+=(e.op==='in'?e.amount:-e.amount);return{e,run:running};}).reverse();
   const inL=isSup?'مستلم':isExp?'مرتجع':'دائن';
   const outL=isSup?'مدفوع':isExp?'مصروف':'مدين';
-  let html=`<div class="card"><div class="ctitle">${sub.replace('sup_','')}${filterActive?` <span style="font-size:11px;background:var(--acl);color:var(--ac);border-radius:20px;padding:2px 8px;font-weight:700">📅 ${fromD||'البداية'} ← ${toD||'النهاية'}</span>`:''}</div>
+  const accColKey='acc_col_'+activeAccTab.replace(/[^a-z0-9]/gi,'_');
+  let html=`<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem"><div class="ctitle" style="margin:0">${sub.replace('sup_','')}${filterActive?` <span style="font-size:11px;background:var(--acl);color:var(--ac);border-radius:20px;padding:2px 8px;font-weight:700">📅 ${fromD||'البداية'} ← ${toD||'النهاية'}</span>`:''}</div><button class="btn btn-sm" onclick="const w=document.getElementById('acc-entries-wrap');const a=document.getElementById('acc-col-arr');if(w.style.display==='none'){w.style.display='';a.textContent='▲';}else{w.style.display='none';a.textContent='▼';}" style="font-size:11px;flex-shrink:0"><span id="acc-col-arr">▲</span> إخفاء القيود</button></div>
     <div class="g3" style="margin-bottom:.875rem">
       <div class="stat green" style="padding:.65rem"><div class="stat-label">${inL}</div><div class="stat-val" style="font-size:14px;color:var(--ac)">${inn.toLocaleString()} ج</div></div>
       <div class="stat red" style="padding:.65rem"><div class="stat-label">${outL}</div><div class="stat-val" style="font-size:14px;color:var(--dn)">${out.toLocaleString()} ج</div></div>
@@ -5296,7 +5297,7 @@ function renderAccDetail(key){
     </div>`;
   if(!ents.length){html+='<div style="text-align:center;color:var(--tx3);padding:2rem">لا توجد قيود</div>';}
   else{
-    html+=`<div class="tbl-wrap"><table id="acc-tbl"><thead><tr><th>التاريخ</th><th>البيان</th><th>الفئة</th><th>النوع</th><th>المبلغ</th><th>الرصيد</th><th></th></tr></thead><tbody>`;
+    html+=`<div id="acc-entries-wrap"><div class="tbl-wrap"><table id="acc-tbl"><thead><tr><th>التاريخ</th><th>البيان</th><th>الفئة</th><th>النوع</th><th>المبلغ</th><th>الرصيد</th><th></th></tr></thead><tbody>`;
     html+=rows.map(({e,run})=>`<tr data-desc="${(e.desc||'').toLowerCase()}" data-op="${e.op}">
       <td style="font-size:11px;color:var(--tx3)">${e.date||'-'}</td>
       <td style="font-size:13px;font-weight:600">${e.clientName||e.desc||'-'}${e.category?`<br><span class="badge b-wn" style="font-size:10px">${e.category}</span>`:''}</td>
@@ -5317,7 +5318,7 @@ function renderAccDetail(key){
         </div>
       </td>
     </tr>`).join('');
-    html+=`</tbody></table></div>`;
+    html+=`</tbody></table></div></div>`;
   }
   html+=`</div>`;
   document.getElementById('acc-detail').innerHTML=html;
@@ -5497,6 +5498,42 @@ async function delPendPay(bookingId,payIdx){
   b.payments.splice(payIdx,1);b.paid=Math.max(0,b.paid-amt);b.remaining=b.total-b.paid;
   try{await sbFetch('mtr_bookings','PATCH',{payments:b.payments,paid:b.paid,remaining:b.remaining},`?id=eq.${bookingId}`);renderAccs();}catch(e){alert('فشل: '+e.message)}
 }
+async function approveAllPending(){
+  if(!await confirm('اعتماد كل الدفعات المعلقة دفعة واحدة؟'))return;
+  const btn=event?.target;if(btn){btn.disabled=true;btn.textContent='⏳ جاري...';}
+  let ok=0,fail=0;
+  const snapshot=[...pend];
+  for(const p of snapshot){
+    try{
+      const safeRef=String(p.ref).replace(/[^a-z0-9]/gi,'_');
+      const el_amt=document.getElementById('pend-amt-'+safeRef);
+      const el_pm=document.getElementById('pend-pm-'+safeRef);
+      const el_date=document.getElementById('pend-date-'+safeRef);
+      const amt=el_amt?parseFloat(el_amt.value)||p.amount:p.amount;
+      const pmType=el_pm?el_pm.value||p.payMethod:p.payMethod;
+      const date=el_date?el_date.value||p.date:p.date;
+      if(p.isHotel){
+        const hb=typeof hotelBookings!=='undefined'?hotelBookings.find(x=>x.id===p.bookingId):null;
+        const payRef='htl_'+p.bookingId+'_'+p.payIdx;
+        const r=await sbFetch('mtr_acc','POST',{type:pmType,op:'in',amount:amt,entry_date:date||new Date().toISOString().split('T')[0],description:'حجز فندق: '+p.clientName,client_name:p.clientName,category:'',booking_ref:'htl_'+String(p.bookingId),booking_pay_ref:payRef,supplier_id:null},'');
+        if(r&&r[0])accEntries.push(mA(r[0]));
+      }else{
+        const b=bookings.find(x=>x.id===p.bookingId);
+        const realAmt=b&&b.payments[p.payIdx]?b.payments[p.payIdx].amount:amt;
+        const realPm=b&&b.payments[p.payIdx]?b.payments[p.payIdx].payMethod:pmType;
+        const conv=b?getConv(b.convoy):null;
+        const payRef=String(p.bookingId)+'_'+p.payIdx;
+        const r=await sbFetch('mtr_acc','POST',{type:realPm,op:'in',amount:realAmt,entry_date:date||new Date().toISOString().split('T')[0],description:'حجز: '+p.clientName+(conv?' - فوج '+conv.checkin:''),client_name:p.clientName,category:'',booking_ref:String(p.bookingId),booking_pay_ref:payRef,supplier_id:null},'');
+        if(r&&r[0])accEntries.push(mA(r[0]));
+      }
+      ok++;
+    }catch(e){fail++;console.warn('approve failed:',p.clientName,e);}
+  }
+  await addLog('اعتماد جماعي للدفعات: '+ok+' دفعة','add','إجمالي: '+snapshot.reduce((s,p)=>s+p.amount,0).toLocaleString()+' ج');
+  renderAccs();
+  toast('✓ تم اعتماد '+ok+' دفعة'+(fail?' · فشل '+fail:''),'success');
+}
+
 async function saveDoubleEntry(){
   const amount=parseFloat(document.getElementById('acc-amount')?.value)||0;
   const date=document.getElementById('acc-date')?.value||new Date().toISOString().split('T')[0];
