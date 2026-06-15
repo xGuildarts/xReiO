@@ -4,6 +4,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -3061,6 +3062,8 @@ async function exportBackupJSON(){
     customRoleLabels:(typeof customRoleLabels!=='undefined'?customRoleLabels:{}),
     pmTypes:(typeof PM_TYPES!=='undefined'?PM_TYPES:[]),
     expCats:(typeof EXP_CATS!=='undefined'?EXP_CATS:[]),
+    // ✅ أسماء الباصات — مهمة جداً للاستيراد
+    busNames:(typeof BUS_NAMES!=='undefined'?BUS_NAMES:{}),
     // ===== localStorage snapshot =====
     localStorage:lsSnap,
   };
@@ -3100,9 +3103,65 @@ async function importBackupJSON(){
         let done=0,errors=0;
         async function upsertAll(table,rows){
           if(!rows||!rows.length)return;
-          for(let i=0;i<rows.length;i+=50){
-            const chunk=rows.slice(i,i+50);
-            try{await sbFetch(table,'POST',chunk,'');}catch(ex){errors++;}
+          // نقسم: صفوف عندها id (هنعمل لها upsert) وصفوف من غير id (هنعمل insert عادي)
+          const withId=rows.filter(r=>r.id!=null);
+          const withoutId=rows.filter(r=>r.id==null);
+          // ── upsert الصفوف اللي عندها id ──
+          for(let i=0;i<withId.length;i+=50){
+            const chunk=withId.slice(i,i+50);
+            try{
+              const url=SB_URL+'/rest/v1/'+table;
+              const res=await fetch(url,{
+                method:'POST',
+                headers:{
+                  'Content-Type':'application/json',
+                  'apikey':SB_KEY,
+                  'Authorization':'Bearer '+SB_KEY,
+                  'Prefer':'resolution=merge-duplicates,return=minimal'
+                },
+                body:JSON.stringify(chunk),
+                signal:AbortSignal.timeout(15000)
+              });
+              if(!res.ok){
+                // لو فشل بسبب GENERATED ALWAYS، نجرب PATCH على كل صف بـ id
+                if((await res.text()).includes('generated always')||true){
+                  for(const row of chunk){
+                    const {id,...rest}=row;
+                    try{
+                      const r2=await fetch(SB_URL+'/rest/v1/'+table+'?id=eq.'+id,{
+                        method:'PATCH',
+                        headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                        body:JSON.stringify(rest),
+                        signal:AbortSignal.timeout(10000)
+                      });
+                      if(!r2.ok){
+                        // مش موجود — insert بدون id
+                        await fetch(SB_URL+'/rest/v1/'+table,{
+                          method:'POST',
+                          headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                          body:JSON.stringify(rest),
+                          signal:AbortSignal.timeout(10000)
+                        });
+                      }
+                    }catch(e2){errors++;console.warn('patch/insert error',table,id,e2.message);}
+                  }
+                }
+              }
+            }catch(ex){errors++;console.warn('upsert chunk error on '+table+':',ex.message);}
+          }
+          // ── insert الصفوف من غير id ──
+          for(let i=0;i<withoutId.length;i+=50){
+            const chunk=withoutId.slice(i,i+50);
+            try{
+              const url=SB_URL+'/rest/v1/'+table;
+              const res=await fetch(url,{
+                method:'POST',
+                headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                body:JSON.stringify(chunk),
+                signal:AbortSignal.timeout(15000)
+              });
+              if(!res.ok){const e=await res.text();throw new Error(e);}
+            }catch(ex){errors++;console.warn('insert error on '+table+':',ex.message);}
           }
           done+=rows.length;
         }
@@ -3123,7 +3182,8 @@ async function importBackupJSON(){
           supplier_id:b.supplierId,disc_reason:b.discReason,
           adults:b.adults,children:b.children,status:b.status,
           last_edit_by:b.lastEditBy,last_edit_at:b.lastEditAt,
-          bus_idx:b.busIdx,collect_via:b.collectVia
+          bus_idx:b.busIdx,collect_via:b.collectVia,
+          created_at:b.createdAt||b.created_at||null
         }));
         const dbAcc=(data.accEntries||[]).map(a=>({
           id:a.id,type:a.type,op:a.op,amount:a.amount,entry_date:a.date,
@@ -3153,6 +3213,9 @@ async function importBackupJSON(){
           if(data.priceMap&&Object.keys(data.priceMap).length)settPatch.price_map=JSON.stringify(data.priceMap);
           if(data.lockedConvoys&&Object.keys(data.lockedConvoys).length)settPatch.locked_convoys=JSON.stringify(data.lockedConvoys);
           if(data.customRoles||data.customRoleLabels)settPatch.custom_roles=JSON.stringify({roles:data.customRoles||{},labels:data.customRoleLabels||{}});
+          // ✅ استعادة أسماء الباصات
+          if(data.busNames&&Object.keys(data.busNames).length)settPatch.bus_names=JSON.stringify(data.busNames);
+          else if(data.localStorage&&data.localStorage['mtr_bus_names'])settPatch.bus_names=data.localStorage['mtr_bus_names'];
           if(data.settings){
             if(data.settings.name)settPatch.resort_name=data.settings.name;
             if(data.settings.company)settPatch.company_name=data.settings.company;
@@ -3175,11 +3238,11 @@ async function importBackupJSON(){
           if(data.pmTypes&&Array.isArray(data.pmTypes))try{localStorage.setItem('mtr_cats',JSON.stringify({pm:data.pmTypes,exp:data.expCats||[]}));}catch(ex){}
         }
         if(errors>0){
-          toast('⚠️ تم الاستيراد مع '+errors+' خطأ — بعض السجلات ربما موجودة مسبقاً','warn',8000);
+          toast('⚠️ تم استيراد '+done+' سجل مع '+errors+' خطأ — افتح الكونسول (F12) لتفاصيل الأخطاء','warn',10000);
         } else {
-          toast('✅ تم الاستيراد الكامل بنجاح! سيتم تحديث الصفحة...','success',3000);
+          toast('✅ تم الاستيراد الكامل بنجاح ('+done+' سجل)! سيتم تحديث الصفحة...','success',3000);
         }
-        setTimeout(()=>location.reload(),3000);
+        setTimeout(()=>location.reload(),3500);
       }catch(ex){
         alert('خطأ في قراءة الملف: '+ex.message);
       }
