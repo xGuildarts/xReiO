@@ -3192,45 +3192,36 @@ async function importBackupJSON(){
           custom_perms:Array.isArray(u.custom_perms)?u.custom_perms:(u.custom_perms||[]),
           created_at:u.created_at||null
         }));
-        // ===== استيراد المستخدمين — UPSERT by username لضمان النقل الكامل =====
+        // ===== استيراد المستخدمين — INSERT كل يوزر لوحده =====
         if(dbUsers.length){
-          try{
-            // جرب DELETE الأول — لو فشل (RLS) نكمل بالـ UPSERT
+          let usersOk=0;
+          for(const u of dbUsers){
             try{
-              await fetch(SB_URL+'/rest/v1/mtr_users?id=gt.0',{
-                method:'DELETE',
-                headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+              // جرب PATCH الأول بالـ username
+              const rp=await fetch(SB_URL+'/rest/v1/mtr_users?username=eq.'+encodeURIComponent(u.username),{
+                method:'PATCH',
+                headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal,count=exact'},
+                body:JSON.stringify({password:u.password,name:u.name,role:u.role,custom_perms:u.custom_perms||[]}),
                 signal:AbortSignal.timeout(8000)
               });
-            }catch(delEx){console.warn('users DELETE skipped (RLS?), will upsert',delEx.message);}
-            // UPSERT by username — بيضيف الجديد ويحدث الموجود
-            const usersToUpsert=dbUsers.map(({id,created_at,...rest})=>rest);
-            const rIns=await fetch(SB_URL+'/rest/v1/mtr_users',{
-              method:'POST',
-              headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
-                'Prefer':'return=minimal,resolution=merge-duplicates',
-                'on_conflict':'username'},
-              body:JSON.stringify(usersToUpsert),
-              signal:AbortSignal.timeout(15000)
-            });
-            if(!rIns.ok){
-              // لو UPSERT فشل، نحاول row by row
-              let rowOk=0;
-              for(const u of usersToUpsert){
-                try{
-                  const r=await fetch(SB_URL+'/rest/v1/mtr_users',{
-                    method:'POST',
-                    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
-                      'Prefer':'return=minimal,resolution=merge-duplicates','on_conflict':'username'},
-                    body:JSON.stringify(u),signal:AbortSignal.timeout(8000)
-                  });
-                  if(r.ok)rowOk++;
-                }catch(e){}
-              }
-              done+=rowOk;
-              if(rowOk<usersToUpsert.length)errors++;
-            } else done+=dbUsers.length;
-          }catch(ex){errors++;console.warn('users restore error',ex.message);}
+              const cnt=rp.headers.get('content-range');
+              const matched=cnt?parseInt(cnt.split('/')[1]||'0'):0;
+              if(!rp.ok||matched===0){
+                // مش موجود — أضفه
+                const ri=await fetch(SB_URL+'/rest/v1/mtr_users',{
+                  method:'POST',
+                  headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                  body:JSON.stringify({username:u.username,password:u.password,name:u.name,role:u.role,custom_perms:u.custom_perms||[]}),
+                  signal:AbortSignal.timeout(8000)
+                });
+                if(ri.ok)usersOk++;
+                else{const e=await ri.text();console.warn('user insert fail',u.username,e);}
+              } else usersOk++;
+            }catch(ex){console.warn('user upsert error',u.username,ex.message);}
+          }
+          done+=usersOk;
+          if(usersOk<dbUsers.length)errors++;
+          console.log('users restored:',usersOk,'/',dbUsers.length);
         }
         // ===== Tasks =====
         if((data.tasks||[]).length){
