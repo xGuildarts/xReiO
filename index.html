@@ -348,6 +348,18 @@ textarea{resize:vertical;min-height:60px}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th{text-align:right;padding:10px 13px;border-bottom:2px solid var(--prl);color:var(--pr);font-weight:700;font-size:14px;background:var(--sf2);white-space:nowrap}
 td{padding:10px 13px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;white-space:wrap}
+/* جدول العملاء — عرض موسع */
+#cl-tbl td,#cl-tbl th{padding:7px 9px;font-size:13px}
+#cl-tbl td:first-child{min-width:130px;font-weight:600}
+#cl-tbl td:nth-child(2){min-width:105px;white-space:nowrap}
+#cl-tbl td:nth-child(3){min-width:80px}
+#cl-tbl td:nth-child(4){min-width:85px;white-space:nowrap}
+#cl-tbl td:nth-child(5),#cl-tbl td:nth-child(6),#cl-tbl td:nth-child(7),#cl-tbl td:nth-child(8){min-width:52px;text-align:center}
+#cl-tbl td:nth-child(9){min-width:90px}
+#cl-tbl td:nth-child(10){min-width:85px;white-space:nowrap}
+#cl-tbl td:nth-child(11){min-width:80px}
+#cl-tbl td:nth-child(12),#cl-tbl td:nth-child(13),#cl-tbl td:nth-child(14){min-width:80px;white-space:nowrap}
+#cl-tbl td:last-child{min-width:210px;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f5f8fc}
 .tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd)}
@@ -721,7 +733,7 @@ tr:hover td{background:#f5f8fc}
       <select id="cl-status" onchange="renderClients()" style="max-width:130px"><option value="">كل الحالات</option><option value="done">مكتمل</option><option value="pending">باقي</option></select>
       <select id="cl-party-f" onchange="renderClients()" style="max-width:130px"><option value="">الكل</option><option value="client">عملاء</option><option value="supplier">موردين</option></select>
     </div>
-    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>كراسي الباص</th><th>داخلي</th><th>أفراد</th><th>أطفال</th><th>مكان الركوب</th><th>تاريخ الحجز</th><th>المسؤول</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th><th></th></tr></thead><tbody id="cl-tbl"></tbody></table></div></div>
+    <div class="card"><div class="tbl-wrap" style="min-width:0"><table style="min-width:1300px"><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>كراسي الباص</th><th>داخلي</th><th>أفراد</th><th>أطفال</th><th>مكان الركوب</th><th>تاريخ الحجز</th><th>المسؤول</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th><th></th></tr></thead><tbody id="cl-tbl"></tbody></table></div></div>
   </div>
   <div id="cl-det" style="display:none">
     <button class="btn" style="margin-bottom:.65rem" onclick="showClList()">← Back</button>
@@ -5393,9 +5405,9 @@ function renderAccs(){
     }));
   }
   const pe=document.getElementById('acc-pending');
-  pe.innerHTML=pend.length?`<div class="card" style="border-color:var(--wn);margin-bottom:.875rem"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.5rem"><div class="ctitle" style="color:var(--wn);margin:0">مدفوعات في انتظار الاعتماد (${pend.length} · ${pend.reduce((s,p)=>s+p.amount,0).toLocaleString()} ج)</div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="approveAllPending()" style="background:var(--ac);border-color:var(--ac);color:#fff;font-weight:700;font-size:12px">✅ اعتماد الكل</button><button class="btn btn-sm" onclick="const tb=document.getElementById(\'pend-tbl-wrap\');const arr=document.getElementById(\'pend-arr\');if(tb.style.display===\'none\'){tb.style.display=\'\';arr.textContent=\'▲\';}else{tb.style.display=\'none\';arr.textContent=\'▼\';}" style="font-size:11px"><span id="pend-arr">▲</span> إخفاء</button></div></div>
+  pe.innerHTML=pend.length?`<div class="card" style="border-color:var(--wn);margin-bottom:.875rem"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.5rem"><div class="ctitle" style="color:var(--wn);margin:0">مدفوعات في انتظار الاعتماد (${pend.length} · ${pend.reduce((s,p)=>s+p.amount,0).toLocaleString()} ج)</div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="approveAllPending()" style="background:var(--ac);border-color:var(--ac);color:#fff;font-weight:700;font-size:12px">✅ اعتماد الكل</button><button class="btn btn-sm" onclick="const tb=document.getElementById(\'pend-tbl-wrap\');const arr=document.getElementById(\'pend-arr\');if(tb.style.display===\'none\'){tb.style.display=\'\';arr.textContent=\'▲\';}else{tb.style.display=\'none\';arr.textContent=\'▼\';}" style="font-size:11px"><span id="pend-arr">▼</span> إظهار</button></div></div>
     <div class="warn-box" style="margin-bottom:.5rem">هذه الدفعات مسجلة في الحجوزات ولم تُعتمد في الحسابات بعد.</div>
-    <div id="pend-tbl-wrap"><div class="tbl-wrap"><table><thead><tr><th>العميل</th><th>التاريخ</th><th>المبلغ</th><th>طريقة الدفع</th><th>ملاحظة</th><th></th></tr></thead><tbody>
+    <div id="pend-tbl-wrap" style="display:none"><div class="tbl-wrap"><table><thead><tr><th>العميل</th><th>التاريخ</th><th>المبلغ</th><th>طريقة الدفع</th><th>ملاحظة</th><th></th></tr></thead><tbody>
     ${pend.map(p=>{const safeRef=String(p.ref).replace(/[^a-z0-9]/gi,'_');return`<tr id="pend-row-${safeRef}">
       <td style="font-weight:700">${p.clientName}</td>
       <td><input type="date" id="pend-date-${safeRef}" value="${p.date||''}" style="font-size:11px;padding:3px 5px;border:1px solid var(--bd);border-radius:5px;background:var(--sf);color:var(--tx);width:130px"></td>
