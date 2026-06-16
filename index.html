@@ -2939,6 +2939,37 @@ async function _doPoll(){
       });
       if(accChanged){markTabsDirty('accs','dash','reports');if(_activeTab==='accs')renderAccs();}
     }
+    // جيب آخر 20 تاسك
+    try{
+      const latestTasks=await sbFetch('mtr_tasks','GET',null,'?order=id.desc&limit=20');
+      if(latestTasks&&Array.isArray(latestTasks)&&typeof tasks!=='undefined'){
+        let tChanged=false;
+        latestTasks.forEach(r=>{
+          const i=tasks.findIndex(t=>t.id===r.id);
+          if(i<0){tasks.unshift(typeof _mapTask==='function'?_mapTask(r):r);tChanged=true;}
+          else{const m=typeof _mapTask==='function'?_mapTask(r):r;if(m.status!==tasks[i].status||m.title!==tasks[i].title){tasks[i]=m;tChanged=true;}}
+        });
+        if(tChanged){
+          _updateTasksBadge();
+          if(_activeTab==='tasks')renderTasks();
+          renderDashTasksAlert();
+        }
+      }
+    }catch(te){/* tasks poll optional */}
+    // جيب آخر 10 مصاريف أفواج
+    try{
+      const latestExp=await sbFetch('mtr_conv_expenses','GET',null,'?order=id.desc&limit=10');
+      if(latestExp&&Array.isArray(latestExp)&&typeof convExpenses!=='undefined'){
+        let expChanged=false;
+        latestExp.forEach(r=>{
+          const i=convExpenses.findIndex(e=>e.id===r.id);
+          const mapped=typeof _mapExp==='function'?_mapExp(r):r;
+          if(i<0){convExpenses.unshift(mapped);expChanged=true;}
+          else if(convExpenses[i].amount!==mapped.amount){convExpenses[i]=mapped;expChanged=true;}
+        });
+        if(expChanged&&_activeTab==='conv-accounts')_renderConvAccounts();
+      }
+    }catch(ce){/* conv_expenses poll optional */}
     _lastPollTime=new Date();
     const timeStr=_lastPollTime.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
     if(d)d.className='sdot rt';if(t)t.textContent='آخر تحديث '+timeStr+' 🟢';
@@ -3015,15 +3046,14 @@ async function exportBackupJSON(){
       allHotelBookings=hotelBookings,allTasks=(typeof tasks!=='undefined'?tasks:[]);
   try{
     toast('⏳ جاري تجميع النسخة الاحتياطية الكاملة...','info',15000);
-    const [bksFull,accFull,logFull,tskFull]=await Promise.all([
+    const [bksFull,accFull,tskFull]=await Promise.all([
       sbFetch('mtr_bookings','GET',null,'?order=id.asc&limit=9999'),
       sbFetch('mtr_acc','GET',null,'?order=id.asc&limit=9999'),
-      sbFetch('mtr_log','GET',null,'?order=id.asc&limit=9999'),
       sbFetch('mtr_tasks','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
     ]);
     if(bksFull&&bksFull.length)allBookings=bksFull.map(mB);
     if(accFull&&accFull.length)allAccEntries=accFull.map(mA);
-    if(logFull&&logFull.length)allActivityLog=logFull.map(mL);
+    // mtr_log محذوف من الـ export — بيوفر egress وما بيتستردش في الاستيراد
     if(tskFull&&tskFull.length)allTasks=tskFull;
   }catch(e){console.warn('Full fetch fallback to in-memory:',e);}
   // ====== snapshot كامل من localStorage ======
@@ -3099,7 +3129,29 @@ async function importBackupJSON(){
           (isMaster?'• أسعار + أدوار + فئات + إعدادات كاملة\n':'')+
           '\nتم التصدير: '+(data.exportedAt||'غير معروف')+'\n\nهل تريد المتابعة؟'
         ))return;
-        toast('⏳ جاري الاستيراد الكامل...','info',30000);
+        // === Progress Modal ===
+        const _impMod=document.createElement('div');
+        _impMod.id='imp-prog-mod';
+        _impMod.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center';
+        _impMod.innerHTML=`<div style="background:var(--sf);border-radius:16px;padding:28px 32px;min-width:320px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.3);font-family:'Cairo',sans-serif;direction:rtl">
+          <div style="font-size:18px;font-weight:800;color:var(--pr);margin-bottom:16px;text-align:center">⏳ جاري الاستيراد...</div>
+          <div id="imp-prog-label" style="font-size:13px;color:var(--tx2);margin-bottom:8px;text-align:center">جاري التحضير...</div>
+          <div style="background:var(--bd);border-radius:8px;height:14px;overflow:hidden;margin-bottom:12px">
+            <div id="imp-prog-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--pr),var(--ac));border-radius:8px;transition:width .3s ease"></div>
+          </div>
+          <div id="imp-prog-detail" style="font-size:11px;color:var(--tx3);text-align:center">—</div>
+        </div>`;
+        document.body.appendChild(_impMod);
+        function _updProg(pct,label,detail){
+          const bar=document.getElementById('imp-prog-bar');
+          const lbl=document.getElementById('imp-prog-label');
+          const det=document.getElementById('imp-prog-detail');
+          if(bar)bar.style.width=Math.min(100,pct)+'%';
+          if(lbl)lbl.textContent=label||'';
+          if(det)det.textContent=detail||'';
+        }
+        function _closeProg(){const m=document.getElementById('imp-prog-mod');if(m)m.remove();}
+        // ===
         let done=0,errors=0;
         async function upsertAll(table,rows){
           if(!rows||!rows.length)return;
@@ -3151,6 +3203,7 @@ async function importBackupJSON(){
           }
           done+=rows.length;
         }
+        _updProg(5,'جاري تحضير بيانات الحجوزات...','');
         // Map bookings back to DB format
         const dbBookings=(data.bookings||[]).map(b=>({
           id:b.id,name:b.name,phone:b.phone,phone2:b.phone2,pickup:b.pickup,
@@ -3177,10 +3230,15 @@ async function importBackupJSON(){
           booking_ref:a.bookingRef,booking_pay_ref:a.bookingPayRef,supplier_id:a.supplierId
         }));
         // Upsert all Supabase tables
+        _updProg(15,'جاري استيراد الحجوزات...','الحجوزات: '+(dbBookings.length)+' سجل');
         await upsertAll('mtr_bookings',dbBookings);
+        _updProg(40,'جاري استيراد القيود المحاسبية...','القيود: '+(dbAcc.length)+' سجل');
         await upsertAll('mtr_acc',dbAcc);
+        _updProg(55,'جاري استيراد الموردين...','');
         await upsertAll('mtr_suppliers',data.suppliers||[]);
+        _updProg(62,'جاري استيراد الفنادق...','');
         await upsertAll('htl_hotels',data.hotels||[]);
+        _updProg(70,'جاري استيراد حجوزات الفنادق...','');
         await upsertAll('htl_bookings',data.hotelBookings||[]);
         // ✅ تحضير بيانات المستخدمين — نتأكد من custom_perms صح
         const dbUsers=(data.users||[]).map(u=>({
@@ -3222,6 +3280,7 @@ async function importBackupJSON(){
           done+=usersOk;
           if(usersOk<dbUsers.length)errors++;
           console.log('users restored:',usersOk,'/',dbUsers.length);
+          _updProg(82,'تم استيراد المستخدمين','المستخدمين: '+usersOk+' / '+dbUsers.length);
         }
         // ===== Tasks =====
         if((data.tasks||[]).length){
@@ -3231,6 +3290,7 @@ async function importBackupJSON(){
             client_name:t.client_name||t.clientName||'',done_at:t.done_at||t.doneAt||null,
             snoozed_until:t.snoozed_until||t.snoozedUntil||null,created_at:t.created_at||null
           }));
+          _updProg(88,'جاري استيراد التاسكات...','');
           await upsertAll('mtr_tasks',dbTasks);
         }
         // ===== إعادة كتابة mtr_settings =====
@@ -3263,13 +3323,18 @@ async function importBackupJSON(){
           // استعادة الفئات في الذاكرة
           if(data.pmTypes&&Array.isArray(data.pmTypes))try{localStorage.setItem('mtr_cats',JSON.stringify({pm:data.pmTypes,exp:data.expCats||[]}));}catch(ex){}
         }
-        if(errors>0){
-          toast('⚠️ تم استيراد '+done+' سجل مع '+errors+' خطأ — افتح الكونسول (F12) لتفاصيل الأخطاء','warn',10000);
-        } else {
-          toast('✅ تم الاستيراد الكامل بنجاح ('+done+' سجل)! سيتم تحديث الصفحة...','success',3000);
-        }
-        setTimeout(()=>location.reload(),3500);
+        _updProg(100,'اكتمل الاستيراد ✅','إجمالي: '+done+' سجل'+(errors?' · أخطاء: '+errors:''));
+        setTimeout(()=>{
+          _closeProg();
+          if(errors>0){
+            toast('⚠️ تم استيراد '+done+' سجل مع '+errors+' خطأ — افتح الكونسول (F12) لتفاصيل الأخطاء','warn',10000);
+          } else {
+            toast('✅ تم الاستيراد الكامل بنجاح ('+done+' سجل)! سيتم تحديث الصفحة...','success',3000);
+          }
+          setTimeout(()=>location.reload(),3500);
+        },800);
       }catch(ex){
+        const m=document.getElementById('imp-prog-mod');if(m)m.remove();
         alert('خطأ في قراءة الملف: '+ex.message);
       }
     };
@@ -3367,19 +3432,23 @@ async function resetConn(){if(!await confirm('إعادة الإعداد؟'))retu
 // ============================================================
 async function initApp(){
   document.getElementById('lod-msg').textContent='جاري تحميل البيانات...';
+  const BK_LIMIT=1500,ACC_LIMIT=1500,HBK_LIMIT=1000;
   const [bks,accs,logs,usrs,setts,sups,htls,hbks]=await Promise.all([
-    sbFetch('mtr_bookings','GET',null,'?order=id.desc&limit=300'),
-    sbFetch('mtr_acc','GET',null,'?order=id.desc&limit=300'),
+    sbFetch('mtr_bookings','GET',null,'?order=id.desc&limit='+BK_LIMIT),
+    sbFetch('mtr_acc','GET',null,'?order=id.desc&limit='+ACC_LIMIT),
     sbFetch('mtr_log','GET',null,'?order=id.desc&limit=150'),
     sbFetch('mtr_users','GET',null,'?order=id.asc'),
     sbFetch('mtr_settings','GET',null,'?id=eq.1'),
     sbFetch('mtr_suppliers','GET',null,'?order=name.asc').catch(()=>[]),
     sbFetch('htl_hotels','GET',null,'?order=name.asc').catch(()=>[]),
-    sbFetch('htl_bookings','GET',null,'?order=id.desc&limit=300').catch(()=>[]),
+    sbFetch('htl_bookings','GET',null,'?order=id.desc&limit='+HBK_LIMIT).catch(()=>[]),
   ]);
   bookings=(bks||[]).map(mB);
   accEntries=(accs||[]).map(mA);
   activityLog=(logs||[]).map(mL);
+  // تحذير لو اقتربنا من الـ limit
+  if((bks||[]).length>=BK_LIMIT)console.warn('[MTR] تحذير: الحجوزات وصلت الـ limit ('+BK_LIMIT+') — بعض البيانات القديمة ممكن تكون ناقصة');
+  if((accs||[]).length>=ACC_LIMIT)console.warn('[MTR] تحذير: القيود المحاسبية وصلت الـ limit ('+ACC_LIMIT+')');
   users=usrs||[];
   suppliers=sups||[];
   hotels=htls||[];
