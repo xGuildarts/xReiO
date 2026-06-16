@@ -4462,14 +4462,19 @@ function viewClient(id){
         ${(b.adults||0)>0||(b.children||0)>0?`<div style="font-size:12px;color:var(--pu)">الأفراد: ${b.adults||0} كبار${(b.children||0)>0?' · '+(b.children||0)+' أطفال':''}</div>`:''}
         <div style="font-size:11px;color:var(--tx3)">المسؤول: ${b.createdBy||'—'}</div>
       </div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap">
-        <button class="btn btn-p btn-sm" onclick="printReceipt(${b.id})">إيصال</button>
-        <button class="btn btn-sm" style="background:var(--prl);color:var(--pr);border-color:var(--pr)" onclick="genClientLink(${b.id})" title="نسخ رابط كشف حساب العميل">🔗 رابط العميل</button>
-        ${b.phone?`<button class="btn btn-sm" onclick="openWaModal(${b.id})" style="background:#25D366;color:#fff;border-color:#25D366;display:inline-flex;align-items:center;gap:4px">💬 واتساب</button>`:''}        ${canDo('edit_booking')?`<button class="btn btn-s btn-sm" onclick="addPayTo(${b.id})">+ دفعة</button>`:''}
-        ${canDo('edit_booking')?`<button class="btn btn-sm" onclick="editBooking(${b.id})" style="background:var(--wnl);color:var(--wn);border-color:var(--wn)">✏ تعديل</button>`:''}
-        <button class="btn btn-sm" onclick="showCollectViaModal(${b.id})" style="background:var(--acl);color:var(--ac);border-color:var(--ac)" title="تغيير جهة التحصيل">${(()=>{const v=b.collectVia;if(!v)return(effSeats(b)>0?"🚌 باص":"🏢 برج");if(v==="bus")return"🚌 باص";if(v==="building")return"🏢 برج";if(v.startsWith("supplier_")){const s=suppliers.find(x=>x.id===parseInt(v.replace("supplier_","")));return"🤝 "+(s?.name||"مورد");}return"🔄 تحصيل";})()}} ← تغيير</button>
-        ${canDo('delete_booking')?`<button class="btn btn-d btn-sm" onclick="delBooking(${b.id})">حذف</button>`:''}
-        <button class="btn btn-sm" onclick="addTaskForClient(${b.id})" style="background:var(--pul);color:var(--pu);border-color:var(--pu)">📋 تاسك</button>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="btn btn-p btn-sm" onclick="printReceipt(${b.id})">🧾 إيصال</button>
+          <button class="btn btn-sm" style="background:var(--prl);color:var(--pr);border-color:var(--pr)" onclick="genClientLink(${b.id})" title="نسخ رابط كشف حساب العميل">🔗 رابط العميل</button>
+          ${b.phone?`<button class="btn btn-sm" onclick="openWaModal(${b.id})" style="background:#25D366;color:#fff;border-color:#25D366">💬 واتساب</button>`:''}
+          ${canDo('edit_booking')?`<button class="btn btn-s btn-sm" onclick="addPayTo(${b.id})">＋ دفعة</button>`:''}
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${canDo('edit_booking')?`<button class="btn btn-sm" onclick="editBooking(${b.id})" style="background:var(--wnl);color:var(--wn);border-color:var(--wn)">✏ تعديل</button>`:''}
+          <button class="btn btn-sm" onclick="showCollectViaModal(${b.id})" style="background:var(--acl);color:var(--ac);border-color:var(--ac)" title="تغيير جهة التحصيل">${(()=>{const v=b.collectVia;if(!v)return(effSeats(b)>0?"🚌 باص":"🏢 برج");if(v==="bus")return"🚌 باص";if(v==="building")return"🏢 برج";if(v.startsWith("supplier_")){const s=suppliers.find(x=>x.id===parseInt(v.replace("supplier_","")));return"🤝 "+(s?.name||"مورد");}return"🔄 تحصيل";})()}} ← تغيير</button>
+          <button class="btn btn-sm" onclick="addTaskForClient(${b.id})" style="background:var(--pul);color:var(--pu);border-color:var(--pu)">📋 تاسك</button>
+          ${canDo('delete_booking')?`<button class="btn btn-d btn-sm" onclick="delBooking(${b.id})">🗑 حذف</button>`:''}
+        </div>
       </div>
     </div>
     <div class="g3" style="margin-bottom:.75rem">
