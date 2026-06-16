@@ -3199,51 +3199,36 @@ async function importBackupJSON(){
         let done=0,errors=0;
         async function upsertAll(table,rows){
           if(!rows||!rows.length)return;
-          // نستخدم استراتيجية: PATCH لكل صف عنده id، وPOST (بدون id) للجديد
-          // ده بيتجنب مشكلة GENERATED ALWAYS AS IDENTITY
-          const withId=rows.filter(r=>r.id!=null);
-          const withoutId=rows.filter(r=>r.id==null);
-          // ── الصفوف اللي عندها id: نجرب PATCH الأول، لو مفيش نعمل POST بدون id ──
-          for(const row of withId){
-            const {id,created_at,...rest}=row;
-            // حاول PATCH الأول (تحديث لو موجود)
-            try{
-              const rPatch=await fetch(SB_URL+'/rest/v1/'+table+'?id=eq.'+id,{
-                method:'PATCH',
-                headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal','Count':'exact'},
-                body:JSON.stringify(rest),
-                signal:AbortSignal.timeout(10000)
-              });
-              const affected=rPatch.headers.get('Content-Range');
-              const count=affected?parseInt(affected.split('/')[1]||'0'):0;
-              if(rPatch.ok && count===0){
-                // مش موجود — نعمل insert بدون id (Supabase هيولد id تلقائي)
-                const rIns=await fetch(SB_URL+'/rest/v1/'+table,{
-                  method:'POST',
-                  headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-                  body:JSON.stringify(rest),
-                  signal:AbortSignal.timeout(10000)
-                });
-                if(!rIns.ok){const e=await rIns.text();console.warn('insert new row failed',table,id,e);}
-              }else if(!rPatch.ok){
-                const e=await rPatch.text();
-                console.warn('patch failed',table,id,e);
-                errors++;
-              }
-            }catch(ex){errors++;console.warn('upsert row error',table,id,ex.message);}
-          }
-          // ── الصفوف من غير id: insert عادي ──
-          for(let i=0;i<withoutId.length;i+=50){
-            const chunk=withoutId.slice(i,i+50);
+          // استراتيجية جديدة: INSERT chunks كاملة بدون id — أسرع وأضمن
+          const CHUNK=50;
+          const cleanRows=rows.map(({id,created_at,...rest})=>rest);
+          for(let i=0;i<cleanRows.length;i+=CHUNK){
+            const chunk=cleanRows.slice(i,i+CHUNK);
             try{
               const res=await fetch(SB_URL+'/rest/v1/'+table,{
                 method:'POST',
-                headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                headers:{'Content-Type':'application/json','apikey':SB_KEY,
+                  'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
                 body:JSON.stringify(chunk),
-                signal:AbortSignal.timeout(15000)
+                signal:AbortSignal.timeout(20000)
               });
-              if(!res.ok){const e=await res.text();throw new Error(e);}
-            }catch(ex){errors++;console.warn('insert error',table,ex.message);}
+              if(!res.ok){
+                const e=await res.text();
+                console.warn('chunk insert failed',table,'chunk',i,e);
+                // fallback: insert واحد واحد
+                for(const row of chunk){
+                  try{
+                    const r2=await fetch(SB_URL+'/rest/v1/'+table,{
+                      method:'POST',
+                      headers:{'Content-Type':'application/json','apikey':SB_KEY,
+                        'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                      body:JSON.stringify(row),signal:AbortSignal.timeout(8000)
+                    });
+                    if(!r2.ok){const e2=await r2.text();console.warn('row insert fail',table,e2);errors++;}
+                  }catch(ex2){errors++;console.warn('row insert error',table,ex2.message);}
+                }
+              }
+            }catch(ex){errors++;console.warn('chunk error',table,ex.message);}
           }
           done+=rows.length;
         }
@@ -4658,9 +4643,9 @@ function renderClients(resetPage=true){
   const start=_clPage*_CL_PAGE_SIZE,end=start+_CL_PAGE_SIZE;
   const pageItems=f.slice(start,end);
   pager.innerHTML=f.length>_CL_PAGE_SIZE?`
-    <button onclick="_clPage=Math.max(0,_clPage-1);renderClients(false)" ${_clPage===0?'disabled':''} style="padding:4px 12px;border:1px solid var(--bd2);border-radius:7px;cursor:pointer;font-family:Cairo,sans-serif;background:var(--sf)">‹ السابق</button>
+    <button onclick="clPageGo(-1)" ${_clPage===0?'disabled':''} style="padding:4px 12px;border:1px solid var(--bd2);border-radius:7px;cursor:pointer;font-family:Cairo,sans-serif;background:var(--sf)">‹ السابق</button>
     <span style="color:var(--tx2)">صفحة ${_clPage+1} من ${totalPages} · إجمالي ${f.length} حجز</span>
-    <button onclick="_clPage=Math.min(totalPages-1,_clPage+1);renderClients(false)" ${_clPage>=totalPages-1?'disabled':''} style="padding:4px 12px;border:1px solid var(--bd2);border-radius:7px;cursor:pointer;font-family:Cairo,sans-serif;background:var(--sf)">التالي ›</button>
+    <button onclick="clPageGo(1,${totalPages})" ${_clPage>=totalPages-1?'disabled':''} style="padding:4px 12px;border:1px solid var(--bd2);border-radius:7px;cursor:pointer;font-family:Cairo,sans-serif;background:var(--sf)">التالي ›</button>
   `:`<span style="color:var(--tx3);font-size:12px">${f.length} حجز</span>`;
   if(!pageItems.length){tb.innerHTML='<tr><td colspan="14" style="text-align:center;color:var(--tx3);padding:2rem">لا توجد نتائج</td></tr>';return;}
   tb.innerHTML=pageItems.map(b=>{
@@ -4682,6 +4667,12 @@ function renderClients(resetPage=true){
     <td>${b.remaining<=0?'<span class="badge b-gr">مكتمل</span>':'<span class="badge b-wn">باقي</span>'}</td>
     <td><button class="btn btn-p btn-sm" onclick="printReceipt(${b.id})">إيصال</button><button class="btn btn-s btn-sm" onclick="printVoucher(${b.id},'receipt')">📥 استلام</button><button class="btn btn-d btn-sm" onclick="printVoucher(${b.id},'payment')">💸 صرف</button><button class="btn btn-sm" style="background:var(--prl);color:var(--pr);border-color:var(--pr)" onclick="event.stopPropagation();genClientLink(${b.id})" title="رابط كشف حساب العميل">🔗</button></td>
   </tr>`;}).join('');
+}
+function clPageGo(dir,total){
+  if(dir<0)_clPage=Math.max(0,_clPage-1);
+  else _clPage=Math.min((total||1)-1,_clPage+1);
+  renderClients(false);
+  document.getElementById('cl-list')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function viewClient(id){
   const b=bookings.find(x=>x.id===id);if(!b)return;
