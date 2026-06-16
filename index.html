@@ -620,8 +620,8 @@ tr:hover td{background:#f5f8fc}
   <div class="g3">
     <div class="fg"><label>نوع الطرف</label><select id="f-party" onchange="onPartyChange()"><option value="client">عميل</option><option value="supplier">مورد</option></select></div>
     <div class="fg"><label><span class="req">*</span>الاسم</label><input type="text" id="f-name"><select id="f-sup-sel" style="display:none" onchange="onSupSel()"><option value="">-- اختار مورد --</option></select></div>
-    <div class="fg"><label>الهاتف</label><input type="tel" id="f-phone" oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)"></div>
-    <div class="fg"><label>رقم آخر</label><input type="tel" id="f-phone2" placeholder="اختياري" oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)"></div>
+    <div class="fg"><label>الهاتف</label><input type="tel" id="f-phone" oninput="this.value=(v=>v.startsWith('2')&&v.length>11?v.slice(1):v)(this.value.replace(/\D/g,'').slice(0,12))"></div>
+    <div class="fg"><label>رقم آخر</label><input type="tel" id="f-phone2" placeholder="اختياري" oninput="this.value=(v=>v.startsWith('2')&&v.length>11?v.slice(1):v)(this.value.replace(/\D/g,'').slice(0,12))"></div>
   </div>
   <div class="g2">
     <div class="fg"><label><span class="req">*</span>الفوج <span id="conv-info" style="font-weight:400;color:var(--tx3);font-size:10px"></span></label><select id="f-convoy" onchange="onConvChg()"><option value="">--</option></select></div>
@@ -1046,8 +1046,8 @@ tr:hover td{background:#f5f8fc}
       <input type="hidden" id="hbk-edit-id" value="">
       <div class="g3">
         <div class="fg"><label>الاسم <span class="req">*</span></label><input type="text" id="hbk-name" placeholder="اسم العميل"></div>
-        <div class="fg"><label>الهاتف</label><input type="tel" id="hbk-phone" placeholder="01xxxxxxxxx" oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)"></div>
-        <div class="fg"><label>رقم آخر</label><input type="tel" id="hbk-phone2" placeholder="اختياري" oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)"></div>
+        <div class="fg"><label>الهاتف</label><input type="tel" id="hbk-phone" placeholder="01xxxxxxxxx" oninput="this.value=(v=>v.startsWith('2')&&v.length>11?v.slice(1):v)(this.value.replace(/\D/g,'').slice(0,12))"></div>
+        <div class="fg"><label>رقم آخر</label><input type="tel" id="hbk-phone2" placeholder="اختياري" oninput="this.value=(v=>v.startsWith('2')&&v.length>11?v.slice(1):v)(this.value.replace(/\D/g,'').slice(0,12))"></div>
         <div class="fg"><label>مسؤول المبيعات</label>
           <select id="hbk-sales">
             <option value="">-- نفس المسجّل دخول --</option>
@@ -6439,7 +6439,7 @@ function editBooking(id){
   document.getElementById('edit-modal-body').innerHTML=`
     <div class="g2" style="margin-bottom:.75rem">
       <div class="fg"><label>اسم العميل</label><input type="text" id="edit-name" value="${b.name}"></div>
-      <div class="fg"><label>الهاتف</label><input type="tel" id="edit-phone" value="${b.phone||''}"></div>
+      <div class="fg"><label>الهاتف</label><input type="tel" id="edit-phone" value="${b.phone||''}" oninput="this.value=(v=>v.startsWith('2')&&v.length>11?v.slice(1):v)(this.value.replace(/\D/g,'').slice(0,12))"></div>
       <div class="fg"><label>رقم آخر</label><input type="tel" id="edit-phone2" value="${b.phone2||''}" placeholder="اختياري" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,11)"></div>
     </div>
     <div class="g2">
