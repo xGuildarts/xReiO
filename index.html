@@ -5452,7 +5452,7 @@ function renderAccDetail(key){
   const inL=isSup?'مستلم':isExp?'مرتجع':'دائن';
   const outL=isSup?'مدفوع':isExp?'مصروف':'مدين';
   const accColKey='acc_col_'+activeAccTab.replace(/[^a-z0-9]/gi,'_');
-  let html=`<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem"><div class="ctitle" style="margin:0">${sub.replace('sup_','')}${filterActive?` <span style="font-size:11px;background:var(--acl);color:var(--ac);border-radius:20px;padding:2px 8px;font-weight:700">📅 ${fromD||'البداية'} ← ${toD||'النهاية'}</span>`:''}</div><button class="btn btn-sm" onclick="const w=document.getElementById('acc-entries-wrap');const a=document.getElementById('acc-col-arr');if(w.style.display==='none'){w.style.display='';a.textContent='▲';}else{w.style.display='none';a.textContent='▼';}" style="font-size:11px;flex-shrink:0"><span id="acc-col-arr">▲</span> إخفاء القيود</button></div>
+  let html=`<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem"><div class="ctitle" style="margin:0">${sub.replace('sup_','')}${filterActive?` <span style="font-size:11px;background:var(--acl);color:var(--ac);border-radius:20px;padding:2px 8px;font-weight:700">📅 ${fromD||'البداية'} ← ${toD||'النهاية'}</span>`:''}</div><button class="btn btn-sm" onclick="const w=document.getElementById('acc-entries-wrap');const a=document.getElementById('acc-col-arr');if(w.style.display==='none'){w.style.display='';a.textContent='▲ إخفاء القيود';}else{w.style.display='none';a.textContent='▼ إظهار القيود';}" style="font-size:11px;flex-shrink:0"><span id="acc-col-arr">▼ إظهار القيود</span></button></div>
     <div class="g3" style="margin-bottom:.875rem">
       <div class="stat green" style="padding:.65rem"><div class="stat-label">${inL}</div><div class="stat-val" style="font-size:14px;color:var(--ac)">${inn.toLocaleString()} ج</div></div>
       <div class="stat red" style="padding:.65rem"><div class="stat-label">${outL}</div><div class="stat-val" style="font-size:14px;color:var(--dn)">${out.toLocaleString()} ج</div></div>
@@ -5465,7 +5465,7 @@ function renderAccDetail(key){
     </div>`;
   if(!ents.length){html+='<div style="text-align:center;color:var(--tx3);padding:2rem">لا توجد قيود</div>';}
   else{
-    html+=`<div id="acc-entries-wrap"><div class="tbl-wrap"><table id="acc-tbl"><thead><tr><th>التاريخ</th><th>البيان</th><th>الفئة</th><th>النوع</th><th>المبلغ</th><th>الرصيد</th><th></th></tr></thead><tbody>`;
+    html+=`<div id="acc-entries-wrap" style="display:none"><div class="tbl-wrap"><table id="acc-tbl"><thead><tr><th>التاريخ</th><th>البيان</th><th>الفئة</th><th>النوع</th><th>المبلغ</th><th>الرصيد</th><th></th></tr></thead><tbody>`;
     html+=rows.map(({e,run})=>`<tr data-desc="${(e.desc||'').toLowerCase()}" data-op="${e.op}">
       <td style="font-size:11px;color:var(--tx3)">${e.date||'-'}</td>
       <td style="font-size:13px;font-weight:600">${e.clientName||e.desc||'-'}${e.category?`<br><span class="badge b-wn" style="font-size:10px">${e.category}</span>`:''}</td>
