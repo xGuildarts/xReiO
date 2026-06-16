@@ -301,7 +301,19 @@ body.dark .cfg-ok{background:var(--acl);color:var(--ac);border-color:var(--ac)}
 .user-pill{background:rgba(255,255,255,.15);color:#fff;font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid rgba(255,255,255,.2)}
 .hbtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif;font-weight:600}
 .hbtn:hover{background:rgba(255,255,255,.22)}
-.tabs{background:var(--sf);border-bottom:2px solid var(--bd);padding:0 .875rem;display:flex;overflow-x:auto;box-shadow:0 2px 8px rgba(0,0,0,.05)}.tabs::-webkit-scrollbar{height:3px}.tabs::-webkit-scrollbar-track{background:transparent}.tabs::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+.tabs{background:var(--sf);border-bottom:2px solid var(--bd);padding:0 .5rem;display:flex;align-items:stretch;box-shadow:0 2px 8px rgba(0,0,0,.05);flex-wrap:nowrap}
+.tab-group{position:relative;display:flex;align-items:stretch}
+.tab-group-btn{padding:12px 14px;border:none;background:transparent;cursor:pointer;font-size:14px;font-weight:700;font-family:'Cairo',sans-serif;color:var(--tx2);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;gap:4px}
+.tab-group-btn:hover,.tab-group:hover .tab-group-btn{color:var(--pr);background:var(--prl)}
+.tab-group-btn.has-active{color:var(--pr);border-bottom-color:var(--pr);background:var(--prl)}
+.tab-group-arrow{font-size:9px;opacity:.6;transition:transform .15s}
+.tab-group:hover .tab-group-arrow{transform:rotate(180deg)}
+.tab-dropdown{position:absolute;top:100%;right:0;min-width:180px;background:var(--sf);border:1px solid var(--bd2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;display:none;padding:5px;margin-top:2px}
+.tab-group:hover .tab-dropdown{display:block}
+.tab-dropdown .tab{display:block;width:100%;text-align:right;border-radius:7px;border-bottom:none;margin:0;padding:9px 13px;font-size:13px}
+.tab-dropdown .tab:hover{background:var(--prl);color:var(--pr)}
+.tab-dropdown .tab.active{background:var(--prl);color:var(--pr);border-bottom:none}
+body.dark .tab-dropdown{box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .tab{padding:12px 15px;border:none;background:transparent;cursor:pointer;font-size:14px;font-weight:700;font-family:'Cairo',sans-serif;color:var(--tx2);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
 .tab:hover{color:var(--pr);background:var(--prl)}
 .tab.active{color:var(--pr);border-bottom-color:var(--pr);background:var(--prl)}
@@ -542,22 +554,41 @@ tr:hover td{background:#f5f8fc}
   <button class="tab" id="tab-clients" onclick="showTab('clients')">العملاء</button>
   <button class="tab" id="tab-bus" onclick="showTab('bus')">الباص</button>
   <button class="tab" id="tab-accs" onclick="showTab('accs')">الحسابات</button>
-  <button class="tab h" id="tab-bulk-voucher" onclick="showTab('bulk-voucher')">📋 إذن جماعي</button>
-  <button class="tab" onclick="openStandaloneReceiptModal()">🧾 إذن استلام نقدية</button>
-  <button class="tab h" id="tab-remainings" onclick="showTab('remainings')">💳 كشف المتبقيات</button>
-  <button class="tab h" id="tab-reps" onclick="showTab('reps')">👤 تقرير المندوبين</button>
   <button class="tab" id="tab-tasks" onclick="showTab('tasks')">📋 التاسكات</button>
   <button class="tab" id="tab-sched" onclick="showTab('sched')">جدول الأفواج</button>
   <button class="tab" id="tab-hotels" onclick="showTab('hotels')">🏨 الفنادق</button>
-  <button class="tab h" id="tab-reports" onclick="showTab('reports')">التقارير</button>
-  <button class="tab h" id="tab-log" onclick="showTab('log')">سجل النشاط</button>
-  <button class="tab h" id="tab-users" onclick="showTab('users')">المستخدمين</button>
-  <button class="tab" id="tab-mgr" onclick="showTab('mgr')">الإعدادات العامة</button>
-  <button class="tab" id="tab-prices" onclick="showTab('prices')">إعدادات الأسعار</button>
-  <button class="tab h" id="tab-locks" onclick="showTab('locks')">🔒 تقفيل الأفواج</button>
-  <button class="tab" id="tab-closing" onclick="showTab('closing')">🧾 تقفيلة الفوج</button>
-  <button class="tab h" id="tab-conv-accounts" onclick="showTab('conv-accounts')">💰 حسابات الأفواج</button>
-  <button class="tab h" id="tab-design" onclick="showTab('design')">🎨 تصميم</button>
+
+  <div class="tab-group" id="tabg-vouchers">
+    <button class="tab-group-btn" id="tabg-btn-vouchers">📋 الإذونات <span class="tab-group-arrow">▼</span></button>
+    <div class="tab-dropdown">
+      <button class="tab h" id="tab-bulk-voucher" onclick="showTab('bulk-voucher')">📋 إذن جماعي</button>
+      <button class="tab" onclick="openStandaloneReceiptModal()">🧾 إذن استلام نقدية</button>
+      <button class="tab" id="tab-closing" onclick="showTab('closing')">🧾 تقفيلة الفوج</button>
+    </div>
+  </div>
+
+  <div class="tab-group" id="tabg-reports">
+    <button class="tab-group-btn" id="tabg-btn-reports">📊 التقارير <span class="tab-group-arrow">▼</span></button>
+    <div class="tab-dropdown">
+      <button class="tab h" id="tab-reports" onclick="showTab('reports')">📈 التقارير</button>
+      <button class="tab h" id="tab-log" onclick="showTab('log')">📜 سجل النشاط</button>
+      <button class="tab h" id="tab-reps" onclick="showTab('reps')">👤 تقرير المندوبين</button>
+      <button class="tab h" id="tab-remainings" onclick="showTab('remainings')">💳 كشف المتبقيات</button>
+      <button class="tab h" id="tab-conv-accounts" onclick="showTab('conv-accounts')">💰 حسابات الأفواج</button>
+    </div>
+  </div>
+
+  <div class="tab-group" id="tabg-admin">
+    <button class="tab-group-btn" id="tabg-btn-admin">⚙ الإدارة <span class="tab-group-arrow">▼</span></button>
+    <div class="tab-dropdown">
+      <button class="tab h" id="tab-users" onclick="showTab('users')">👥 المستخدمين</button>
+      <button class="tab h" id="tab-locks" onclick="showTab('locks')">🔒 تقفيل الأفواج</button>
+      <button class="tab" id="tab-mgr" onclick="showTab('mgr')">⚙ الإعدادات العامة</button>
+      <button class="tab" id="tab-prices" onclick="showTab('prices')">💲 إعدادات الأسعار</button>
+      <button class="tab h" id="tab-design" onclick="showTab('design')">🎨 تصميم</button>
+      <button class="tab h" id="tab-system" onclick="showTab('system')">🛡 النظام</button>
+    </div>
+  </div>
 </div>
 </div>
 <div class="main" id="main-area">
@@ -1274,6 +1305,26 @@ tr:hover td{background:#f5f8fc}
 <!-- DESIGN TAB SECTION -->
 <div id="design" class="sec"></div>
 
+<!-- SYSTEM TAB -->
+<div id="system" class="sec">
+  <div class="card" style="border-color:var(--dn);max-width:700px">
+    <div class="ctitle" style="color:var(--dn)">💾 نسخ احتياطية</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:.75rem">النسخة الكاملة تشمل: الحجوزات · الحسابات · المستخدمين · الفنادق · الموردين · الإعدادات</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-p" onclick="exportBackupJSON()">📥 تصدير نسخة كاملة JSON</button>
+      <button class="btn btn-s" onclick="exportBackupCSV();localStorage.setItem('mtr_last_backup',Date.now())">📊 ملخص CSV</button>
+      <button class="btn" style="border-color:var(--wn);color:var(--wn)" onclick="importBackupJSON()">📤 استيراد نسخة JSON</button>
+    </div>
+    <div style="font-size:11px;color:var(--tx3);margin-top:.75rem">⚠️ احرص على عمل نسخة احتياطية دورية — يُنصح كل أسبوع · الاستيراد يستبدل كل البيانات الحالية</div>
+  </div>
+
+  <div class="card" style="border-color:var(--dn);max-width:700px;margin-top:.875rem">
+    <div class="ctitle" style="color:var(--dn)">🔌 إعادة ضبط الاتصال</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:.75rem">في حالة تغيير بيانات Supabase أو وجود مشكلة في الاتصال</div>
+    <button class="btn btn-d" onclick="resetConn()">إعادة إعداد Supabase</button>
+  </div>
+</div>
+
 <!-- TASKS SECTION -->
 <div id="tasks" class="sec">
   <div class="main">
@@ -1419,10 +1470,6 @@ tr:hover td{background:#f5f8fc}
   <div class="card"><div class="ctitle">إدارة فئات الحسابات والمصاريف</div>
     <div id="cats-mgr-2"></div>
   </div>
-  <div class="card" style="border-color:var(--dn)"><div class="ctitle" style="color:var(--dn)">🔌 إعادة ضبط الاتصال</div>
-    <div style="font-size:12px;color:var(--tx2);margin-bottom:.75rem">في حالة تغيير بيانات Supabase أو وجود مشكلة في الاتصال</div>
-    <button class="btn btn-d" onclick="resetConn()">إعادة إعداد Supabase</button>
-  </div>
 
   <!-- ====== شقق إضافية في تاب الأسعار ====== -->
   <div class="card">
@@ -1490,16 +1537,6 @@ tr:hover td{background:#f5f8fc}
   </div>
   <div class="card" style="background:var(--prl);border-color:var(--pr)">
     <div style="font-size:12px;color:var(--pr)">💡 إدارة الأسعار وفئات الحسابات موجودة في تبويب <strong>الأسعار</strong></div>
-  </div>
-  <div class="card" style="border-color:var(--dn)">
-    <div class="ctitle" style="color:var(--dn)">💾 نسخ احتياطية</div>
-    <div style="font-size:12px;color:var(--tx2);margin-bottom:.75rem">النسخة الكاملة تشمل: الحجوزات · الحسابات · المستخدمين · الفنادق · الموردين · الإعدادات</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-p" onclick="exportBackupJSON()">📥 تصدير نسخة كاملة JSON</button>
-      <button class="btn btn-s" onclick="exportBackupCSV();localStorage.setItem('mtr_last_backup',Date.now())">📊 ملخص CSV</button>
-      <button class="btn" style="border-color:var(--wn);color:var(--wn)" onclick="importBackupJSON()">📤 استيراد نسخة JSON</button>
-    </div>
-    <div style="font-size:11px;color:var(--tx3);margin-top:.5rem">⚠️ احرص على عمل نسخة احتياطية دورية — يُنصح كل أسبوع · الاستيراد يستبدل كل البيانات الحالية</div>
   </div>
 
 </div>
@@ -1574,8 +1611,8 @@ let PM_TYPES=['انستا باي','خزينة (كاش)','حساب بنكي شر�
 let EXP_CATS=['مصاريف نقل','مصاريف عمومية','رواتب وأجور'];
 const SEAT_COLORS=['#1a5276','#117a65','#7d3c98','#c0392b','#d68910','#1abc9c','#e67e22','#2980b9','#8e44ad','#27ae60','#922b21','#148f77','#6c3483','#b7950b','#1f618d'];
 const MAX_SEATS=49;
-const ALL_PERMS={'add_booking':'إضافة حجز','edit_booking':'تعديل حجز','delete_booking':'حذف حجز','add_client':'إضافة عميل','add_supplier':'إضافة مورد','view_accounts':'عرض الحسابات','edit_accounts':'تعديل قيود','delete_accounts':'حذف قيود','approve_payments':'اعتماد دفعات','transfer_accounts':'تحويل بين الحسابات','view_log':'سجل النشاط','manage_users':'إدارة المستخدمين','view_bus':'إدارة الباص','print_bus':'طباعة قائمة الباص','settings':'الإعدادات العامة','manage_prices':'إدارة الأسعار','view_design':'إدارة التصميم','view_reports':'التقارير','print_receipt':'طباعة إيصالات','manage_categories':'إدارة فئات الحسابات','manage_locks':'تقفيل الأفواج','bypass_lock':'تجاوز قفل الفوج','view_conv_accounts':'حسابات الأفواج'};
-const ROLE_DEFAULTS={admin:Object.keys(ALL_PERMS),bookings:['add_booking','edit_booking','add_client','view_bus','print_receipt'],accounts:['view_accounts','edit_accounts','delete_accounts','approve_payments','transfer_accounts','view_reports'],operations:['view_bus','print_bus','view_reports'],viewer:['view_bus','view_reports']};
+const ALL_PERMS={'add_booking':'إضافة حجز','edit_booking':'تعديل حجز','delete_booking':'حذف حجز','add_client':'إضافة عميل','add_supplier':'إضافة مورد','view_accounts':'عرض الحسابات','edit_accounts':'تعديل قيود','delete_accounts':'حذف قيود','approve_payments':'اعتماد دفعات','transfer_accounts':'تحويل بين الحسابات','view_log':'سجل النشاط','manage_users':'إدارة المستخدمين','view_bus':'عرض الباص','edit_bus':'تعديل مقاعد الباص','print_bus':'طباعة قائمة الباص','settings':'الإعدادات العامة','manage_prices':'إدارة الأسعار','view_design':'إدارة التصميم','view_reports':'التقارير','print_receipt':'طباعة إيصالات','manage_categories':'إدارة فئات الحسابات','manage_locks':'تقفيل الأفواج','bypass_lock':'تجاوز قفل الفوج','view_conv_accounts':'حسابات الأفواج','view_closing':'تقفيلة الفوج','view_remainings':'كشف المتبقيات','view_reps':'تقرير المندوبين','view_receipt_voucher':'إذن استلام نقدية','view_bulk_voucher':'إذن جماعي','manage_system':'إدارة النظام (نسخ احتياطي + اتصال)'};
+const ROLE_DEFAULTS={admin:Object.keys(ALL_PERMS),bookings:['add_booking','edit_booking','add_client','view_bus','edit_bus','print_receipt','view_closing','view_receipt_voucher','view_bulk_voucher'],accounts:['view_accounts','edit_accounts','delete_accounts','approve_payments','transfer_accounts','view_reports','view_remainings','view_conv_accounts','view_receipt_voucher','view_bulk_voucher','view_closing'],operations:['view_bus','edit_bus','print_bus','view_reports','view_closing'],viewer:['view_bus','view_reports']};
 
 // ============================================================
 // POPUP SYSTEM — replaces browser alert/confirm
@@ -3556,22 +3593,36 @@ function applyPerms(){
   // Tabs visible per role
   const alwaysShow=['dash','clients','sched','tasks'];
   const showTabs=[...alwaysShow];
-  if(!isViewer) showTabs.push('add'); // viewer can't add bookings
-  if(perms.includes('view_bus')||perms.includes('view_bus')) showTabs.push('bus');
+  if(!isViewer) showTabs.push('add');
+  if(perms.includes('view_bus')||perms.includes('edit_bus')) showTabs.push('bus');
   if(perms.includes('view_accounts')) showTabs.push('accs');
-  if(perms.includes('view_accounts')||perms.includes('edit_accounts')||perms.includes('approve_payments')) showTabs.push('bulk-voucher');
   if(perms.includes('view_reports')) showTabs.push('reports');
   if(perms.includes('view_log')) showTabs.push('log');
   if(perms.includes('manage_users')) showTabs.push('users');
   if(perms.includes('settings')) showTabs.push('mgr');
   if(perms.includes('manage_prices')) showTabs.push('prices');
   if(perms.includes('view_design')) showTabs.push('design');
+  if(perms.includes('manage_system')) showTabs.push('system');
+  // receipt voucher button visibility
+  const rcptBtn=document.querySelector('.tab-dropdown button[onclick="openStandaloneReceiptModal()"]');
+  if(rcptBtn)rcptBtn.classList.toggle('h',!perms.includes('view_receipt_voucher'));
   if(perms.includes('manage_locks')) showTabs.push('locks');
-  showTabs.push('hotels'); // hotels available to all logged-in users
-  
+  if(perms.includes('view_conv_accounts')) showTabs.push('conv-accounts');
+  if(perms.includes('view_closing')) showTabs.push('closing');
+  if(perms.includes('view_remainings')) showTabs.push('remainings');
+  if(perms.includes('view_reps')) showTabs.push('reps');
+  if(perms.includes('view_bulk_voucher')) showTabs.push('bulk-voucher');
+  showTabs.push('hotels');
+
   document.querySelectorAll('.tab[id^="tab-"]').forEach(t=>{
     const id=t.id.replace('tab-','');
     t.classList.toggle('h',!showTabs.includes(id));
+  });
+  // Hide dropdown group button if ALL its tabs are hidden
+  document.querySelectorAll('.tab-group').forEach(grp=>{
+    const allHidden=[...grp.querySelectorAll('.tab[id^="tab-"]')].every(t=>t.classList.contains('h'));
+    const btn=grp.querySelector('.tab-group-btn');
+    if(btn)btn.style.display=allHidden?'none':'';
   });
   
   // For viewer: disable all interactive buttons after render
@@ -3585,6 +3636,204 @@ function applyPerms(){
     if(banner)banner.style.display='none';
   }
   // NOTE: do NOT call showTab here — loginUser handles tab restore
+}
+
+// ============================================================
+// REMAININGS - كشف المتبقيات
+// ============================================================
+function renderRem(){
+  const convoys=[...new Set(activeBookings().map(b=>b.convoy))].sort((a,b)=>a-b);
+  const sel=document.getElementById('rem-convoy');
+  if(sel){
+    const cur=sel.value;
+    sel.innerHTML='<option value="">كل الأفواج</option>'+convoys.map(c=>{const cv=getConv(c);return`<option value="${c}" ${cur==c?'selected':''}>${cv?cv.label:'فوج '+c}</option>`;}).join('');
+  }
+  const convFilter=document.getElementById('rem-convoy')?.value||'';
+  const minVal=parseFloat(document.getElementById('rem-min')?.value)||0;
+  const search=(document.getElementById('rem-search')?.value||'').trim().toLowerCase();
+  const sortBy=document.getElementById('rem-sort')?.value||'rem-desc';
+
+  let rows=activeBookings().filter(b=>b.partyType!=='supplier');
+  if(convFilter)rows=rows.filter(b=>String(b.convoy)===String(convFilter));
+  if(minVal>0)rows=rows.filter(b=>b.remaining>=minVal);
+  if(search)rows=rows.filter(b=>b.name.toLowerCase().includes(search)||(b.phone||'').includes(search));
+
+  rows.sort((a,b)=>{
+    if(sortBy==='rem-desc')return b.remaining-a.remaining;
+    if(sortBy==='rem-asc')return a.remaining-b.remaining;
+    if(sortBy==='name')return a.name.localeCompare(b.name,'ar');
+    if(sortBy==='convoy')return a.convoy-b.convoy;
+    return 0;
+  });
+
+  const totalRem=rows.reduce((s,b)=>s+b.remaining,0);
+  const totalPaid=rows.reduce((s,b)=>s+b.paid,0);
+  const totalAll=rows.reduce((s,b)=>s+b.total,0);
+  const withRem=rows.filter(b=>b.remaining>0).length;
+
+  const statsEl=document.getElementById('rem-stats');
+  if(statsEl)statsEl.innerHTML=`
+    <div class="stat gold" style="padding:.6rem;flex:1;min-width:120px"><div class="stat-label">إجمالي العملاء</div><div class="stat-val" style="font-size:15px">${rows.length}</div></div>
+    <div class="stat red" style="padding:.6rem;flex:1;min-width:120px"><div class="stat-label">بهم متبقي</div><div class="stat-val" style="font-size:15px;color:var(--dn)">${withRem}</div></div>
+    <div class="stat green" style="padding:.6rem;flex:1;min-width:120px"><div class="stat-label">إجمالي المدفوع</div><div class="stat-val" style="font-size:15px;color:var(--ac)">${totalPaid.toLocaleString()} ج</div></div>
+    <div class="stat red" style="padding:.6rem;flex:1;min-width:120px"><div class="stat-label">إجمالي المتبقي</div><div class="stat-val" style="font-size:15px;color:var(--dn)">${totalRem.toLocaleString()} ج</div></div>
+  `;
+
+  const tbody=document.getElementById('rem-tbl');
+  if(!tbody)return;
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:2rem">لا توجد نتائج</td></tr>';return;}
+  tbody.innerHTML=rows.map((b,i)=>{
+    const pct=b.total>0?Math.round(b.paid/b.total*100):0;
+    const cv=getConv(b.convoy);
+    return`<tr>
+      <td style="color:var(--tx3);font-size:11px">${i+1}</td>
+      <td style="font-weight:700;cursor:pointer;color:var(--pr)" onclick="viewClient(${b.id})">${b.name}</td>
+      <td style="font-size:12px">${b.phone||'—'}</td>
+      <td style="font-size:12px">${cv?cv.label:'فوج '+b.convoy}</td>
+      <td style="font-weight:700">${b.total.toLocaleString()} ج</td>
+      <td style="color:var(--ac);font-weight:700">${b.paid.toLocaleString()} ج</td>
+      <td style="color:${b.remaining>0?'var(--dn)':'var(--ac)'};font-weight:700">${b.remaining>0?b.remaining.toLocaleString()+' ج':'✓ مكتمل'}</td>
+      <td>
+        <div style="background:var(--bd);border-radius:10px;height:7px;min-width:60px;overflow:hidden">
+          <div style="background:${pct>=100?'var(--ac)':pct>=50?'var(--wn)':'var(--dn)'};height:100%;width:${Math.min(pct,100)}%;border-radius:10px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:10px;color:var(--tx3);text-align:center;margin-top:2px">${pct}%</div>
+      </td>
+      <td><button class="btn btn-s btn-sm" onclick="showTab('clients');viewClient(${b.id})">عرض</button></td>
+    </tr>`;
+  }).join('');
+
+  const footer=document.getElementById('rem-footer');
+  if(footer)footer.textContent=`${rows.length} عميل · إجمالي: ${totalAll.toLocaleString()} ج · مدفوع: ${totalPaid.toLocaleString()} ج · متبقي: ${totalRem.toLocaleString()} ج`;
+}
+
+function printRem(){
+  const rows=[...document.querySelectorAll('#rem-tbl tr')];
+  if(!rows.length)return;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>كشف المتبقيات</title>
+  <style>body{font-family:'Cairo',Arial,sans-serif;direction:rtl;font-size:12px;color:#1a2535}
+  table{width:100%;border-collapse:collapse}th{background:#1a5276;color:#fff;padding:7px 10px;text-align:right}
+  td{padding:6px 10px;border-bottom:1px solid #dce6f0}tr:nth-child(even){background:#f7f9fb}
+  h2{color:#1a5276;margin-bottom:8px}.stats{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .stat{background:#f0f4f8;border-radius:8px;padding:8px 14px;font-weight:700}
+  @media print{body{font-size:11px}}</style></head><body>
+  <h2>💳 كشف المتبقيات</h2>
+  <div class="stats">${document.getElementById('rem-stats')?.innerHTML||''}</div>
+  <table><thead><tr><th>#</th><th>العميل</th><th>الهاتف</th><th>الفوج</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>%</th></tr></thead>
+  <tbody>${[...document.querySelectorAll('#rem-tbl tr')].map(r=>{const cells=[...r.querySelectorAll('td')].slice(0,8);return'<tr>'+cells.map(c=>'<td>'+c.innerText+'</td>').join('')+'</tr>';}).join('')}</tbody></table>
+  <div style="margin-top:8px;font-size:11px;color:#666">${document.getElementById('rem-footer')?.textContent||''}</div>
+  <script>window.print();<\/script></body></html>`);
+  w.document.close();
+}
+
+// ============================================================
+// REPS - تقرير المندوبين
+// ============================================================
+function renderReps(){
+  const convoys=[...new Set(activeBookings().map(b=>b.convoy))].sort((a,b)=>a-b);
+  const sel=document.getElementById('reps-convoy');
+  if(sel){
+    const cur=sel.value;
+    sel.innerHTML='<option value="">كل الأفواج</option>'+convoys.map(c=>{const cv=getConv(c);return`<option value="${c}" ${cur==c?'selected':''}>${cv?cv.label:'فوج '+c}</option>`;}).join('');
+  }
+  const convFilter=document.getElementById('reps-convoy')?.value||'';
+  const search=(document.getElementById('reps-search')?.value||'').trim().toLowerCase();
+
+  let rows=activeBookings().filter(b=>b.partyType!=='supplier');
+  if(convFilter)rows=rows.filter(b=>String(b.convoy)===String(convFilter));
+
+  // Group by createdBy (sales rep)
+  const byRep={};
+  rows.forEach(b=>{
+    const rep=b.createdBy||'غير محدد';
+    if(!byRep[rep])byRep[rep]={name:rep,count:0,total:0,paid:0,remaining:0,clients:[]};
+    byRep[rep].count++;
+    byRep[rep].total+=b.total;
+    byRep[rep].paid+=b.paid;
+    byRep[rep].remaining+=b.remaining;
+    byRep[rep].clients.push(b);
+  });
+
+  let reps=Object.values(byRep).sort((a,b)=>b.total-a.total);
+  if(search)reps=reps.filter(r=>r.name.toLowerCase().includes(search)||r.clients.some(b=>b.name.toLowerCase().includes(search)));
+
+  const totalBookings=reps.reduce((s,r)=>s+r.count,0);
+  const totalRev=reps.reduce((s,r)=>s+r.total,0);
+  const totalRem=reps.reduce((s,r)=>s+r.remaining,0);
+
+  const summaryEl=document.getElementById('reps-summary');
+  if(summaryEl)summaryEl.innerHTML=`<div style="display:flex;gap:.5rem;flex-wrap:wrap">
+    <div class="stat gold" style="padding:.6rem;flex:1;min-width:120px"><div class="stat-label">المندوبين</div><div class="stat-val" style="font-size:15px">${reps.length}</div></div>
+    <div class="stat" style="padding:.6rem;flex:1;min-width:120px"><div class="stat-label">إجمالي الحجوزات</div><div class="stat-val" style="font-size:15px">${totalBookings}</div></div>
+    <div class="stat green" style="padding:.6rem;flex:1;min-width:120px"><div class="stat-label">إجمالي الإيرادات</div><div class="stat-val" style="font-size:15px;color:var(--ac)">${totalRev.toLocaleString()} ج</div></div>
+    <div class="stat red" style="padding:.6rem;flex:1;min-width:120px"><div class="stat-label">إجمالي المتبقيات</div><div class="stat-val" style="font-size:15px;color:var(--dn)">${totalRem.toLocaleString()} ج</div></div>
+  </div>`;
+
+  const detailEl=document.getElementById('reps-detail');
+  if(!detailEl)return;
+  if(!reps.length){detailEl.innerHTML='<div style="text-align:center;color:var(--tx3);padding:2rem">لا توجد بيانات</div>';return;}
+
+  detailEl.innerHTML=reps.map(rep=>{
+    const pct=rep.total>0?Math.round(rep.paid/rep.total*100):0;
+    const filtered=search?rep.clients.filter(b=>b.name.toLowerCase().includes(search)||rep.name.toLowerCase().includes(search)):rep.clients;
+    return`<div class="card" style="margin-bottom:.875rem;padding:.875rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:.75rem">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--pr);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff">${rep.name.charAt(0)}</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:var(--pr)">${rep.name}</div>
+            <div style="font-size:11px;color:var(--tx3)">${rep.count} حجز · تحصيل ${pct}%</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:1rem;text-align:center">
+          <div><div style="font-size:10px;color:var(--tx3)">الإجمالي</div><div style="font-weight:800;color:var(--gd)">${rep.total.toLocaleString()} ج</div></div>
+          <div><div style="font-size:10px;color:var(--tx3)">المدفوع</div><div style="font-weight:800;color:var(--ac)">${rep.paid.toLocaleString()} ج</div></div>
+          <div><div style="font-size:10px;color:var(--tx3)">المتبقي</div><div style="font-weight:800;color:${rep.remaining>0?'var(--dn)':'var(--ac)'}">${rep.remaining>0?rep.remaining.toLocaleString()+' ج':'✓'}</div></div>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table style="font-size:12px"><thead><tr><th>#</th><th>العميل</th><th>الفوج</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th></th></tr></thead><tbody>
+      ${filtered.map((b,i)=>{const cv=getConv(b.convoy);return`<tr>
+        <td style="color:var(--tx3)">${i+1}</td>
+        <td style="font-weight:700">${b.name}</td>
+        <td style="font-size:11px">${cv?cv.label:'فوج '+b.convoy}</td>
+        <td>${b.total.toLocaleString()} ج</td>
+        <td style="color:var(--ac)">${b.paid.toLocaleString()} ج</td>
+        <td style="color:${b.remaining>0?'var(--dn)':'var(--ac)'};font-weight:700">${b.remaining>0?b.remaining.toLocaleString()+' ج':'✓'}</td>
+        <td><button class="btn btn-sm btn-p" onclick="showTab('clients');viewClient(${b.id})">عرض</button></td>
+      </tr>`;}).join('')}
+      </tbody></table></div>
+    </div>`;
+  }).join('');
+}
+
+function printReps(){
+  const w=window.open('','_blank');
+  const convoys=[...new Set(activeBookings().map(b=>b.convoy))].sort((a,b)=>a-b);
+  const convFilter=document.getElementById('reps-convoy')?.value||'';
+  let rows=activeBookings().filter(b=>b.partyType!=='supplier');
+  if(convFilter)rows=rows.filter(b=>String(b.convoy)===String(convFilter));
+  const byRep={};
+  rows.forEach(b=>{const rep=b.createdBy||'غير محدد';if(!byRep[rep])byRep[rep]={name:rep,count:0,total:0,paid:0,remaining:0,clients:[]};byRep[rep].count++;byRep[rep].total+=b.total;byRep[rep].paid+=b.paid;byRep[rep].remaining+=b.remaining;byRep[rep].clients.push(b);});
+  const reps=Object.values(byRep).sort((a,b)=>b.total-a.total);
+  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>تقرير المندوبين</title>
+  <style>body{font-family:'Cairo',Arial,sans-serif;direction:rtl;font-size:12px;color:#1a2535}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}th{background:#1a5276;color:#fff;padding:6px 10px;text-align:right}
+  td{padding:5px 10px;border-bottom:1px solid #dce6f0}tr:nth-child(even){background:#f7f9fb}
+  h2{color:#1a5276}.rep-header{background:#eef5fb;border-radius:6px;padding:8px 12px;margin:12px 0 6px;display:flex;justify-content:space-between;align-items:center}
+  .rep-name{font-weight:900;font-size:14px;color:#1a5276}.rep-stats{font-size:12px;color:#444}
+  @media print{body{font-size:11px}}</style></head><body>
+  <h2>👤 تقرير المندوبين</h2>
+  ${reps.map(rep=>`
+    <div class="rep-header">
+      <span class="rep-name">${rep.name} (${rep.count} حجز)</span>
+      <span class="rep-stats">إجمالي: ${rep.total.toLocaleString()} ج · مدفوع: ${rep.paid.toLocaleString()} ج · متبقي: ${rep.remaining.toLocaleString()} ج</span>
+    </div>
+    <table><thead><tr><th>#</th><th>العميل</th><th>الفوج</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th></tr></thead>
+    <tbody>${rep.clients.map((b,i)=>{const cv=getConv(b.convoy);return`<tr><td>${i+1}</td><td>${b.name}</td><td>${cv?cv.label:'فوج '+b.convoy}</td><td>${b.total.toLocaleString()} ج</td><td>${b.paid.toLocaleString()} ج</td><td style="color:${b.remaining>0?'#c0392b':'#117a65'};font-weight:700">${b.remaining>0?b.remaining.toLocaleString()+' ج':'✓'}</td></tr>`;}).join('')}</tbody></table>
+  `).join('')}
+  <script>window.print();<\/script></body></html>`);
+  w.document.close();
 }
 
 // ============================================================
@@ -3928,10 +4177,10 @@ function populateSupSel(){
 // SHOW TAB
 // ============================================================
 // ===== Lazy Tab Render — track dirty tabs =====
-const _dirtyTabs=new Set(['dash','clients','bus','accs','reports','log','hotels','remainings','conv-accounts']);
+const _dirtyTabs=new Set(['dash','clients','bus','accs','reports','log','hotels','remainings','reps','conv-accounts']);
 let _activeTab='dash';
 function markTabsDirty(...tabs){tabs.forEach(t=>_dirtyTabs.add(t));}
-function markAllTabsDirty(){['dash','clients','bus','accs','reports','log','hotels','remainings','conv-accounts','sched','tasks'].forEach(t=>_dirtyTabs.add(t));}
+function markAllTabsDirty(){['dash','clients','bus','accs','reports','log','hotels','remainings','reps','conv-accounts','sched','tasks','system'].forEach(t=>_dirtyTabs.add(t));}
 
 function showTab(t){
   _activeTab=t;
@@ -3939,10 +4188,12 @@ function showTab(t){
   localStorage.setItem('mtr_last_tab',t);
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   const tb=document.getElementById('tab-'+t);if(tb)tb.classList.add('active');
+  document.querySelectorAll('.tab-group-btn').forEach(b=>b.classList.remove('has-active'));
+  if(tb){const grp=tb.closest('.tab-group');if(grp){const gbtn=grp.querySelector('.tab-group-btn');if(gbtn)gbtn.classList.add('has-active');}}
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   const sc=document.getElementById(t);if(sc)sc.classList.add('active');
   // Only render if tab is dirty (data changed) or always-fresh tabs
-  const alwaysFresh=['add','mgr','locks','prices','bulk-voucher','users','sched','tasks'];
+  const alwaysFresh=['add','mgr','locks','prices','bulk-voucher','users','sched','tasks','remainings','reps','system'];
   const needRender=alwaysFresh.includes(t)||_dirtyTabs.has(t);
   if(!needRender)return;
   _dirtyTabs.delete(t);
@@ -3955,6 +4206,8 @@ function showTab(t){
   if(t==='tasks')renderTasks();
   if(t==='reports')onRptTypeChange();
   if(t==='log')renderLog();
+  if(t==='remainings')renderRem();
+  if(t==='reps')renderReps();
   if(t==='add'){populateConvoys();populateCities();populateSupSel();renderGrid();}
   if(t==='hotels'){renderHotelStats();renderHotelBookings();}
   if(t==='bulk-voucher'){bvInit();}
@@ -4704,12 +4957,13 @@ function renderBusNameManager(cn){
     if(busCard)busCard.insertBefore(el,document.getElementById('bus-warn'));
   }
   const names=getBusNames(cn);
+  const canEditB=canDo('edit_bus');
   el.innerHTML=`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:.65rem;padding:.65rem;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r)">
     <span style="font-size:12px;font-weight:700;color:var(--pr)">🚌 الباصات:</span>
     ${names.map((n,i)=>`<button onclick="selectBusIdx(${i})" style="padding:5px 12px;border:2px solid ${activeBusIdx===i?'var(--pr)':'var(--bd2)'};border-radius:20px;background:${activeBusIdx===i?'var(--pr)':'var(--sf)'};color:${activeBusIdx===i?'#fff':'var(--tx2)'};cursor:pointer;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">${n}</button>`).join('')}
-    <button onclick="addBusToConvoy(${cn})" style="padding:5px 12px;border:2px dashed var(--ac);border-radius:20px;background:var(--acl);color:var(--ac);cursor:pointer;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">+ باص جديد</button>
-    <button onclick="renameBus(${cn},${activeBusIdx})" style="padding:4px 9px;border:1px solid var(--bd2);border-radius:8px;background:var(--sf);color:var(--tx2);cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif">✏ تسمية الباص</button>
-    ${names.length>1?`<button onclick="removeBus(${cn},${activeBusIdx})" style="padding:4px 9px;border:1px solid var(--dn);border-radius:8px;background:var(--dnl);color:var(--dn);cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif">🗑 حذف</button>`:''}
+    ${canEditB?`<button onclick="addBusToConvoy(${cn})" style="padding:5px 12px;border:2px dashed var(--ac);border-radius:20px;background:var(--acl);color:var(--ac);cursor:pointer;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">+ باص جديد</button>`:''}
+    ${canEditB?`<button onclick="renameBus(${cn},${activeBusIdx})" style="padding:4px 9px;border:1px solid var(--bd2);border-radius:8px;background:var(--sf);color:var(--tx2);cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif">✏ تسمية الباص</button>`:''}
+    ${canEditB&&names.length>1?`<button onclick="removeBus(${cn},${activeBusIdx})" style="padding:4px 9px;border:1px solid var(--dn);border-radius:8px;background:var(--dnl);color:var(--dn);cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif">🗑 حذف</button>`:''}
   </div>`;
 }
 
@@ -4970,7 +5224,7 @@ function renderBusLayout(cn,busIdx){
     <div class="stat green" style="padding:.5rem .75rem;min-width:75px"><div class="stat-label">هذا الباص</div><div class="stat-val" style="font-size:14px;color:var(--ac)">${usedThisBus}</div></div>
     <div class="stat" style="padding:.5rem .75rem;min-width:75px"><div class="stat-label">فاضي</div><div class="stat-val" style="font-size:14px;color:var(--pr)">${Math.max(0,MAX_SEATS-usedThisBus)}</div></div>
     <div class="stat" style="padding:.5rem .75rem;min-width:100px;border-top-color:var(--gd)"><div class="stat-label">🚌 ${busName}</div><div class="stat-val" style="font-size:12px;color:var(--gd)">${bks.length} حجز</div></div>
-    <button onclick="clearAllSeats(${cn},${busIdx})" style="align-self:center;background:var(--dnl);color:var(--dn);border:1.5px solid var(--dn);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">🗑 إلغاء كل التخصيص</button>`;
+    ${canDo('edit_bus')?`<button onclick="clearAllSeats(${cn},${busIdx})" style="align-self:center;background:var(--dnl);color:var(--dn);border:1.5px solid var(--dn);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">🗑 إلغاء كل التخصيص</button>`:''}`;
   const pickupCount={};
   bks.forEach(b=>{const p=b.pickup||'—';pickupCount[p]=(pickupCount[p]||0)+effSeats(b);});
   document.getElementById('pickup-summary').innerHTML=Object.entries(pickupCount).map(([p,c])=>`<div class="pickup-tag">من <span>${p}</span>: <span>${c}</span> مقعد</div>`).join('');
@@ -5096,20 +5350,27 @@ function renderBusLayout(cn,busIdx){
   }
 
   function ms(sn){
+    const canEdit=canDo('edit_bus');
     // Check if this seat has a return client (convoy2=cn)
     if(occ2[sn]){
       const o2=occ2[sn];
       const conv1=getConv(o2.fromConvoy);
-      return `<div class="seat taken" style="background:#7d3c98;border:3px solid #f9e79f;cursor:pointer" ondblclick="clearSeat2(${cn},${sn})" title="${o2.name} · راجع من فوج ${o2.fromConvoy} · ${o2.pickup} · دبل كليك للإلغاء"><span class="snum" style="color:rgba(255,255,255,.7)">${sn}</span><span class="sname">${o2.name}</span><span class="sphone" style="font-size:18px">↩ راجع من فوج ${conv1?conv1.label:o2.fromConvoy}</span><span style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:8px;font-weight:900;padding:1px 4px;margin-top:1px">فوجين</span></div>`;
+      return `<div class="seat taken" style="background:#7d3c98;border:3px solid #f9e79f;cursor:${canEdit?'pointer':'default'}" ${canEdit?`ondblclick="clearSeat2(${cn},${sn})"`:''}title="${o2.name} · راجع من فوج ${o2.fromConvoy} · ${o2.pickup}${canEdit?' · دبل كليك للإلغاء':''}"><span class="snum" style="color:rgba(255,255,255,.7)">${sn}</span><span class="sname">${o2.name}</span><span class="sphone" style="font-size:18px">↩ راجع من فوج ${conv1?conv1.label:o2.fromConvoy}</span><span style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:8px;font-weight:900;padding:1px 4px;margin-top:1px">فوجين</span></div>`;
     }
     const o=occ[sn];
     if(o){
       const col=cColor(o.bookingId,cn);
       const doubleBadge=o.isDouble?`<span style="background:#f9e79f;color:#7d3c98;border-radius:3px;font-size:15px;font-weight:900;padding:1px 4px;margin-top:1px">⚠ فوجين · مش هيرجع معنا</span>`:'';
       const noteBadge=o.seatNote?`<span style="background:rgba(255,255,255,.25);border-radius:3px;font-size:15px;padding:1px 4px;margin-top:1px;white-space:normal;line-height:1.3">📝 ${o.seatNote}</span>`:'';
-      return `<div class="seat taken" style="background:${col};${o.isDouble?'border:3px solid #f9e79f':''}" draggable="true" ondragstart="dragInfo={cn:${cn},sn:${sn}};poolDragInfo=null;event.dataTransfer.effectAllowed='move';setTimeout(()=>event.target.classList.add('dragging'),0)" ondragend="event.target.classList.remove('dragging')" ondragover="event.preventDefault()" ondragenter="event.currentTarget.classList.add('drag-over')" ondragleave="event.currentTarget.classList.remove('drag-over')" ondrop="event.currentTarget.classList.remove('drag-over');busDrop(event,${cn},${sn})" ondblclick="clearSeat(${cn},${sn})" title="${o.name} · ${o.pickup}${o.isDouble?' · واخد فوجين':''}${o.seatNote?' · 📝 '+o.seatNote:''}"><span class="snum">${sn}</span><span class="sname">${o.name}</span><span class="sphone">${o.phone}</span><span class="splace">${o.pickup}</span>${doubleBadge}${noteBadge}</div>`;
+      if(canEdit){
+        return `<div class="seat taken" style="background:${col};${o.isDouble?'border:3px solid #f9e79f':''}" draggable="true" ondragstart="dragInfo={cn:${cn},sn:${sn}};poolDragInfo=null;event.dataTransfer.effectAllowed='move';setTimeout(()=>event.target.classList.add('dragging'),0)" ondragend="event.target.classList.remove('dragging')" ondragover="event.preventDefault()" ondragenter="event.currentTarget.classList.add('drag-over')" ondragleave="event.currentTarget.classList.remove('drag-over')" ondrop="event.currentTarget.classList.remove('drag-over');busDrop(event,${cn},${sn})" ondblclick="clearSeat(${cn},${sn})" title="${o.name} · ${o.pickup}${o.isDouble?' · واخد فوجين':''}${o.seatNote?' · 📝 '+o.seatNote:''}"><span class="snum">${sn}</span><span class="sname">${o.name}</span><span class="sphone">${o.phone}</span><span class="splace">${o.pickup}</span>${doubleBadge}${noteBadge}</div>`;
+      }
+      return `<div class="seat taken" style="background:${col};${o.isDouble?'border:3px solid #f9e79f':''}cursor:default" title="${o.name} · ${o.pickup}${o.isDouble?' · واخد فوجين':''}${o.seatNote?' · 📝 '+o.seatNote:''}"><span class="snum">${sn}</span><span class="sname">${o.name}</span><span class="sphone">${o.phone}</span><span class="splace">${o.pickup}</span>${doubleBadge}${noteBadge}</div>`;
     }
-    return `<div class="seat empty" ondragover="event.preventDefault()" ondragenter="event.currentTarget.classList.add('drag-over')" ondragleave="event.currentTarget.classList.remove('drag-over')" ondrop="event.currentTarget.classList.remove('drag-over');busDrop(event,${cn},${sn})"><span class="snum">${sn}</span></div>`;
+    if(canEdit){
+      return `<div class="seat empty" ondragover="event.preventDefault()" ondragenter="event.currentTarget.classList.add('drag-over')" ondragleave="event.currentTarget.classList.remove('drag-over')" ondrop="event.currentTarget.classList.remove('drag-over');busDrop(event,${cn},${sn})"><span class="snum">${sn}</span></div>`;
+    }
+    return `<div class="seat empty" style="cursor:default"><span class="snum">${sn}</span></div>`;
   }
   let busHtml=`<div class="bus-wrap" style="overflow:visible"><div class="bus-top">🚌 ${busName} · ${conv.label} · دخول ${conv.checkin} 9-11 ص · خروج ${conv.checkout} 5-7 ص</div><div class="bus-driver">سائق</div>`;
 
@@ -5168,8 +5429,9 @@ function renderBusLayout(cn,busIdx){
   busHtml+=`<div class="bus-legend">${bks.map((b,i)=>`<span><span class="ldot" style="background:${SEAT_COLORS[i%SEAT_COLORS.length]}"></span>${b.name.split(' ').slice(0,2).join(' ')} · ${b.pickup||'-'}${b.convoy2?' ⚠فوجين':''}</span>`).join('')}</div>`;
   // Add return clients to legend
   if(returnClients.length){busHtml+=`<div class="bus-legend" style="margin-top:4px">${returnClients.map(b=>`<span style="color:var(--pu)"><span class="ldot" style="background:var(--pu)"></span>${b.name.split(' ').slice(0,2).join(' ')} ↩راجع · ${b.pickup||'-'}</span>`).join('')}</div>`;}
-  busHtml+=`<div style="font-size:11px;text-align:center;color:var(--tx3);margin-top:.5rem">اسحب من البركة → مقعد · اسحب مقعد → نقل · دبل كليك على أي مقعد → إلغاء التخصيص (يشمل كراسي العودة 🟣)</div></div>`;
-  const stickyPool=poolHtml?`<div id="bus-pool-sticky" style="position:fixed;bottom:0;right:0;left:0;z-index:999;background:var(--sf);border-top:2px solid var(--bd2);box-shadow:0 -4px 20px rgba(0,0,0,.15)"><div id="pool-header" style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;cursor:pointer;user-select:none" onclick="togglePool()"><span style="font-weight:800;color:var(--pr);font-size:13px">🎫 ينتظرون تخصيص — اسحب للمقعد</span><span id="pool-arr" style="font-size:18px;color:var(--tx2);font-weight:900">▼</span></div><div id="pool-body" style="max-height:35vh;overflow-y:auto;padding:.5rem 1rem">${poolHtml}</div></div>`:'';const bottomPad=`<div id="bus-bottom-pad" style="height:${poolHtml?'42vh':'0'}"></div>`;document.getElementById('bus-layout').innerHTML=busHtml+bottomPad+stickyPool;
+  if(canDo('edit_bus'))busHtml+=`<div style="font-size:11px;text-align:center;color:var(--tx3);margin-top:.5rem">اسحب من البركة → مقعد · اسحب مقعد → نقل · دبل كليك على أي مقعد → إلغاء التخصيص (يشمل كراسي العودة 🟣)</div>`;
+  busHtml+=`</div>`;
+  const stickyPool=(poolHtml&&canDo('edit_bus'))?`<div id="bus-pool-sticky" style="position:fixed;bottom:0;right:0;left:0;z-index:999;background:var(--sf);border-top:2px solid var(--bd2);box-shadow:0 -4px 20px rgba(0,0,0,.15)"><div id="pool-header" style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;cursor:pointer;user-select:none" onclick="togglePool()"><span style="font-weight:800;color:var(--pr);font-size:13px">🎫 ينتظرون تخصيص — اسحب للمقعد</span><span id="pool-arr" style="font-size:18px;color:var(--tx2);font-weight:900">▼</span></div><div id="pool-body" style="max-height:35vh;overflow-y:auto;padding:.5rem 1rem">${poolHtml}</div></div>`:'';const bottomPad=`<div id="bus-bottom-pad" style="height:${poolHtml?'42vh':'0'}"></div>`;document.getElementById('bus-layout').innerHTML=busHtml+bottomPad+stickyPool;
   // Add print + PDF buttons — inside bottom pad so they stay above sticky pool
   const btnWrap=document.createElement('div');
   btnWrap.style.cssText='padding:1rem 0 .5rem 0;display:flex;gap:8px;flex-wrap:wrap;';
@@ -5204,6 +5466,7 @@ function togglePool(){
   }
 }
 async function busDrop(e,cn,toSn){
+  if(!canDo('edit_bus')){return;}
   e.preventDefault();
   if(poolDragInfo){
     const{bookingId,assignIdx,isReturn2}=poolDragInfo;poolDragInfo=null;
@@ -5247,6 +5510,7 @@ async function busDrop(e,cn,toSn){
   }
 }
 async function clearSeat(cn,sn){
+  if(!canDo('edit_bus')){toast('ليس لديك صلاحية تعديل الباص','warn');return;}
   if(!await confirm('إلغاء التخصيص؟'))return;
   const b=bookings.find(bb=>bb.convoy===cn&&(bb.seatAssign||[]).some(s=>s.seatNum===sn));if(!b)return;
   b.seatAssign.forEach((sa,i)=>{if(sa.seatNum===sn)b.seatAssign[i].seatNum=null;});
@@ -5255,6 +5519,7 @@ async function clearSeat(cn,sn){
 }
 
 async function clearSeat2(cn,sn){
+  if(!canDo('edit_bus')){toast('ليس لديك صلاحية تعديل الباص','warn');return;}
   if(!await confirm('إلغاء تخصيص كرسي العودة؟'))return;
   const b=bookings.find(bb=>bb.convoy2===cn&&(bb.seatAssign2||[]).some(s=>s.seatNum===sn));if(!b)return;
   b.seatAssign2.forEach((sa,i)=>{if(sa.seatNum===sn)b.seatAssign2[i].seatNum=null;});
@@ -5263,6 +5528,7 @@ async function clearSeat2(cn,sn){
 }
 
 async function clearAllSeats(cn,busIdx){
+  if(!canDo('edit_bus')){toast('ليس لديك صلاحية تعديل الباص','warn');return;}
   const busName=getBusNames(cn)[busIdx]||'الباص '+(busIdx+1);
   if(!await confirm(`إلغاء كل تخصيص المقاعد في ${busName}؟ هيتم تفريغ كل المقاعد المحجوزة للعملاء في هذا الباص (ذهاب وعودة).`))return;
   const allBks=activeBookings().filter(b=>b.convoy===cn&&effSeats(b)>0);
