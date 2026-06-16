@@ -284,7 +284,7 @@ body.dark .cfg-ok{background:var(--acl);color:var(--ac);border-color:var(--ac)}
 .login-err{background:var(--dnl);border:1px solid var(--dn);border-radius:var(--r);padding:.6rem .875rem;font-size:12px;color:var(--dn);margin-bottom:.75rem;display:none}
 .app{display:none}
 .app.show{display:block}
-.hdr{background:var(--pr);padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.sticky-nav{position:sticky;top:0;z-index:100}.hdr{background:var(--pr);padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.2)}
 .hdr-l{display:flex;align-items:center;gap:10px}
 .hdr-logo{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.4)}
 .hdr-logo-ph{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:15px}
@@ -301,7 +301,7 @@ body.dark .cfg-ok{background:var(--acl);color:var(--ac);border-color:var(--ac)}
 .user-pill{background:rgba(255,255,255,.15);color:#fff;font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid rgba(255,255,255,.2)}
 .hbtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif;font-weight:600}
 .hbtn:hover{background:rgba(255,255,255,.22)}
-.tabs{background:var(--sf);border-bottom:2px solid var(--bd);padding:0 .875rem;display:flex;overflow-x:auto;position:sticky;top:56px;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.tabs{background:var(--sf);border-bottom:2px solid var(--bd);padding:0 .875rem;display:flex;overflow-x:auto;box-shadow:0 2px 8px rgba(0,0,0,.05)}.tabs::-webkit-scrollbar{height:3px}.tabs::-webkit-scrollbar-track{background:transparent}.tabs::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
 .tab{padding:12px 15px;border:none;background:transparent;cursor:pointer;font-size:14px;font-weight:700;font-family:'Cairo',sans-serif;color:var(--tx2);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
 .tab:hover{color:var(--pr);background:var(--prl)}
 .tab.active{color:var(--pr);border-bottom-color:var(--pr);background:var(--prl)}
@@ -507,6 +507,7 @@ tr:hover td{background:#f5f8fc}
 
 <!-- APP -->
 <div class="app" id="app">
+<div class="sticky-nav">
 <div class="hdr">
   <div class="hdr-l">
     <div id="hdr-lph" class="hdr-logo-ph">🏖</div>
@@ -557,6 +558,7 @@ tr:hover td{background:#f5f8fc}
   <button class="tab" id="tab-closing" onclick="showTab('closing')">🧾 تقفيلة الفوج</button>
   <button class="tab h" id="tab-conv-accounts" onclick="showTab('conv-accounts')">💰 حسابات الأفواج</button>
   <button class="tab h" id="tab-design" onclick="showTab('design')">🎨 تصميم</button>
+</div>
 </div>
 <div class="main" id="main-area">
 <!-- DASH -->
