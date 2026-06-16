@@ -5,6 +5,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -2925,7 +2926,7 @@ async function _doPoll(){
         if(_activeTab==='dash')renderDash();
         else if(_activeTab==='clients')renderClients();
         else if(_activeTab==='bus')renderBusTab();
-        if(typeof toast==='function')toast('🔄 تم تحديث البيانات','info');
+        // لا toast — بيوفر egress وما بيزعلش المستخدم
       }
     }
     // جيب آخر 30 قيد محاسبي
@@ -2953,7 +2954,7 @@ function startPollingFallback(){
   // أول poll بعد 3 ثواني من الدخول
   setTimeout(_doPoll,3000);
   // ثم كل 5 دقائق
-  _pollInterval=setInterval(_doPoll,300000);
+  _pollInterval=setInterval(_doPoll,900000); // كل 15 دقيقة بدل 5 لتوفير Egress
 }
 
 // تحديث يدوي فوري
@@ -3103,65 +3104,51 @@ async function importBackupJSON(){
         let done=0,errors=0;
         async function upsertAll(table,rows){
           if(!rows||!rows.length)return;
-          // نقسم: صفوف عندها id (هنعمل لها upsert) وصفوف من غير id (هنعمل insert عادي)
+          // نستخدم استراتيجية: PATCH لكل صف عنده id، وPOST (بدون id) للجديد
+          // ده بيتجنب مشكلة GENERATED ALWAYS AS IDENTITY
           const withId=rows.filter(r=>r.id!=null);
           const withoutId=rows.filter(r=>r.id==null);
-          // ── upsert الصفوف اللي عندها id ──
-          for(let i=0;i<withId.length;i+=50){
-            const chunk=withId.slice(i,i+50);
+          // ── الصفوف اللي عندها id: نجرب PATCH الأول، لو مفيش نعمل POST بدون id ──
+          for(const row of withId){
+            const {id,created_at,...rest}=row;
+            // حاول PATCH الأول (تحديث لو موجود)
             try{
-              const url=SB_URL+'/rest/v1/'+table;
-              const res=await fetch(url,{
-                method:'POST',
-                headers:{
-                  'Content-Type':'application/json',
-                  'apikey':SB_KEY,
-                  'Authorization':'Bearer '+SB_KEY,
-                  'Prefer':'resolution=merge-duplicates,return=minimal'
-                },
-                body:JSON.stringify(chunk),
-                signal:AbortSignal.timeout(15000)
+              const rPatch=await fetch(SB_URL+'/rest/v1/'+table+'?id=eq.'+id,{
+                method:'PATCH',
+                headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal','Count':'exact'},
+                body:JSON.stringify(rest),
+                signal:AbortSignal.timeout(10000)
               });
-              if(!res.ok){
-                // لو فشل بسبب GENERATED ALWAYS، نجرب PATCH على كل صف بـ id
-                if((await res.text()).includes('generated always')||true){
-                  for(const row of chunk){
-                    const {id,...rest}=row;
-                    try{
-                      const r2=await fetch(SB_URL+'/rest/v1/'+table+'?id=eq.'+id,{
-                        method:'PATCH',
-                        headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-                        body:JSON.stringify(rest),
-                        signal:AbortSignal.timeout(10000)
-                      });
-                      if(!r2.ok){
-                        // مش موجود — insert بدون id
-                        await fetch(SB_URL+'/rest/v1/'+table,{
-                          method:'POST',
-                          headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-                          body:JSON.stringify(rest),
-                          signal:AbortSignal.timeout(10000)
-                        });
-                      }
-                    }catch(e2){errors++;console.warn('patch/insert error',table,id,e2.message);}
-                  }
-                }
+              const affected=rPatch.headers.get('Content-Range');
+              const count=affected?parseInt(affected.split('/')[1]||'0'):1;
+              if(rPatch.ok && count===0){
+                // مش موجود — نعمل insert بدون id (Supabase هيولد id تلقائي)
+                const rIns=await fetch(SB_URL+'/rest/v1/'+table,{
+                  method:'POST',
+                  headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                  body:JSON.stringify(rest),
+                  signal:AbortSignal.timeout(10000)
+                });
+                if(!rIns.ok){const e=await rIns.text();console.warn('insert new row failed',table,id,e);}
+              }else if(!rPatch.ok){
+                const e=await rPatch.text();
+                console.warn('patch failed',table,id,e);
+                errors++;
               }
-            }catch(ex){errors++;console.warn('upsert chunk error on '+table+':',ex.message);}
+            }catch(ex){errors++;console.warn('upsert row error',table,id,ex.message);}
           }
-          // ── insert الصفوف من غير id ──
+          // ── الصفوف من غير id: insert عادي ──
           for(let i=0;i<withoutId.length;i+=50){
             const chunk=withoutId.slice(i,i+50);
             try{
-              const url=SB_URL+'/rest/v1/'+table;
-              const res=await fetch(url,{
+              const res=await fetch(SB_URL+'/rest/v1/'+table,{
                 method:'POST',
                 headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
                 body:JSON.stringify(chunk),
                 signal:AbortSignal.timeout(15000)
               });
               if(!res.ok){const e=await res.text();throw new Error(e);}
-            }catch(ex){errors++;console.warn('insert error on '+table+':',ex.message);}
+            }catch(ex){errors++;console.warn('insert error',table,ex.message);}
           }
           done+=rows.length;
         }
@@ -3196,7 +3183,17 @@ async function importBackupJSON(){
         await upsertAll('mtr_suppliers',data.suppliers||[]);
         await upsertAll('htl_hotels',data.hotels||[]);
         await upsertAll('htl_bookings',data.hotelBookings||[]);
-        await upsertAll('mtr_users',data.users||[]);
+        // ✅ تحضير بيانات المستخدمين — نتأكد من custom_perms صح
+        const dbUsers=(data.users||[]).map(u=>({
+          id:u.id,
+          username:u.username||'',
+          password:u.password||'',
+          name:u.name||'',
+          role:u.role||'viewer',
+          custom_perms:Array.isArray(u.custom_perms)?u.custom_perms:(u.custom_perms||[]),
+          created_at:u.created_at||null
+        }));
+        await upsertAll('mtr_users',dbUsers);
         // ===== Tasks =====
         if((data.tasks||[]).length){
           const dbTasks=(data.tasks||[]).map(t=>({
@@ -3269,15 +3266,7 @@ function exportBackupCSV(){
   if(typeof toast==='function')toast('✅ تم تصدير ملف CSV','success');
 }
 // Auto backup reminder every 7 days
-function checkAutoBackup(){
-  const last=localStorage.getItem('mtr_last_backup');
-  const now=Date.now();
-  if(!last||now-parseInt(last)>7*24*60*60*1000){
-    setTimeout(()=>{
-      if(typeof toast==='function')toast('💾 تذكير: لم يتم عمل نسخة احتياطية منذ أكثر من 7 أيام','warn',6000);
-    },3000);
-  }
-}
+function checkAutoBackup(){} // تم إزالة تذكير الـ 7 أيام
 
 // ============================================================
 // STARTUP
@@ -3431,6 +3420,7 @@ function loginUser(f){
   document.getElementById('lang-btn').textContent=lang==='ar'?'EN':'AR';
   applyPerms();updateLogoDsp();
   populateConvoys();populateCities();populateSalesReps();renderGrid();
+  populateNuRole(); // ✅ تعبئة الأدوار في فورم إضافة مستخدم
   document.getElementById('acc-date').value=new Date().toISOString().split('T')[0];
   renderDash();
   renderExtraAptsList();
