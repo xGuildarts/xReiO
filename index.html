@@ -3383,42 +3383,9 @@ async function importBackupJSON(){
             }catch(ex){console.warn('delete table failed',t,ex.message);}
           }
         }
-        _updProg(5,'جاري تحضير بيانات الحجوزات...','');
-        // Map bookings back to DB format
-        const dbBookings=(data.bookings||[]).map(b=>({
-          id:b.id,name:b.name,phone:b.phone,phone2:b.phone2,pickup:b.pickup,
-          convoy:b.convoy,convoy2:b.convoy2,checkin:b.checkin,checkout:b.checkout,
-          apts:b.apts,apt_prices:b.aptPrices,apts_total:b.aptsTotal,
-          apts2:b.apts2,apt_prices2:b.aptPrices2,
-          seats:b.seats,extra_seats:b.extraSeats,seat_discount:b.seatDiscount,
-          seat_price:b.seatPrice,seat_disc_amt:b.seatDiscAmt,
-          int_seats:b.intSeats,int_seat_price:b.intSeatPrice,int_total:b.intTotal,
-          transfer_fee:b.transferFee,transfer_fee_note:b.transferFeeNote,
-          disc:b.disc,total:b.total,paid:b.paid,remaining:b.remaining,
-          payments:b.payments,notes:b.notes,seat_note:b.seatNote,
-          seat_assign:b.seatAssign,seat_assign2:b.seatAssign2,
-          mgr_snap:b.mgrSnap,created_by:b.createdBy,party_type:b.partyType,
-          supplier_id:b.supplierId,disc_reason:b.discReason,
-          adults:b.adults,children:b.children,status:b.status,
-          last_edit_by:b.lastEditBy,last_edit_at:b.lastEditAt,
-          bus_idx:b.busIdx,collect_via:b.collectVia,
-          created_at:b.createdAt||b.created_at||null
-        }));
-        const dbAcc=(data.accEntries||[]).map(a=>({
-          id:a.id,type:a.type,op:a.op,amount:a.amount,entry_date:a.date,
-          description:a.desc,client_name:a.clientName,category:a.category,
-          booking_ref:a.bookingRef,booking_pay_ref:a.bookingPayRef,supplier_id:a.supplierId,
-          created_at:a.createdAt||a.created_at||null
-        }));
-        // Upsert all Supabase tables
-        _updProg(15,'جاري استيراد الحجوزات...','الحجوزات: '+(dbBookings.length)+' سجل');
-        await upsertAll('mtr_bookings',dbBookings);
-        // تحديث collect_via في dbBookings بالـ IDs الجديدة للموردين
-        // (بيتعمل بعد insert الحجوزات — هنعمله بـ PATCH على الحجوزات اللي عندها supplier)
-        _updProg(40,'جاري استيراد القيود المحاسبية...','القيود: '+(dbAcc.length)+' سجل');
-        await upsertAll('mtr_acc',dbAcc);
-        _updProg(55,'جاري استيراد الموردين...','');
-        // استيراد الموردين مع بناء mapping بين ID القديم والجديد
+        _updProg(5,'جاري استيراد الموردين...','');
+        // === نستورد الموردين الأول، قبل الحجوزات والحسابات، عشان نبني mapping بين الـ ID القديم والجديد ===
+        // (لازم يحصل قبل الحجوزات/الحسابات لأن العمودين supplier_id و collect_via بيعتمدوا على IDs الموردين)
         const _supIdMap={}; // {oldId: newId}
         if((data.suppliers||[]).length){
           for(const sup of data.suppliers){
@@ -3441,35 +3408,50 @@ async function importBackupJSON(){
           }
           console.log('[import] supplier ID map:',_supIdMap);
         }
-        // إصلاح collect_via في الحجوزات — نحدث الـ supplier IDs القديمة بالجديدة
-        if(Object.keys(_supIdMap).length){
-          _updProg(60,'جاري إصلاح روابط الموردين...','');
-          const bksWithSup=(data.bookings||[]).filter(b=>b.collectVia&&b.collectVia.startsWith('supplier_'));
-          for(const b of bksWithSup){
-            try{
-              const oldSupId=parseInt(b.collectVia.replace('supplier_',''));
-              const newSupId=_supIdMap[oldSupId];
-              if(newSupId){
-                // نلاقي الحجز في Supabase بالاسم+الفوج+التاريخ
-                const qRes=await fetch(SB_URL+'/rest/v1/mtr_bookings?name=eq.'+encodeURIComponent(b.name)+'&convoy=eq.'+b.convoy+'&select=id&limit=1',{
-                  headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
-                  signal:AbortSignal.timeout(6000)
-                });
-                if(qRes.ok){
-                  const qData=await qRes.json();
-                  if(qData&&qData[0]){
-                    await fetch(SB_URL+'/rest/v1/mtr_bookings?id=eq.'+qData[0].id,{
-                      method:'PATCH',
-                      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-                      body:JSON.stringify({collect_via:'supplier_'+newSupId}),
-                      signal:AbortSignal.timeout(6000)
-                    });
-                  }
-                }
-              }
-            }catch(ex){console.warn('collect_via fix error',b.name,ex.message);}
+        _updProg(15,'جاري تحضير بيانات الحجوزات...','');
+        // Map bookings back to DB format
+        const dbBookings=(data.bookings||[]).map(b=>{
+          // نصحح supplier_id و collect_via بالـ ID الجديد للمورد (لو الـ mapping متوفر)
+          let fixedSupplierId=b.supplierId||null;
+          if(fixedSupplierId&&_supIdMap[fixedSupplierId])fixedSupplierId=_supIdMap[fixedSupplierId];
+          let fixedCollectVia=b.collectVia||'';
+          if(fixedCollectVia&&fixedCollectVia.startsWith('supplier_')){
+            const oldCvId=parseInt(fixedCollectVia.replace('supplier_',''));
+            if(_supIdMap[oldCvId])fixedCollectVia='supplier_'+_supIdMap[oldCvId];
           }
-        }
+          return{
+          id:b.id,name:b.name,phone:b.phone,phone2:b.phone2,pickup:b.pickup,
+          convoy:b.convoy,convoy2:b.convoy2,checkin:b.checkin,checkout:b.checkout,
+          apts:b.apts,apt_prices:b.aptPrices,apts_total:b.aptsTotal,
+          apts2:b.apts2,apt_prices2:b.aptPrices2,
+          seats:b.seats,extra_seats:b.extraSeats,seat_discount:b.seatDiscount,
+          seat_price:b.seatPrice,seat_disc_amt:b.seatDiscAmt,
+          int_seats:b.intSeats,int_seat_price:b.intSeatPrice,int_total:b.intTotal,
+          transfer_fee:b.transferFee,transfer_fee_note:b.transferFeeNote,
+          disc:b.disc,total:b.total,paid:b.paid,remaining:b.remaining,
+          payments:b.payments,notes:b.notes,seat_note:b.seatNote,
+          seat_assign:b.seatAssign,seat_assign2:b.seatAssign2,
+          mgr_snap:b.mgrSnap,created_by:b.createdBy,party_type:b.partyType,
+          supplier_id:fixedSupplierId,disc_reason:b.discReason,
+          adults:b.adults,children:b.children,status:b.status,
+          last_edit_by:b.lastEditBy,last_edit_at:b.lastEditAt,
+          bus_idx:b.busIdx,collect_via:fixedCollectVia,
+          created_at:b.createdAt||b.created_at||null
+        }});
+        const dbAcc=(data.accEntries||[]).map(a=>{
+          let fixedSupplierId=a.supplierId||null;
+          if(fixedSupplierId&&_supIdMap[fixedSupplierId])fixedSupplierId=_supIdMap[fixedSupplierId];
+          return{
+          id:a.id,type:a.type,op:a.op,amount:a.amount,entry_date:a.date,
+          description:a.desc,client_name:a.clientName,category:a.category,
+          booking_ref:a.bookingRef,booking_pay_ref:a.bookingPayRef,supplier_id:fixedSupplierId,
+          created_at:a.createdAt||a.created_at||null
+        }});
+        // Upsert all Supabase tables
+        _updProg(30,'جاري استيراد الحجوزات...','الحجوزات: '+(dbBookings.length)+' سجل');
+        await upsertAll('mtr_bookings',dbBookings);
+        _updProg(45,'جاري استيراد القيود المحاسبية...','القيود: '+(dbAcc.length)+' سجل');
+        await upsertAll('mtr_acc',dbAcc);
         _updProg(62,'جاري استيراد الفنادق...','');
         await upsertAll('htl_hotels',data.hotels||[]);
         _updProg(70,'جاري استيراد حجوزات الفنادق...','');
