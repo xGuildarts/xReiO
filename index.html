@@ -4938,7 +4938,7 @@ async function saveBooking(){
     delete payload._discReason;
     const res=await sbFetch('mtr_bookings','POST',payload,'');
     if(res&&res[0]){
-      const nb=mB(res[0]);bookings.unshift(nb);
+      const _r0=res[0];if(!_r0.id){_r0.id=Date.now();}const nb=mB(_r0);bookings.unshift(nb);
       if(supplierId&&total>0){
         const sup=suppliers.find(s=>s.id===supplierId);
         const se=await sbFetch('mtr_acc','POST',{type:sup?.name||'مورد',op:'expense',amount:total,entry_date:conv.checkin,description:`حجز فوج ${cn} - ${name}`,client_name:name,category:'',booking_ref:String(res[0].id),booking_pay_ref:'',supplier_id:supplierId},'');
@@ -5002,7 +5002,7 @@ function renderClients(resetPage=true){
     const ms=!sf||(sf==='done'&&b.remaining<=0)||(sf==='pending'&&b.remaining>0);
     const mp=!pf||(b.partyType||'client')===pf;
     return mq&&ms&&mp;
-  }).sort((a,b)=>b.id-a.id);
+  }).sort((a,b)=>(b.id||Number.MAX_SAFE_INTEGER)-(a.id||Number.MAX_SAFE_INTEGER)||new Date(b.createdAt||0)-new Date(a.createdAt||0));
   const tb=document.getElementById('cl-tbl');
   // pagination footer
   const totalPages=Math.ceil(f.length/_CL_PAGE_SIZE)||1;
