@@ -2957,7 +2957,7 @@ async function _doPoll(){
   try{
     if(d)d.className='sdot s';if(t)t.textContent='جاري التحديث...';
     // جيب آخر 50 حجز فقط للمقارنة
-    const latest=await sbFetch('mtr_bookings','GET',null,'?order=id.desc&limit=50&select=id,name,phone,convoy,checkin,apts,seats,extra_seats,seat_discount,total,paid,remaining,payments,status,created_by,created_at,pickup,party_type,adults,children,int_seats,bus_idx,collect_via');
+    const latest=await sbFetch('mtr_bookings','GET',null,'?order=id.desc&limit=50');
     if(latest&&Array.isArray(latest)){
       let changed=false;
       latest.forEach(r=>{
