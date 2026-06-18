@@ -2971,6 +2971,7 @@ async function _doPoll(){
         }
       });
       if(changed){
+        bookings.sort((a,b)=>Number(b.id)-Number(a.id));
         markAllTabsDirty();
         if(_activeTab==='dash')renderDash();
         else if(_activeTab==='clients')renderClients();
@@ -4938,7 +4939,7 @@ async function saveBooking(){
     delete payload._discReason;
     const res=await sbFetch('mtr_bookings','POST',payload,'');
     if(res&&res[0]){
-      const _r0=res[0];if(!_r0.created_at)_r0.created_at=new Date().toISOString();const nb=mB(_r0);bookings.unshift(nb);
+      const _r0=res[0];if(!_r0.created_at)_r0.created_at=new Date().toISOString();const nb=mB(_r0);bookings.unshift(nb);bookings.sort((a,b)=>Number(b.id)-Number(a.id));
       if(supplierId&&total>0){
         const sup=suppliers.find(s=>s.id===supplierId);
         const se=await sbFetch('mtr_acc','POST',{type:sup?.name||'مورد',op:'expense',amount:total,entry_date:conv.checkin,description:`حجز فوج ${cn} - ${name}`,client_name:name,category:'',booking_ref:String(res[0].id),booking_pay_ref:'',supplier_id:supplierId},'');
