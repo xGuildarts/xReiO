@@ -2957,7 +2957,7 @@ async function _doPoll(){
   try{
     if(d)d.className='sdot s';if(t)t.textContent='جاري التحديث...';
     // جيب آخر 50 حجز فقط للمقارنة
-    const latest=await sbFetch('mtr_bookings','GET',null,'?order=id.desc&limit=50');
+    const latest=await sbFetch('mtr_bookings','GET',null,'?order=created_at.desc&limit=50');
     if(latest&&Array.isArray(latest)){
       let changed=false;
       latest.forEach(r=>{
@@ -3830,7 +3830,7 @@ async function initApp(){
   document.getElementById('lod-msg').textContent='جاري تحميل البيانات...';
   const BK_LIMIT=1500,ACC_LIMIT=1500,HBK_LIMIT=1000;
   const [bks,accs,logs,usrs,setts,sups,htls,hbks]=await Promise.all([
-    sbFetch('mtr_bookings','GET',null,'?order=id.desc&limit='+BK_LIMIT),
+    sbFetch('mtr_bookings','GET',null,'?order=created_at.desc&limit='+BK_LIMIT),
     sbFetch('mtr_acc','GET',null,'?order=id.desc&limit='+ACC_LIMIT),
     sbFetch('mtr_log','GET',null,'?order=id.desc&limit=150'),
     sbFetch('mtr_users','GET',null,'?order=id.asc'),
