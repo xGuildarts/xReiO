@@ -3188,17 +3188,23 @@ async function exportBackupJSON(){
       allConvExpenses=(typeof convExpenses!=='undefined'?convExpenses:[]);
   try{
     toast('⏳ جاري تجميع النسخة الاحتياطية الكاملة...','info',15000);
-    const [bksFull,accFull,tskFull,expFull]=await Promise.all([
+    const [bksFull,accFull,tskFull,expFull,supFull,htlFull,hbkFull]=await Promise.all([
       sbFetch('mtr_bookings','GET',null,'?order=id.asc&limit=9999'),
       sbFetch('mtr_acc','GET',null,'?order=id.asc&limit=9999'),
       sbFetch('mtr_tasks','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
       sbFetch('mtr_conv_expenses','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
+      sbFetch('mtr_suppliers','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
+      sbFetch('htl_hotels','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
+      sbFetch('htl_bookings','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
     ]);
     if(bksFull&&bksFull.length)allBookings=bksFull.map(mB);
     if(accFull&&accFull.length)allAccEntries=accFull.map(mA);
     // mtr_log محذوف من الـ export — بيوفر egress وما بيتستردش في الاستيراد
     if(tskFull&&tskFull.length)allTasks=tskFull;
     if(expFull&&expFull.length)allConvExpenses=expFull;
+    if(supFull&&supFull.length)allSuppliers=supFull;
+    if(htlFull&&htlFull.length)allHotels=htlFull;
+    if(hbkFull&&hbkFull.length)allHotelBookings=hbkFull.map(r=>typeof mHB==='function'?mHB(r):r);
   }catch(e){console.warn('Full fetch fallback to in-memory:',e);}
   // ====== snapshot كامل من localStorage ======
   const lsSnap={};
@@ -3311,13 +3317,26 @@ async function importBackupJSON(){
           const bar=document.getElementById('imp-prog-bar');
           const lbl=document.getElementById('imp-prog-label');
           const det=document.getElementById('imp-prog-detail');
-          if(bar)bar.style.width=Math.min(100,pct)+'%';
-          if(lbl)lbl.textContent=label||'';
+          if(bar&&pct!=null)bar.style.width=Math.min(100,pct)+'%';
+          if(lbl&&label!=null)lbl.textContent=label;
           if(det)det.textContent=detail||'';
         }
         function _closeProg(){const m=document.getElementById('imp-prog-mod');if(m)m.remove();}
         // ===
         let done=0,errors=0;
+        const _failedTables={}; // {table: count} لإظهار تفاصيل واضحة لو جدول فضل فاضي
+        // جلب عدد السجلات الحالية في جدول — يُستخدم للتحقق بعد الإدخال
+        async function _countRows(table){
+          try{
+            const r=await fetch(SB_URL+'/rest/v1/'+table+'?select=id&limit=1',{
+              headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'count=exact'},
+              signal:AbortSignal.timeout(8000)
+            });
+            const cr=r.headers.get('content-range'); // مثال: "0-0/123"
+            return cr?parseInt(cr.split('/')[1]||'0'):null; // null = تعذر القياس
+          }catch(ex){return null;}
+        }
+        // upsertAll عادي (بدون الحاجة لـ idMap) — لكن الآن بيتحقق فعليًا إن الصفوف اتكتبت
         async function upsertAll(table,rows){
           if(!rows||!rows.length)return;
           const CHUNK=50;
@@ -3338,18 +3357,28 @@ async function importBackupJSON(){
               }
             }catch(ex){console.warn('merge check failed',table,ex.message);}
           }
+          if(!rowsToInsert.length)return;
+          const countBefore=await _countRows(table);
           const cleanRows=rowsToInsert.map(({id,...rest})=>rest); // نحتفظ بـ created_at الأصلي
+          let insertedOk=0;
           for(let i=0;i<cleanRows.length;i+=CHUNK){
             const chunk=cleanRows.slice(i,i+CHUNK);
             try{
               const res=await fetch(SB_URL+'/rest/v1/'+table,{
                 method:'POST',
                 headers:{'Content-Type':'application/json','apikey':SB_KEY,
-                  'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                  'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
                 body:JSON.stringify(chunk),
                 signal:AbortSignal.timeout(20000)
               });
-              if(!res.ok){
+              if(res.ok){
+                const rd=await res.json().catch(()=>[]);
+                insertedOk+=Array.isArray(rd)?rd.length:chunk.length;
+                if(Array.isArray(rd)&&rd.length<chunk.length){
+                  console.warn('[RLS?] '+table+': sent '+chunk.length+' rows but only '+rd.length+' came back — some rows were likely blocked silently');
+                  errors+=(chunk.length-rd.length);
+                }
+              }else{
                 const e=await res.text();
                 console.warn('chunk insert failed',table,'chunk',i,e);
                 // fallback: insert واحد واحد
@@ -3358,21 +3387,104 @@ async function importBackupJSON(){
                     const r2=await fetch(SB_URL+'/rest/v1/'+table,{
                       method:'POST',
                       headers:{'Content-Type':'application/json','apikey':SB_KEY,
-                        'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                        'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
                       body:JSON.stringify(row),signal:AbortSignal.timeout(8000)
                     });
-                    if(!r2.ok){const e2=await r2.text();console.warn('row insert fail',table,e2);errors++;}
+                    if(r2.ok){
+                      const rd2=await r2.json().catch(()=>[]);
+                      if(Array.isArray(rd2)&&rd2.length>0)insertedOk++;
+                      else{errors++;console.warn('[RLS?] row reported ok but returned no data',table);}
+                    }else{const e2=await r2.text();console.warn('row insert fail',table,e2);errors++;}
                   }catch(ex2){errors++;console.warn('row insert error',table,ex2.message);}
                 }
               }
             }catch(ex){errors++;console.warn('chunk error',table,ex.message);}
           }
-          done+=rows.length;
+          // ===== تحقق نهائي: قارن العدد الفعلي في القاعدة قبل/بعد =====
+          const countAfter=await _countRows(table);
+          if(countBefore!==null&&countAfter!==null){
+            const actualDelta=countAfter-countBefore;
+            if(actualDelta<insertedOk){
+              const missing=insertedOk-actualDelta;
+              console.error('[RLS SILENT FAILURE] '+table+': API reported '+insertedOk+' inserted, but row count only increased by '+actualDelta+' — '+missing+' rows were silently blocked (likely RLS policy)');
+              errors+=missing;
+              _failedTables[table]=(_failedTables[table]||0)+missing;
+            }
+          }
+          done+=insertedOk;
+        }
+        // ===== upsertAllMapped: زي upsertAll بس بيرجع {oldId: newId} =====
+        // لازم نستخدمه لأي جدول جداول تانية بتشاور عليه بـ Foreign Key
+        // (الحجوزات، الموردين، الفنادق، حجوزات الفنادق، القيود المحاسبية)
+        // ملاحظة: بنادخل صف صف (مش batch) لأن PostgREST مش بيضمن إن ترتيب الصفوف
+        // الراجعة من batch insert يطابق ترتيب الإدخال 100% — وده حرج جدًا لمطابقة IDs صحيحة
+        async function upsertAllMapped(table,rows){
+          const idMap={};
+          if(!rows||!rows.length)return idMap;
+          let rowsToInsert=rows;
+          if(_importMode==='merge'){
+            try{
+              const existing=await fetch(SB_URL+'/rest/v1/'+table+'?select=id&limit=9999',{
+                headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+                signal:AbortSignal.timeout(10000)
+              });
+              if(existing.ok){
+                const exData=await existing.json();
+                const exIds=new Set((exData||[]).map(r=>r.id));
+                // في وضع الدمج: لو الـ id موجود فعلاً، خليه يشاور على نفسه (مفيش تغيير)
+                rows.forEach(r=>{if(exIds.has(r.id))idMap[r.id]=r.id;});
+                rowsToInsert=rows.filter(r=>!exIds.has(r.id));
+              }
+            }catch(ex){console.warn('merge check failed',table,ex.message);}
+          }
+          if(!rowsToInsert.length)return idMap;
+          const countBefore=await _countRows(table);
+          let insertedOk=0;
+          for(let ri=0;ri<rowsToInsert.length;ri++){
+            const row=rowsToInsert[ri];
+            const {id:oldId,...rowRest}=row;
+            if(ri%25===0)_updProg(null,null,table+': '+ri+' / '+rowsToInsert.length);
+            try{
+              const res=await fetch(SB_URL+'/rest/v1/'+table,{
+                method:'POST',
+                headers:{'Content-Type':'application/json','apikey':SB_KEY,
+                  'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
+                body:JSON.stringify(rowRest),
+                signal:AbortSignal.timeout(10000)
+              });
+              if(res.ok){
+                const rd=await res.json().catch(()=>[]);
+                if(Array.isArray(rd)&&rd[0]&&rd[0].id!=null){
+                  if(oldId!=null)idMap[oldId]=rd[0].id;
+                  insertedOk++;
+                }else{
+                  console.error('[RLS SILENT FAILURE] '+table+': insert reported success (HTTP '+res.status+') but returned no row — likely blocked by RLS policy. Old id: '+oldId);
+                  errors++;
+                }
+              }else{
+                const e=await res.text();
+                console.warn('row insert fail',table,'old id',oldId,e);
+                errors++;
+              }
+            }catch(ex){errors++;console.warn('row insert error',table,'old id',oldId,ex.message);}
+          }
+          const countAfter=await _countRows(table);
+          if(countBefore!==null&&countAfter!==null){
+            const actualDelta=countAfter-countBefore;
+            if(actualDelta<insertedOk){
+              const missing=insertedOk-actualDelta;
+              console.error('[RLS SILENT FAILURE] '+table+': API reported '+insertedOk+' inserted, but row count only increased by '+actualDelta+' — '+missing+' rows were silently blocked (likely RLS policy). idMap may be unreliable for this table.');
+              errors+=missing;
+              _failedTables[table]=(_failedTables[table]||0)+missing;
+            }
+          }
+          done+=insertedOk;
+          return idMap;
         }
         // === fresh mode: امسح الجداول الأول ===
         if(_importMode==='fresh'){
           _updProg(3,'جاري مسح البيانات القديمة...','');
-          const _delTables=['mtr_bookings','mtr_acc','mtr_suppliers','htl_hotels','htl_bookings','mtr_tasks','mtr_conv_expenses'];
+          const _delTables=['mtr_acc','mtr_tasks','htl_bookings','mtr_bookings','htl_hotels','mtr_suppliers','mtr_conv_expenses'];
           for(const t of _delTables){
             try{
               await fetch(SB_URL+'/rest/v1/'+t+'?id=gt.0',{
@@ -3380,82 +3492,122 @@ async function importBackupJSON(){
                 headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
                 signal:AbortSignal.timeout(10000)
               });
+              // ===== تحقق فعلي إن الجدول فضل فاضي — DELETE برجع 2xx برضه لو RLS حظر الحذف =====
+              const remaining=await _countRows(t);
+              if(remaining!==null&&remaining>0){
+                console.error('[RLS SILENT FAILURE on DELETE] '+t+': still has '+remaining+' rows after delete — RLS likely blocking DELETE. Import will continue but old data may remain mixed with new data.');
+                errors++;
+                _failedTables['DELETE:'+t]=remaining;
+              }
             }catch(ex){console.warn('delete table failed',t,ex.message);}
           }
         }
         _updProg(5,'جاري استيراد الموردين...','');
-        // === نستورد الموردين الأول، قبل الحجوزات والحسابات، عشان نبني mapping بين الـ ID القديم والجديد ===
-        // (لازم يحصل قبل الحجوزات/الحسابات لأن العمودين supplier_id و collect_via بيعتمدوا على IDs الموردين)
-        const _supIdMap={}; // {oldId: newId}
-        if((data.suppliers||[]).length){
-          for(const sup of data.suppliers){
-            try{
-              const {id:oldId,created_at,...supRest}=sup;
-              const rs=await fetch(SB_URL+'/rest/v1/mtr_suppliers',{
-                method:'POST',
-                headers:{'Content-Type':'application/json','apikey':SB_KEY,
-                  'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
-                body:JSON.stringify({...supRest,created_at:sup.created_at||null}),
-                signal:AbortSignal.timeout(8000)
-              });
-              if(rs.ok){
-                const rd=await rs.json();
-                const newId=(rd&&rd[0])?rd[0].id:null;
-                if(newId&&oldId)_supIdMap[oldId]=newId;
-                done++;
-              }else{errors++;const e=await rs.text();console.warn('supplier insert fail',e);}
-            }catch(ex){errors++;console.warn('supplier error',ex.message);}
-          }
-          console.log('[import] supplier ID map:',_supIdMap);
-        }
+        // ===== 1) الموردين أولاً — لازم idMap قبل الحجوزات والقيود =====
+        const dbSuppliers=(data.suppliers||[]).map(s=>({...s}));
+        const supIdMap=await upsertAllMapped('mtr_suppliers',dbSuppliers);
+        console.log('[import] supplier ID map:',supIdMap);
         _updProg(15,'جاري تحضير بيانات الحجوزات...','');
-        // Map bookings back to DB format
+        // ===== 2) الحجوزات — مع تصحيح supplier_id و collect_via بالـ IDs الجديدة =====
         const dbBookings=(data.bookings||[]).map(b=>{
-          // نصحح supplier_id و collect_via بالـ ID الجديد للمورد (لو الـ mapping متوفر)
-          let fixedSupplierId=b.supplierId||null;
-          if(fixedSupplierId&&_supIdMap[fixedSupplierId])fixedSupplierId=_supIdMap[fixedSupplierId];
-          let fixedCollectVia=b.collectVia||'';
-          if(fixedCollectVia&&fixedCollectVia.startsWith('supplier_')){
-            const oldCvId=parseInt(fixedCollectVia.replace('supplier_',''));
-            if(_supIdMap[oldCvId])fixedCollectVia='supplier_'+_supIdMap[oldCvId];
+          // collect_via ممكن يكون 'supplier_<oldId>' — نصلحه على الـ ID الجديد فورًا
+          let fixedCollectVia=b.collectVia||null;
+          if(fixedCollectVia&&typeof fixedCollectVia==='string'&&fixedCollectVia.startsWith('supplier_')){
+            const oldSupId=parseInt(fixedCollectVia.replace('supplier_',''));
+            const newSupId=supIdMap[oldSupId];
+            if(newSupId)fixedCollectVia='supplier_'+newSupId;
           }
+          const fixedSupplierId=(b.supplierId!=null&&supIdMap[b.supplierId]!=null)?supIdMap[b.supplierId]:(b.supplierId||null);
           return{
-          id:b.id,name:b.name,phone:b.phone,phone2:b.phone2,pickup:b.pickup,
-          convoy:b.convoy,convoy2:b.convoy2,checkin:b.checkin,checkout:b.checkout,
-          apts:b.apts,apt_prices:b.aptPrices,apts_total:b.aptsTotal,
-          apts2:b.apts2,apt_prices2:b.aptPrices2,
-          seats:b.seats,extra_seats:b.extraSeats,seat_discount:b.seatDiscount,
-          seat_price:b.seatPrice,seat_disc_amt:b.seatDiscAmt,
-          int_seats:b.intSeats,int_seat_price:b.intSeatPrice,int_total:b.intTotal,
-          transfer_fee:b.transferFee,transfer_fee_note:b.transferFeeNote,
-          disc:b.disc,total:b.total,paid:b.paid,remaining:b.remaining,
-          payments:b.payments,notes:b.notes,seat_note:b.seatNote,
-          seat_assign:b.seatAssign,seat_assign2:b.seatAssign2,
-          mgr_snap:b.mgrSnap,created_by:b.createdBy,party_type:b.partyType,
-          supplier_id:fixedSupplierId,disc_reason:b.discReason,
-          adults:b.adults,children:b.children,status:b.status,
-          last_edit_by:b.lastEditBy,last_edit_at:b.lastEditAt,
-          bus_idx:b.busIdx,collect_via:fixedCollectVia,
-          created_at:b.createdAt||b.created_at||null
-        }});
+            id:b.id,name:b.name,phone:b.phone,phone2:b.phone2,pickup:b.pickup,
+            convoy:b.convoy,convoy2:b.convoy2,checkin:b.checkin,checkout:b.checkout,
+            apts:b.apts,apt_prices:b.aptPrices,apts_total:b.aptsTotal,
+            apts2:b.apts2,apt_prices2:b.aptPrices2,
+            seats:b.seats,extra_seats:b.extraSeats,seat_discount:b.seatDiscount,
+            seat_price:b.seatPrice,seat_disc_amt:b.seatDiscAmt,
+            int_seats:b.intSeats,int_seat_price:b.intSeatPrice,int_total:b.intTotal,
+            transfer_fee:b.transferFee,transfer_fee_note:b.transferFeeNote,
+            disc:b.disc,total:b.total,paid:b.paid,remaining:b.remaining,
+            payments:b.payments,notes:b.notes,seat_note:b.seatNote,
+            seat_assign:b.seatAssign,seat_assign2:b.seatAssign2,
+            mgr_snap:b.mgrSnap,created_by:b.createdBy,party_type:b.partyType,
+            supplier_id:fixedSupplierId,disc_reason:b.discReason,
+            adults:b.adults,children:b.children,status:b.status,
+            last_edit_by:b.lastEditBy,last_edit_at:b.lastEditAt,
+            bus_idx:b.busIdx,collect_via:fixedCollectVia,
+            created_at:b.createdAt||b.created_at||null
+          };
+        });
+        _updProg(25,'جاري استيراد الحجوزات...','الحجوزات: '+(dbBookings.length)+' سجل');
+        const bookingIdMap=await upsertAllMapped('mtr_bookings',dbBookings);
+        console.log('[import] booking ID map size:',Object.keys(bookingIdMap).length);
+        // ===== 3) القيود المحاسبية — مع تصحيح booking_ref و supplier_id بالـ IDs الجديدة =====
+        // booking_ref ممكن يكون: رقم حجز عادي، أو 'htl_<id>' لحجوزات الفنادق، أو 'pair_...' لقيود مرتبطة ببعضها (مش معرّف حجز)
         const dbAcc=(data.accEntries||[]).map(a=>{
-          let fixedSupplierId=a.supplierId||null;
-          if(fixedSupplierId&&_supIdMap[fixedSupplierId])fixedSupplierId=_supIdMap[fixedSupplierId];
+          let fixedBookingRef=a.bookingRef||null;
+          if(fixedBookingRef&&typeof fixedBookingRef==='string'){
+            // 'htl_<oldId>' بيتصحح بعدين في خطوة 5b بعد ما نعرف IDs الجديدة لحجوزات الفنادق — نسيبه كما هو الآن
+            if(!fixedBookingRef.startsWith('htl_')&&!fixedBookingRef.startsWith('pair_')&&/^\d+$/.test(fixedBookingRef)){
+              const oldBId=parseInt(fixedBookingRef);
+              if(bookingIdMap[oldBId]!=null)fixedBookingRef=String(bookingIdMap[oldBId]);
+              else console.warn('[import] acc entry references missing booking id',oldBId);
+            }
+          }
+          const fixedSupId=(a.supplierId!=null&&supIdMap[a.supplierId]!=null)?supIdMap[a.supplierId]:(a.supplierId||null);
           return{
-          id:a.id,type:a.type,op:a.op,amount:a.amount,entry_date:a.date,
-          description:a.desc,client_name:a.clientName,category:a.category,
-          booking_ref:a.bookingRef,booking_pay_ref:a.bookingPayRef,supplier_id:fixedSupplierId,
-          created_at:a.createdAt||a.created_at||null
-        }});
-        // Upsert all Supabase tables
-        _updProg(30,'جاري استيراد الحجوزات...','الحجوزات: '+(dbBookings.length)+' سجل');
-        await upsertAll('mtr_bookings',dbBookings);
-        _updProg(45,'جاري استيراد القيود المحاسبية...','القيود: '+(dbAcc.length)+' سجل');
-        await upsertAll('mtr_acc',dbAcc);
+            id:a.id,type:a.type,op:a.op,amount:a.amount,entry_date:a.date,
+            description:a.desc,client_name:a.clientName,category:a.category,
+            booking_ref:fixedBookingRef,booking_pay_ref:a.bookingPayRef,supplier_id:fixedSupId,
+            created_at:a.createdAt||a.created_at||null
+          };
+        });
+        _updProg(40,'جاري استيراد القيود المحاسبية...','القيود: '+(dbAcc.length)+' سجل');
+        const accIdMap=await upsertAllMapped('mtr_acc',dbAcc);
         _updProg(62,'جاري استيراد الفنادق...','');
-        await upsertAll('htl_hotels',data.hotels||[]);
+        // ===== 4) الفنادق =====
+        const hotelIdMap=await upsertAllMapped('htl_hotels',data.hotels||[]);
         _updProg(70,'جاري استيراد حجوزات الفنادق...','');
-        await upsertAll('htl_bookings',data.hotelBookings||[]);
+        // ===== 5) حجوزات الفنادق — مع تصحيح hotel_id بالـ ID الجديد =====
+        const oldHotelBookings=data.hotelBookings||[];
+        const dbHotelBookings=oldHotelBookings.map(hb=>{
+          const fixedHotelId=(hb.hotelId!=null&&hotelIdMap[hb.hotelId]!=null)?hotelIdMap[hb.hotelId]:(hb.hotelId||null);
+          return{
+            id:hb.id,name:hb.name||'',phone:hb.phone||'',destination:hb.dest||'',
+            hotel_id:fixedHotelId,hotel_name:hb.hotelName||'',
+            checkin:hb.checkin||'',checkout:hb.checkout||'',nights:hb.nights||0,
+            room_type:hb.roomType||'single',rooms:hb.rooms||1,price_per_night:hb.pricePerNight||0,
+            adults:hb.adults||0,children:hb.children||0,disc:hb.disc||0,disc_reason:hb.discReason||'',
+            total:hb.total||0,paid:hb.paid||0,remaining:hb.remaining||0,payments:hb.payments||[],
+            status:hb.status||'pending',notes:hb.notes||'',sales_rep:hb.salesRep||'',
+            created_by:hb.createdBy||'',
+            bus_seats:hb.busSeats||0,bus_seat_price:hb.busSeatPrice||0,transport_total:hb.transportTotal||0,
+            pickup:hb.pickup||'',dropoff:hb.dropoff||'',transport_note:hb.transportNote||'',
+            created_at:hb.createdAt||hb.created_at||null
+          };
+        });
+        const hotelBookingIdMap=await upsertAllMapped('htl_bookings',dbHotelBookings);
+        // ===== 5b) تصحيح booking_ref='htl_<oldId>' في القيود المحاسبية بعد ما عرفنا IDs الجديدة لحجوزات الفنادق =====
+        if(Object.keys(hotelBookingIdMap).length){
+          const accNeedingHtlFix=(data.accEntries||[]).filter(a=>a.bookingRef&&typeof a.bookingRef==='string'&&a.bookingRef.startsWith('htl_'));
+          if(accNeedingHtlFix.length){
+            _updProg(78,'جاري إصلاح روابط حجوزات الفنادق المحاسبية...','');
+            for(const a of accNeedingHtlFix){
+              try{
+                const oldHbId=parseInt(a.bookingRef.replace('htl_',''));
+                const newHbId=hotelBookingIdMap[oldHbId];
+                const newAccId=accIdMap[a.id];
+                if(newHbId&&newAccId){
+                  await fetch(SB_URL+'/rest/v1/mtr_acc?id=eq.'+newAccId,{
+                    method:'PATCH',
+                    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                    body:JSON.stringify({booking_ref:'htl_'+newHbId}),
+                    signal:AbortSignal.timeout(6000)
+                  });
+                }
+              }catch(ex){console.warn('htl booking_ref fix error',a.id,ex.message);}
+            }
+          }
+        }
         // ✅ تحضير بيانات المستخدمين — نتأكد من custom_perms صح
         const dbUsers=(data.users||[]).map(u=>({
           id:u.id,
@@ -3484,11 +3636,15 @@ async function importBackupJSON(){
                 // مش موجود — أضفه
                 const ri=await fetch(SB_URL+'/rest/v1/mtr_users',{
                   method:'POST',
-                  headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+                  headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
                   body:JSON.stringify({username:u.username,password:u.password,name:u.name,role:u.role,custom_perms:u.custom_perms||[]}),
                   signal:AbortSignal.timeout(8000)
                 });
-                if(ri.ok)usersOk++;
+                if(ri.ok){
+                  const rd=await ri.json().catch(()=>[]);
+                  if(Array.isArray(rd)&&rd.length>0)usersOk++;
+                  else console.warn('[RLS?] user insert reported ok but returned no row',u.username);
+                }
                 else{const e=await ri.text();console.warn('user insert fail',u.username,e);}
               } else usersOk++;
             }catch(ex){console.warn('user upsert error',u.username,ex.message);}
@@ -3505,19 +3661,23 @@ async function importBackupJSON(){
         }
         // ===== Tasks =====
         if((data.tasks||[]).length){
-          const dbTasks=(data.tasks||[]).map(t=>({
-            id:t.id,title:t.title||'',notes:t.notes||'',status:t.status||'open',
-            priority:t.priority||'normal',
-            remind_at:t.remind_at||t.remindAt||null,
-            remind_before_min:t.remind_before_min||t.remindBeforeMin||30,
-            client_name:t.client_name||t.clientName||'',
-            booking_id:t.booking_id||t.bookingId||null,
-            created_by:t.created_by||t.createdBy||'',
-            assigned_to:t.assigned_to||t.assignedTo||'',
-            done_at:t.done_at||t.doneAt||null,
-            snoozed_until:t.snoozed_until||t.snoozedUntil||null,
-            created_at:t.created_at||null
-          }));
+          const dbTasks=(data.tasks||[]).map(t=>{
+            const oldBId=t.booking_id||t.bookingId||null;
+            const fixedBId=(oldBId!=null&&bookingIdMap[oldBId]!=null)?bookingIdMap[oldBId]:oldBId;
+            return{
+              id:t.id,title:t.title||'',notes:t.notes||'',status:t.status||'open',
+              priority:t.priority||'normal',
+              remind_at:t.remind_at||t.remindAt||null,
+              remind_before_min:t.remind_before_min||t.remindBeforeMin||30,
+              client_name:t.client_name||t.clientName||'',
+              booking_id:fixedBId,
+              created_by:t.created_by||t.createdBy||'',
+              assigned_to:t.assigned_to||t.assignedTo||'',
+              done_at:t.done_at||t.doneAt||null,
+              snoozed_until:t.snoozed_until||t.snoozedUntil||null,
+              created_at:t.created_at||null
+            };
+          });
           _updProg(92,'جاري استيراد التاسكات...','');
           await upsertAll('mtr_tasks',dbTasks);
         }
@@ -3553,15 +3713,20 @@ async function importBackupJSON(){
           // استعادة الفئات في الذاكرة
           if(data.pmTypes&&Array.isArray(data.pmTypes))try{localStorage.setItem('mtr_cats',JSON.stringify({pm:data.pmTypes,exp:data.expCats||[]}));}catch(ex){}
         }
+        const _failedTableNames=Object.keys(_failedTables);
         _updProg(100,'اكتمل الاستيراد ✅','إجمالي: '+done+' سجل'+(errors?' · أخطاء: '+errors:''));
         setTimeout(()=>{
           _closeProg();
-          if(errors>0){
+          if(_failedTableNames.length){
+            const detail=_failedTableNames.map(t=>t+' ('+_failedTables[t]+')').join('، ');
+            toast('🛑 فشل صامت مكتشف (RLS؟) في: '+detail+' — البيانات دخلت بنجاح ظاهريًا لكن الصفوف لم تُحفظ فعليًا في القاعدة. تحقق من سياسات RLS قبل الاستمرار. الصفحة لن تُحدّث تلقائيًا.','warn',15000);
+          } else if(errors>0){
             toast('⚠️ تم استيراد '+done+' سجل مع '+errors+' خطأ — افتح الكونسول (F12) لتفاصيل الأخطاء','warn',10000);
+            setTimeout(()=>location.reload(),3500);
           } else {
             toast('✅ تم الاستيراد الكامل بنجاح ('+done+' سجل)! سيتم تحديث الصفحة...','success',3000);
+            setTimeout(()=>location.reload(),3500);
           }
-          setTimeout(()=>location.reload(),3500);
         },800);
       }catch(ex){
         const m=document.getElementById('imp-prog-mod');if(m)m.remove();
@@ -3692,7 +3857,7 @@ async function initApp(){
 }
 
 // Mappers
-function mB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',phone2:r.phone2||'',pickup:r.pickup||'',convoy:r.convoy,convoy2:r.convoy2||null,checkin:r.checkin||'',checkout:r.checkout||'',apts:r.apts||[],aptPrices:r.apt_prices||{},aptsTotal:r.apts_total||0,apts2:r.apts2||[],aptPrices2:r.apt_prices2||{},seats:r.seats||0,extraSeats:r.extra_seats||0,seatDiscount:r.seat_discount||0,seatPrice:r.seat_price||0,seatDiscAmt:r.seat_disc_amt||0,intSeats:r.int_seats||0,intSeatPrice:r.int_seat_price||0,intTotal:r.int_total||0,transferFee:r.transfer_fee||0,transferFeeNote:r.transfer_fee_note||'',disc:r.disc||0,total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],notes:r.notes||'',seatNote:r.seat_note||'',seatAssign:r.seat_assign||[],seatAssign2:r.seat_assign2||[],mgrSnap:r.mgr_snap||{},createdBy:r.created_by||'',partyType:r.party_type||'client',supplierId:r.supplier_id||null,discReason:r.disc_reason||'',adults:r.adults||0,children:r.children||0,status:r.status||'active',lastEditBy:r.last_edit_by||'',lastEditAt:r.last_edit_at||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):'',createdAt:r.created_at||'',busIdx:r.bus_idx||0,collectVia:r.collect_via||''}}function mA(r){return{id:r.id,type:r.type||'',op:r.op||'in',amount:r.amount||0,date:r.entry_date||'',desc:r.description||'',clientName:r.client_name||'',category:r.category||'',bookingRef:r.booking_ref||'',bookingPayRef:r.booking_pay_ref||'',counterParty:r.booking_pay_ref||'',supplierId:r.supplier_id||null}}
+function mB(r){return{id:r.id,name:r.name||'',phone:r.phone||'',phone2:r.phone2||'',pickup:r.pickup||'',convoy:r.convoy,convoy2:r.convoy2||null,checkin:r.checkin||'',checkout:r.checkout||'',apts:r.apts||[],aptPrices:r.apt_prices||{},aptsTotal:r.apts_total||0,apts2:r.apts2||[],aptPrices2:r.apt_prices2||{},seats:r.seats||0,extraSeats:r.extra_seats||0,seatDiscount:r.seat_discount||0,seatPrice:r.seat_price||0,seatDiscAmt:r.seat_disc_amt||0,intSeats:r.int_seats||0,intSeatPrice:r.int_seat_price||0,intTotal:r.int_total||0,transferFee:r.transfer_fee||0,transferFeeNote:r.transfer_fee_note||'',disc:r.disc||0,total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],notes:r.notes||'',seatNote:r.seat_note||'',seatAssign:r.seat_assign||[],seatAssign2:r.seat_assign2||[],mgrSnap:r.mgr_snap||{},createdBy:r.created_by||'',partyType:r.party_type||'client',supplierId:r.supplier_id||null,discReason:r.disc_reason||'',adults:r.adults||0,children:r.children||0,status:r.status||'active',lastEditBy:r.last_edit_by||'',lastEditAt:r.last_edit_at||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):'',createdAt:r.created_at||'',busIdx:r.bus_idx||0,collectVia:r.collect_via||''}}function mA(r){return{id:r.id,type:r.type||'',op:r.op||'in',amount:r.amount||0,date:r.entry_date||'',desc:r.description||'',clientName:r.client_name||'',category:r.category||'',bookingRef:r.booking_ref||'',bookingPayRef:r.booking_pay_ref||'',counterParty:r.booking_pay_ref||'',supplierId:r.supplier_id||null,createdAt:r.created_at||''}}
 function mL(r){return{id:r.id,ts:r.created_at?new Date(r.created_at).toLocaleString('ar-EG'):'',user:r.user_name||'',username:r.username||'',action:r.action||'',type:r.log_type||'',detail:r.detail||''}}
 function mS(r){
   // Load price map from settings - always prefer DB over defaults
@@ -10176,6 +10341,7 @@ function mHB(r){
     total:r.total||0,paid:r.paid||0,remaining:r.remaining||0,payments:r.payments||[],
     status:r.status||'pending',notes:r.notes||'',salesRep:r.sales_rep||'',
     createdBy:r.created_by||'',created:r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):'',
+    createdAt:r.created_at||'',
     busSeats:r.bus_seats||0,busSeatPrice:r.bus_seat_price||0,transportTotal:r.transport_total||0,
     pickup:r.pickup||'',dropoff:r.dropoff||'',transportNote:r.transport_note||''
   };
