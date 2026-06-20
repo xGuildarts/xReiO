@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -5040,8 +5039,9 @@ async function saveBooking(){
     }
     addLog(`إضافة ${pt==='supplier'?'حجز مورد':'حجز'}: ${name} - فوج ${cn} (${conv?.checkin||''} → ${conv?.checkout||''})`,'add',`إجمالي: ${total.toLocaleString()} ج · شقق: ${selApts.join('، ')||'-'} · مكان الركوب: ${document.getElementById('f-pickup')?.value||'-'} · هاتف: ${phone||'-'}`);
     alert('تم حفظ الحجز!');resetForm();
-    markTabsDirty('clients','dash','reports');
+    markTabsDirty('clients','dash','reports','accs');
     if(_activeTab==='clients')renderClients();
+    if(_activeTab==='accs')renderAccs();
   }catch(e){alert('فشل: '+e.message)}
 }
 function resetForm(){
