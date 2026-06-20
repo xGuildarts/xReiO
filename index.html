@@ -484,6 +484,20 @@ tr:hover td{background:#f5f8fc}
   <div class="step"><strong>4. للتحديث الجديد (فوجين)</strong>شغّل: <code style="font-size:10px">ALTER TABLE mtr_bookings ADD COLUMN IF NOT EXISTS convoy2 integer; ALTER TABLE mtr_bookings ADD COLUMN IF NOT EXISTS seat_assign2 jsonb DEFAULT '[]';</code></div>
   <div class="step"><strong>5. للتحديث الجديد (جهة التحصيل)</strong>شغّل: <code style="font-size:10px">ALTER TABLE mtr_bookings ADD COLUMN IF NOT EXISTS collect_via text;</code></div>
   <div class="step"><strong>6. للتحديث الجديد (سعر كرسي المورد)</strong>شغّل: <code style="font-size:10px">ALTER TABLE mtr_bookings ADD COLUMN IF NOT EXISTS collect_via_seat_cost numeric DEFAULT 0;</code></div>
+  <div class="step"><strong>7. للتحديث الجديد (مصاريف تقفيلة الفوج)</strong>شغّل:
+    <code style="font-size:10px;display:block;direction:ltr;text-align:left;white-space:pre-wrap">CREATE TABLE IF NOT EXISTS mtr_closing_expenses (
+  id bigint generated always as identity primary key,
+  convoy_num integer not null,
+  group_type text not null,
+  group_ref text default '',
+  label text not null,
+  amount numeric(12,2) default 0,
+  notes text default '',
+  created_at timestamptz default now()
+);
+ALTER TABLE mtr_closing_expenses ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all" ON mtr_closing_expenses FOR ALL USING (true) WITH CHECK (true);</code>
+  </div>
   <div class="cfg-err" id="cfg-err"></div>
   <div class="cfg-ok" id="cfg-ok"></div>
   <div class="fg"><label>Project URL</label><input type="text" id="sb-url" placeholder="https://xxxx.supabase.co"></div>
@@ -2903,6 +2917,7 @@ const TAB_PERMS={reports:null,log:'view_log',users:'manage_users',mgr:'settings'
 // ============================================================
 let SB_URL='',SB_KEY='';
 let bookings=[],users=[],suppliers=[],accEntries=[],activityLog=[];
+let closingExp=[],closingExpConvoy=0; // مصاريف تقفيلة الفوج (باص/برج/مورد) — مرتبطة بالفوج المعروض حالياً
 let hotels=[],hotelBookings=[];
 let settings={name:'مصيف مطروح 2026',company:'',contact:'',license:'',logo:'',notes:''};
 let currentUser=null,selApts=[],activeBusConv=null,activeBusIdx=0,dragInfo=null,poolDragInfo=null,activeAccTab='accounts|'+PM_TYPES[0],lang='ar';
@@ -3181,6 +3196,7 @@ async function clearAllData(){
     {t:'mtr_log',l:'سجل النشاط'},
     {t:'mtr_tasks',l:'التاسكات'},
     {t:'mtr_conv_expenses',l:'مصاريف الأفواج'},
+    {t:'mtr_closing_expenses',l:'مصاريف تقفيلة الفوج'},
     {t:'htl_bookings',l:'حجوزات الفنادق'},
     {t:'htl_hotels',l:'الفنادق'},
     {t:'mtr_suppliers',l:'الموردين'},
@@ -3213,10 +3229,11 @@ async function exportBackupJSON(){
   let allBookings=bookings,allAccEntries=accEntries,allActivityLog=activityLog,
       allUsers=users,allSuppliers=suppliers,allHotels=hotels,
       allHotelBookings=hotelBookings,allTasks=(typeof tasks!=='undefined'?tasks:[]),
-      allConvExpenses=(typeof convExpenses!=='undefined'?convExpenses:[]);
+      allConvExpenses=(typeof convExpenses!=='undefined'?convExpenses:[]),
+      allClosingExpenses=[];
   try{
     toast('⏳ جاري تجميع النسخة الاحتياطية الكاملة...','info',15000);
-    const [bksFull,accFull,tskFull,expFull,supFull,htlFull,hbkFull]=await Promise.all([
+    const [bksFull,accFull,tskFull,expFull,supFull,htlFull,hbkFull,cexpFull]=await Promise.all([
       sbFetch('mtr_bookings','GET',null,'?order=id.asc&limit=9999'),
       sbFetch('mtr_acc','GET',null,'?order=id.asc&limit=9999'),
       sbFetch('mtr_tasks','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
@@ -3224,6 +3241,7 @@ async function exportBackupJSON(){
       sbFetch('mtr_suppliers','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
       sbFetch('htl_hotels','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
       sbFetch('htl_bookings','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
+      sbFetch('mtr_closing_expenses','GET',null,'?order=id.asc&limit=9999').catch(()=>[]),
     ]);
     if(bksFull&&bksFull.length)allBookings=bksFull.map(mB);
     if(accFull&&accFull.length)allAccEntries=accFull.map(mA);
@@ -3233,6 +3251,7 @@ async function exportBackupJSON(){
     if(supFull&&supFull.length)allSuppliers=supFull;
     if(htlFull&&htlFull.length)allHotels=htlFull;
     if(hbkFull&&hbkFull.length)allHotelBookings=hbkFull.map(r=>typeof mHB==='function'?mHB(r):r);
+    if(cexpFull&&cexpFull.length)allClosingExpenses=cexpFull;
   }catch(e){console.warn('Full fetch fallback to in-memory:',e);}
   // ====== snapshot كامل من localStorage ======
   const lsSnap={};
@@ -3251,6 +3270,7 @@ async function exportBackupJSON(){
       totalTasks:allTasks.length,
       totalHotelBookings:allHotelBookings.length,
       totalConvExpenses:allConvExpenses.length,
+      totalClosingExpenses:allClosingExpenses.length,
       exportedBy:(typeof currentUser!=='undefined'&&currentUser?currentUser.name:'—'),
     },
     // ===== Supabase tables =====
@@ -3263,6 +3283,7 @@ async function exportBackupJSON(){
     hotelBookings:allHotelBookings,
     tasks:allTasks,
     convExpenses:allConvExpenses,
+    closingExpenses:allClosingExpenses,
     // ===== إعدادات النظام =====
     settings:settings,
     // ===== بيانات الأسعار والأدوار والفئات =====
@@ -3512,7 +3533,7 @@ async function importBackupJSON(){
         // === fresh mode: امسح الجداول الأول ===
         if(_importMode==='fresh'){
           _updProg(3,'جاري مسح البيانات القديمة...','');
-          const _delTables=['mtr_acc','mtr_tasks','htl_bookings','mtr_bookings','htl_hotels','mtr_suppliers','mtr_conv_expenses'];
+          const _delTables=['mtr_acc','mtr_tasks','htl_bookings','mtr_bookings','htl_hotels','mtr_suppliers','mtr_conv_expenses','mtr_closing_expenses'];
           for(const t of _delTables){
             try{
               await fetch(SB_URL+'/rest/v1/'+t+'?id=gt.0',{
@@ -3686,6 +3707,18 @@ async function importBackupJSON(){
         if((data.convExpenses||[]).length){
           _updProg(86,'جاري استيراد مصاريف الأفواج...','');
           await upsertAll('mtr_conv_expenses',data.convExpenses||[]);
+        }
+        // ===== closing_expenses (مصاريف تقفيلة الفوج: باص/برج/مورد) =====
+        if((data.closingExpenses||[]).length){
+          _updProg(87,'جاري استيراد مصاريف تقفيلة الفوج...','');
+          const dbClosingExp=(data.closingExpenses||[]).map(e=>{
+            const gt=e.group_type||e.groupType||'';
+            let gref=e.group_ref!=null?e.group_ref:(e.groupRef!=null?e.groupRef:'');
+            if(gt==='supplier'&&gref&&supIdMap[gref]!=null) gref=String(supIdMap[gref]);
+            return{convoy_num:e.convoy_num||e.convoyNum,group_type:gt,group_ref:String(gref||''),
+              label:e.label||'',amount:e.amount||0,notes:e.notes||''};
+          });
+          await upsertAll('mtr_closing_expenses',dbClosingExp);
         }
         // ===== Tasks =====
         if((data.tasks||[]).length){
@@ -8403,7 +8436,87 @@ function populateClosingSel(){
   if(prev) sel.value=prev; // restore selection
 }
 
-function renderClosing(){
+// ═══════════════════════════════════════════════════════════
+//  💸 مصاريف تقفيلة الفوج (باص / برج / مورد) — مرنة وبيضيفها المستخدم
+//  جدول Supabase المطلوب:
+//  CREATE TABLE IF NOT EXISTS mtr_closing_expenses (
+//    id bigint generated always as identity primary key,
+//    convoy_num integer not null,
+//    group_type text not null,   -- 'bus' | 'building' | 'supplier'
+//    group_ref  text default '', -- رقم المورد كنص لو group_type='supplier', وإلا فاضي
+//    label text not null,
+//    amount numeric(12,2) default 0,
+//    notes text default '',
+//    created_at timestamptz default now()
+//  );
+//  ALTER TABLE mtr_closing_expenses ENABLE ROW LEVEL SECURITY;
+//  CREATE POLICY "allow_all" ON mtr_closing_expenses FOR ALL USING (true) WITH CHECK (true);
+// ═══════════════════════════════════════════════════════════
+async function _loadClosingExp(cn){
+  try{
+    const rows=await sbFetch('mtr_closing_expenses','GET',null,`?convoy_num=eq.${cn}&order=id.asc`);
+    closingExp=Array.isArray(rows)?rows.map(r=>({id:r.id,convoyNum:Number(r.convoy_num),groupType:r.group_type,groupRef:r.group_ref||'',label:r.label||'',amount:Number(r.amount)||0,notes:r.notes||''})):[];
+    closingExpConvoy=cn;
+  }catch(e){
+    closingExp=[];closingExpConvoy=cn;
+    console.warn('closing_expenses load error:',e);
+  }
+}
+function _expsFor(groupType,groupRef){
+  return closingExp.filter(e=>e.groupType===groupType&&String(e.groupRef||'')===String(groupRef||''));
+}
+async function addClosingExpense(groupType,groupRef,convoyNum){
+  const gid=groupType+'_'+(groupRef||'');
+  const labelEl=document.getElementById('cexp-label-'+gid);
+  const amtEl=document.getElementById('cexp-amt-'+gid);
+  const label=(labelEl?.value||'').trim();
+  const amount=parseFloat(amtEl?.value)||0;
+  if(!label){alert('اكتب وصف المصروف');return;}
+  if(!amount){alert('اكتب قيمة المصروف');return;}
+  try{
+    await sbFetch('mtr_closing_expenses','POST',{convoy_num:convoyNum,group_type:groupType,group_ref:String(groupRef||''),label,amount},'');
+    await _loadClosingExp(convoyNum);
+    renderClosing();
+  }catch(e){alert('فشل إضافة المصروف: '+e.message)}
+}
+async function deleteClosingExpense(id,convoyNum){
+  if(!confirm('تأكيد حذف المصروف؟'))return;
+  try{
+    await sbFetch('mtr_closing_expenses','DELETE',null,`?id=eq.${id}`);
+    await _loadClosingExp(convoyNum);
+    renderClosing();
+  }catch(e){alert('فشل الحذف: '+e.message)}
+}
+function _mkExpBox(groupType,groupRef,convoyNum,color,light,baseTotal,baseLabel){
+  const gid=groupType+'_'+(groupRef||'');
+  const exps=_expsFor(groupType,groupRef);
+  const totalExp=exps.reduce((s,e)=>s+e.amount,0);
+  const net=baseTotal-totalExp;
+  const n=v=>(v||0).toLocaleString('ar-EG');
+  return `<div style="margin-top:.6rem;background:${light};border:1px solid ${color}33;border-radius:10px;padding:.75rem .9rem">
+    <div style="font-size:12px;font-weight:800;color:${color};margin-bottom:${exps.length?'.5rem':'0'}">💸 مصاريف ${baseLabel}</div>
+    ${exps.length?`<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:.6rem">
+      ${exps.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:6px;padding:5px 8px;font-size:12px">
+        <span style="font-weight:600">${e.label}</span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:800;color:#c0392b">-${n(e.amount)} ج</span>
+          <span onclick="deleteClosingExpense(${e.id},${convoyNum})" style="cursor:pointer;color:#c0392b;font-size:13px" title="حذف">✕</span>
+        </span>
+      </div>`).join('')}
+    </div>`:''}
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <input id="cexp-label-${gid}" placeholder="وصف المصروف (مثلاً مرتب المشرف)" style="flex:2;min-width:140px;padding:6px 8px;border-radius:6px;border:1.5px solid var(--bd2);font-size:12px;font-family:inherit;background:var(--sf);color:var(--tx)">
+      <input id="cexp-amt-${gid}" type="number" min="0" placeholder="القيمة" style="flex:1;min-width:80px;padding:6px 8px;border-radius:6px;border:1.5px solid var(--bd2);font-size:12px;font-family:inherit;background:var(--sf);color:var(--tx)">
+      <button onclick="addClosingExpense('${groupType}','${groupRef||''}',${convoyNum})" style="background:${color};color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">➕ إضافة</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:.6rem;padding-top:.5rem;border-top:1.5px solid ${color}33;font-size:13px">
+      <span style="font-weight:700;color:var(--tx2)">إجمالي المصاريف: <strong style="color:#c0392b">${n(totalExp)} ج</strong></span>
+      <span style="font-weight:900;color:${color}">الصافي بعد المصاريف: ${n(net)} ج</span>
+    </div>
+  </div>`;
+}
+
+async function renderClosing(){
   // Don't call populateClosingSel here - it resets selection
   // Just populate if empty
   const sel=document.getElementById('cl-convoy-sel');
@@ -8411,6 +8524,7 @@ function renderClosing(){
   const cn=sel?parseInt(sel.value)||0:0;
   const out=document.getElementById('closing-output');
   if(!cn||!out){out&&(out.innerHTML='<div class="info-box">اختار الفوج من الأعلى</div>');return;}
+  await _loadClosingExp(cn);
   const conv=getConv(cn);
   const bks=bookings.filter(b=>b.convoy===cn&&b.partyType!=='supplier');
   const SP=600,IP=200;
@@ -8448,7 +8562,7 @@ function renderClosing(){
   const hs=c=>`background:${c};color:#fff;padding:11px 13px;text-align:right;font-size:12px;font-weight:800;white-space:nowrap;border-bottom:2px solid rgba(0,0,0,.15)`;
   const ts=`border-bottom:1.5px solid #e8eef5;padding:9px 12px;text-align:right;font-size:13px;vertical-align:middle`;
   const fs=c=>`background:${c}22;padding:9px 12px;font-weight:900;text-align:right;font-size:13px;border-top:2.5px solid ${c}`;
-  function mkTable(data,title,color,light,isSupplier){
+  function mkTable(data,title,color,light,isSupplier,groupType,groupRef){
     if(!data.length)return'';
     const sd=r=>r.busSeats*((r.b&&r.b.collectViaSeatCost)||0);
     const TT={busSeats:data.reduce((s,r)=>s+r.busSeats,0),busTot:data.reduce((s,r)=>s+r.busTot,0),
@@ -8504,15 +8618,17 @@ function renderClosing(){
           <td style="${fs(light)};color:${color};font-size:15px;font-weight:900">${n(TT.remaining)}</td>
           ${isSupplier?`<td style="${fs(light)};color:#c0392b">${TT.supDeduct?'-'+n(TT.supDeduct):'-'}</td><td style="${fs(light)};color:#117a65;font-size:15px;font-weight:900">${n(TT.supNet)}</td>`:''}
         </tr></tfoot>
-      </table></div></div>`;
+      </table></div>
+      ${groupType?_mkExpBox(groupType,groupRef,cn,color,light,isSupplier?TT.supNet:TT.remaining,title):''}
+      </div>`;
   }
   const mainTbl=mkTable(rows,'تقفيلة الفوج','#1a5276','#e8f4fd');
-  const busColl=mkTable(collBus,'تحصيلات في الباص','#d68910','#fef9e7');
-  const bldColl=mkTable(collBuilding,'تحصيلات في البرج','#c0392b','#fdf2f0');
+  const busColl=mkTable(collBus,'تحصيلات في الباص','#d68910','#fef9e7',false,'bus','');
+  const bldColl=mkTable(collBuilding,'تحصيلات في البرج','#c0392b','#fdf2f0',false,'building','');
   const collSupplierTbl=Object.entries(supGroups).map(([key,data])=>{
     const sid=parseInt(key.replace('supplier_',''));
     const sup=suppliers.find(s=>s.id===sid);
-    return mkTable(data,'تحصيلات عند المورد: '+(sup?.name||'مورد'),'#3c4fa8','#e8f0fe',true);
+    return mkTable(data,'تحصيلات عند المورد: '+(sup?.name||'مورد'),'#3c4fa8','#e8f0fe',true,'supplier',sid);
   }).join('');
   const allOk=!collBus.length&&!collBuilding.length?
     `<div style="background:var(--acl);border:1px solid var(--ac);border-radius:var(--r);padding:.875rem;font-weight:700;color:var(--ac);margin-top:1rem">✓ لا توجد تحصيلات متبقية</div>`:'';
@@ -11159,12 +11275,19 @@ function _calcConvoyRevenue(cn){
 function _getConvExpenses(cn){
   return convExpenses.filter(e=>e.convoyNum===cn);
 }
+function _sumCat(exps,cat){return exps.filter(e=>e.category===cat).reduce((s,e)=>s+e.amount,0);}
 
 function _calcConvoyProfit(cn){
   const rev = _calcConvoyRevenue(cn);
   const exps = _getConvExpenses(cn);
+  const aptExp=_sumCat(exps,'apt_cost');
+  const busExp=_sumCat(exps,'bus_cost');
+  const intExp=_sumCat(exps,'int_transport');
+  const otherExp=_sumCat(exps,'other');
   const totalExp = exps.reduce((s,e)=>s+e.amount,0);
-  return {...rev, totalExp, netProfit: rev.totalRev - totalExp, expenses: exps};
+  return {...rev, totalExp, netProfit: rev.totalRev - totalExp, expenses: exps,
+    aptExp, busExp, intExp, otherExp,
+    aptProfit: rev.aptRev-aptExp, busProfit: rev.busRev-busExp, intProfit: rev.intRev-intExp};
 }
 
 // ── الرندر الرئيسي ─────────────────────────────────────────
@@ -11203,7 +11326,14 @@ CREATE POLICY "allow_all" ON mtr_conv_expenses FOR ALL USING (true) WITH CHECK (
     busRev: seasonData.reduce((s,d)=>s+d.busRev,0),
     intRev: seasonData.reduce((s,d)=>s+d.intRev,0),
     totalRev: seasonData.reduce((s,d)=>s+d.totalRev,0),
+    aptExp: seasonData.reduce((s,d)=>s+d.aptExp,0),
+    busExp: seasonData.reduce((s,d)=>s+d.busExp,0),
+    intExp: seasonData.reduce((s,d)=>s+d.intExp,0),
+    otherExp: seasonData.reduce((s,d)=>s+d.otherExp,0),
     totalExp: seasonData.reduce((s,d)=>s+d.totalExp,0),
+    aptProfit: seasonData.reduce((s,d)=>s+d.aptProfit,0),
+    busProfit: seasonData.reduce((s,d)=>s+d.busProfit,0),
+    intProfit: seasonData.reduce((s,d)=>s+d.intProfit,0),
     netProfit: seasonData.reduce((s,d)=>s+d.netProfit,0),
   };
 
@@ -11222,46 +11352,89 @@ CREATE POLICY "allow_all" ON mtr_conv_expenses FOR ALL USING (true) WITH CHECK (
     <div class="stat" style="border-top-color:${profColor(seasonTotals.netProfit)}"><div class="stat-label">صافي الموسم</div><div class="stat-val" style="color:${profColor(seasonTotals.netProfit)}">${n(seasonTotals.netProfit)}</div></div>
   </div>`;
 
+  // ── جدول تفصيل الموسم حسب النوع (شقق / انتقالات / داخلي) ──
+  const catTh=t=>`<th style="background:linear-gradient(135deg,#1a5276,#117a65);color:#fff;padding:9px 11px;text-align:right;font-size:12px;white-space:nowrap">${t}</th>`;
+  const catTd=(v,c='',extra='')=>`<td style="padding:8px 11px;text-align:right;font-size:13px;border-bottom:1px solid var(--bd);${c?'color:'+c+';':''};font-weight:700;${extra}">${v}</td>`;
+  const catRows=[
+    {lbl:'🏠 الشقق',rev:seasonTotals.aptRev,exp:seasonTotals.aptExp,profit:seasonTotals.aptProfit},
+    {lbl:'🚌 الانتقالات (الباص)',rev:seasonTotals.busRev,exp:seasonTotals.busExp,profit:seasonTotals.busProfit},
+    {lbl:'🚗 الداخلي',rev:seasonTotals.intRev,exp:seasonTotals.intExp,profit:seasonTotals.intProfit},
+  ].map(c=>`<tr>
+    ${catTd(c.lbl,'','font-weight:800')}
+    ${catTd(n(c.rev),'var(--ac)')}
+    ${catTd(c.exp?n(c.exp):'—','var(--dn)')}
+    ${catTd(n(c.profit),profColor(c.profit),'font-size:14px;font-weight:900')}
+  </tr>`).join('');
+  const catFootRow=`<tr>
+    ${catTd('<strong>إجمالي عام للموسم</strong>','var(--pr)','font-weight:900')}
+    ${catTd(n(seasonTotals.totalRev),'var(--gd)','font-weight:900')}
+    ${catTd(n(seasonTotals.totalExp),'var(--dn)','font-weight:900')}
+    ${catTd(n(seasonTotals.netProfit),profColor(seasonTotals.netProfit),'font-size:15px;font-weight:900')}
+  </tr>`;
+  const catBreakdownTable=`<div style="margin-bottom:1rem">
+    <div style="font-weight:800;color:var(--pr);font-size:13px;margin-bottom:.5rem">📂 ملخص الموسم حسب النوع</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr>${catTh('النوع')}${catTh('الإيراد')}${catTh('المصروف')}${catTh('الربح')}</tr></thead>
+      <tbody>${catRows}</tbody>
+      <tfoot style="background:linear-gradient(135deg,var(--prl),var(--acl))">${catFootRow}</tfoot>
+    </table></div>
+    ${seasonTotals.otherExp?`<div style="margin-top:.5rem;font-size:12px;color:var(--tx2)">+ مصاريف عمومية (غير مرتبطة بنوع معين): <strong style="color:var(--dn)">${n(seasonTotals.otherExp)}</strong> (مخصومة من الصافي العام فقط)</div>`:''}
+  </div>`;
+
   // ── جدول الموسم الكامل ────────────────────────────────────
   const th=t=>`<th style="background:linear-gradient(135deg,#1a5276,#117a65);color:#fff;padding:10px 11px;text-align:right;font-size:12px;white-space:nowrap;border-bottom:2px solid rgba(255,255,255,.15)">${t}</th>`;
+  const th2=(t,col)=>`<th style="background:${col};color:#fff;padding:7px 11px;text-align:center;font-size:11px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.2)">${t}</th>`;
   const td=(v,c='',extra='')=>`<td style="padding:9px 11px;text-align:right;font-size:13px;border-bottom:1px solid var(--bd);${c?'color:'+c+';':''};font-weight:600;${extra}">${v}</td>`;
+  const td3=v=>`<td style="padding:8px 9px;text-align:center;font-size:12px;border-bottom:1px solid var(--bd);font-weight:700">${v}</td>`;
 
   const seasonRows = seasonData.map((d,i)=>{
     const conv=getConv(d.cn);
     const label=conv?conv.label:`فوج ${d.cn}`;
     const bg = i%2===0?'':'background:var(--sf2)';
+    const exp=v=>v?`<span style="color:#c0392b">-${n(v)}</span>`:'—';
+    const prof=v=>`<span style="color:${profColor(v)};font-weight:900">${n(v)}</span>`;
     return `<tr style="${bg}">
       ${td(`<span style="cursor:pointer;color:var(--pr);text-decoration:underline" onclick="window._openConvDetail(${d.cn})">${label}</span>`,'','font-weight:800')}
-      ${td(d.clientCount,'var(--tx2)','')}
-      ${td(n(d.aptRev),'var(--ac)','')}
-      ${td(n(d.busRev),'#1a5276','')}
-      ${td(n(d.intRev),'var(--pu)','')}
-      ${td(n(d.totalRev),'var(--gd)','font-size:14px')}
-      ${td(n(d.totalExp),'var(--dn)','')}
-      ${td(`<span style="color:${profColor(d.netProfit)};font-size:14px;font-weight:900">${n(d.netProfit)}</span>`,'','')}
-      ${td(pct(d.netProfit,d.totalRev),d.netProfit>=0?'var(--ac)':'var(--dn)','')}
+      ${td(d.clientCount,'var(--tx2)','text-align:center')}
+      ${td3(n(d.aptRev))}${td3(exp(d.aptExp))}${td3(prof(d.aptProfit))}
+      ${td3(n(d.busRev))}${td3(exp(d.busExp))}${td3(prof(d.busProfit))}
+      ${td3(n(d.intRev))}${td3(exp(d.intExp))}${td3(prof(d.intProfit))}
+      ${td3(`<strong>${n(d.totalRev)}</strong>`)}${td3(exp(d.totalExp))}${td3(prof(d.netProfit))}
     </tr>`;
   }).join('');
 
   const seasonFooter=`<tr style="background:linear-gradient(135deg,var(--prl),var(--acl))">
     ${td('<strong>إجمالي الموسم</strong>','var(--pr)','font-size:14px;font-weight:900')}
-    ${td(seasonData.reduce((s,d)=>s+d.clientCount,0),'var(--tx)','')}
-    ${td(n(seasonTotals.aptRev),'var(--ac)','font-weight:900')}
-    ${td(n(seasonTotals.busRev),'#1a5276','font-weight:900')}
-    ${td(n(seasonTotals.intRev),'var(--pu)','font-weight:900')}
-    ${td(n(seasonTotals.totalRev),'var(--gd)','font-size:15px;font-weight:900')}
-    ${td(n(seasonTotals.totalExp),'var(--dn)','font-weight:900')}
-    ${td(`<span style="color:${profColor(seasonTotals.netProfit)};font-size:16px;font-weight:900">${n(seasonTotals.netProfit)}</span>`,'','')}
-    ${td(pct(seasonTotals.netProfit,seasonTotals.totalRev),seasonTotals.netProfit>=0?'var(--ac)':'var(--dn)','')}
+    ${td(seasonData.reduce((s,d)=>s+d.clientCount,0),'var(--tx)','text-align:center')}
+    ${td3(`<strong>${n(seasonTotals.aptRev)}</strong>`)}${td3(seasonTotals.aptExp?`<strong style="color:#c0392b">-${n(seasonTotals.aptExp)}</strong>`:'—')}${td3(`<strong style="color:${profColor(seasonTotals.aptProfit)}">${n(seasonTotals.aptProfit)}</strong>`)}
+    ${td3(`<strong>${n(seasonTotals.busRev)}</strong>`)}${td3(seasonTotals.busExp?`<strong style="color:#c0392b">-${n(seasonTotals.busExp)}</strong>`:'—')}${td3(`<strong style="color:${profColor(seasonTotals.busProfit)}">${n(seasonTotals.busProfit)}</strong>`)}
+    ${td3(`<strong>${n(seasonTotals.intRev)}</strong>`)}${td3(seasonTotals.intExp?`<strong style="color:#c0392b">-${n(seasonTotals.intExp)}</strong>`:'—')}${td3(`<strong style="color:${profColor(seasonTotals.intProfit)}">${n(seasonTotals.intProfit)}</strong>`)}
+    ${td3(`<strong style="font-size:14px">${n(seasonTotals.totalRev)}</strong>`)}${td3(`<strong style="color:#c0392b">-${n(seasonTotals.totalExp)}</strong>`)}${td3(`<strong style="font-size:14px;color:${profColor(seasonTotals.netProfit)}">${n(seasonTotals.netProfit)}</strong>`)}
   </tr>`;
 
   const seasonTable = allCns.length===0
     ? `<div class="info-box">لا توجد أفواج مسجلة بعد</div>`
-    : `<div class="tbl-wrap"><table>
-        <thead><tr>${[th('الفوج'),th('العملاء'),th('إيراد الشقق'),th('إيراد الباص'),th('إيراد الداخلي'),th('إجمالي الإيرادات'),th('المصاريف'),th('الصافي'),th('هامش الربح')].join('')}</tr></thead>
+    : `<div class="tbl-wrap"><table style="min-width:1400px">
+        <thead>
+          <tr>
+            <th rowspan="2" style="background:linear-gradient(135deg,#1a5276,#117a65);color:#fff;padding:10px 11px;text-align:right;font-size:12px;white-space:nowrap;vertical-align:middle">الفوج</th>
+            <th rowspan="2" style="background:linear-gradient(135deg,#1a5276,#117a65);color:#fff;padding:10px 11px;text-align:center;font-size:12px;white-space:nowrap;vertical-align:middle">العملاء</th>
+            <th colspan="3" style="background:#117a65;color:#fff;padding:7px 11px;text-align:center;font-size:12px">🏠 الشقق</th>
+            <th colspan="3" style="background:#1a5276;color:#fff;padding:7px 11px;text-align:center;font-size:12px">🚌 الانتقالات (الباص)</th>
+            <th colspan="3" style="background:#7d3c98;color:#fff;padding:7px 11px;text-align:center;font-size:12px">🚗 الداخلي</th>
+            <th colspan="3" style="background:#b8860b;color:#fff;padding:7px 11px;text-align:center;font-size:12px">💰 إجمالي الفوج</th>
+          </tr>
+          <tr>
+            ${th2('إيراد','#117a65cc')}${th2('مصروف','#117a65cc')}${th2('صافي','#117a65cc')}
+            ${th2('إيراد','#1a5276cc')}${th2('مصروف','#1a5276cc')}${th2('صافي','#1a5276cc')}
+            ${th2('إيراد','#7d3c98cc')}${th2('مصروف','#7d3c98cc')}${th2('صافي','#7d3c98cc')}
+            ${th2('إيراد','#b8860bcc')}${th2('مصروف','#b8860bcc')}${th2('صافي','#b8860bcc')}
+          </tr>
+        </thead>
         <tbody>${seasonRows}</tbody>
         <tfoot>${seasonFooter}</tfoot>
       </table></div>`;
+
 
   // ── منطقة التفصيل لفوج محدد ──────────────────────────────
   const detailOptions = allCns.map(cn=>{
@@ -11284,6 +11457,7 @@ CREATE POLICY "allow_all" ON mtr_conv_expenses FOR ALL USING (true) WITH CHECK (
         </div>
       </div>
       ${summaryCards}
+      ${catBreakdownTable}
       ${seasonTable}
     </div>
 
@@ -11327,24 +11501,30 @@ function _renderConvDetail(){
   const label=conv?conv.label:`فوج ${cn}`;
   const n=v=>`${(v||0).toLocaleString('ar-EG')} ج`;
   const isAdmin=currentUser?.role==='admin';
+  const profColor=v=>v>=0?'var(--ac)':'var(--dn)';
 
-  // بيانات الإيرادات — صف لكل نوع
-  const revRows=[
-    {lbl:'إيراد الشقق',val:data.aptRev,icon:'🏠',col:'var(--ac)',note:`${data.aptCount} شقة`},
-    {lbl:`إيراد كراسي الباص`,val:data.busRev,icon:'🚌',col:'#1a5276',note:`${data.busSeatsCount} كرسي`},
-    {lbl:'إيراد الكراسي الداخلي',val:data.intRev,icon:'🚗',col:'var(--pu)',note:`${data.intSeatsCount} كرسي`},
-  ].map(r=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bd)">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:18px">${r.icon}</span>
-        <div><div style="font-weight:700;font-size:14px">${r.lbl}</div>
-          <div style="font-size:11px;color:var(--tx3)">${r.note}</div></div>
+  // بطاقات تفصيل حسب النوع: إيراد - مصروف = ربح
+  const catCards=[
+    {lbl:'الشقق',icon:'🏠',col:'#117a65',rev:data.aptRev,exp:data.aptExp,profit:data.aptProfit,note:`${data.aptCount} شقة`,cat:'apt_cost'},
+    {lbl:'الانتقالات (الباص)',icon:'🚌',col:'#1a5276',rev:data.busRev,exp:data.busExp,profit:data.busProfit,note:`${data.busSeatsCount} كرسي`,cat:'bus_cost'},
+    {lbl:'الداخلي',icon:'🚗',col:'#7d3c98',rev:data.intRev,exp:data.intExp,profit:data.intProfit,note:`${data.intSeatsCount} كرسي`,cat:'int_transport'},
+  ].map(c=>`
+    <div style="border:1.5px solid ${c.col}33;border-radius:12px;overflow:hidden">
+      <div style="background:${c.col}14;padding:9px 13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid ${c.col}33">
+        <span style="font-size:17px">${c.icon}</span>
+        <div><div style="font-weight:800;font-size:13px;color:${c.col}">${c.lbl}</div>
+          <div style="font-size:10px;color:var(--tx3)">${c.note}</div></div>
       </div>
-      <div style="font-size:16px;font-weight:800;color:${r.col}">${n(r.val)}</div>
+      <div style="padding:10px 13px;display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--tx2)">الإيراد</span><span style="font-weight:700;color:var(--ac)">${n(c.rev)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--tx2)">المصروف</span><span style="font-weight:700;color:${c.exp?'var(--dn)':'var(--tx3)'}">${c.exp?'-'+n(c.exp):'—'}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding-top:5px;border-top:1px solid ${c.col}33"><span style="font-weight:800;color:${c.col}">الربح</span><span style="font-weight:900;color:${profColor(c.profit)}">${n(c.profit)}</span></div>
+      </div>
     </div>`).join('');
 
-  // مصاريف الفوج
+  // مصاريف الفوج (الكل) + مصاريف "أخرى" مفصلة
   const exps=data.expenses;
+  const otherExps=exps.filter(e=>e.category==='other'||!['apt_cost','bus_cost','int_transport'].includes(e.category));
   const expRows=exps.length===0
     ? `<div style="padding:1rem;text-align:center;color:var(--tx3);font-size:13px">لا توجد مصاريف مسجلة لهذا الفوج</div>`
     : exps.map(e=>`
@@ -11366,9 +11546,10 @@ function _renderConvDetail(){
         <div class="fg" style="margin:0">
           <label style="font-size:11px">النوع</label>
           <select id="cva-exp-cat" style="font-size:13px">
-            <option value="bus_cost">🚌 تكلفة الباص</option>
-            <option value="int_transport">🚗 انتقالات داخلية</option>
-            <option value="other">📝 مصروف آخر</option>
+            <option value="bus_cost">🚌 تكلفة الانتقالات (الباص)</option>
+            <option value="int_transport">🚗 تكلفة الداخلي</option>
+            <option value="apt_cost">🏠 تكلفة الشقق</option>
+            <option value="other">📝 مصروف آخر (عمومي)</option>
           </select>
         </div>
         <div class="fg" style="margin:0">
@@ -11409,20 +11590,18 @@ function _renderConvDetail(){
     </div>
   </div>
 
-  <!-- إيرادات -->
-  <div style="border:1px solid var(--bd);border-radius:var(--r);margin-bottom:1rem;overflow:hidden">
-    <div style="padding:10px 14px;background:var(--acl);font-weight:800;color:var(--ac);font-size:13px;border-bottom:1px solid var(--bd)">💚 الإيرادات</div>
-    ${revRows}
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--acl)">
-      <div style="font-weight:800;font-size:14px;color:var(--ac)">إجمالي الإيرادات</div>
-      <div style="font-size:17px;font-weight:900;color:var(--ac)">${n(data.totalRev)}</div>
+  <!-- تفصيل حسب النوع: شقق / انتقالات / داخلي -->
+  <div style="margin-bottom:1rem">
+    <div style="font-weight:800;color:var(--pr);font-size:13px;margin-bottom:.5rem">📂 تفصيل حسب النوع</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.65rem">
+      ${catCards}
     </div>
   </div>
 
   <!-- مصاريف -->
   <div style="border:1px solid var(--bd);border-radius:var(--r);margin-bottom:1rem;overflow:hidden">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--dnl);border-bottom:1px solid var(--bd)">
-      <div style="font-weight:800;color:var(--dn);font-size:13px">🔴 المصاريف</div>
+      <div style="font-weight:800;color:var(--dn);font-size:13px">🔴 كل المصاريف</div>
       <div style="font-size:15px;font-weight:900;color:var(--dn)">${n(data.totalExp)}</div>
     </div>
     <div id="cva-exp-list">${expRows}</div>
@@ -11432,7 +11611,7 @@ function _renderConvDetail(){
   <!-- الصافي -->
   <div style="background:${data.netProfit>=0?'linear-gradient(135deg,var(--acl),#e8f8f5)':'linear-gradient(135deg,var(--dnl),#fdf0ef)'};border:2px solid ${data.netProfit>=0?'var(--ac)':'var(--dn)'};border-radius:14px;padding:1.25rem;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:16px;font-weight:800;color:${data.netProfit>=0?'var(--ac)':'var(--dn)'}">
-      ${data.netProfit>=0?'✅ صافي الربح':'❌ صافي الخسارة'}
+      ${data.netProfit>=0?'✅ صافي ربح الفوج':'❌ صافي خسارة الفوج'}
     </div>
     <div style="font-size:22px;font-weight:900;color:${data.netProfit>=0?'var(--ac)':'var(--dn)'}">
       ${n(data.netProfit)}
@@ -11442,10 +11621,10 @@ function _renderConvDetail(){
 
 // ── helpers ───────────────────────────────────────────────
 function _expCatLabel(cat){
-  return cat==='bus_cost'?'باص':cat==='int_transport'?'انتقالات':'أخرى';
+  return cat==='bus_cost'?'انتقالات':cat==='int_transport'?'داخلي':cat==='apt_cost'?'شقق':'أخرى';
 }
 function _expCatColor(cat){
-  return cat==='bus_cost'?'#1a5276':cat==='int_transport'?'#7d3c98':'#d68910';
+  return cat==='bus_cost'?'#1a5276':cat==='int_transport'?'#7d3c98':cat==='apt_cost'?'#117a65':'#d68910';
 }
 
 // ── حفظ مصروف جديد ───────────────────────────────────────
@@ -11501,30 +11680,65 @@ function _printConvAccSeason(){
   const allCns=[...new Set([...CONVOYS.map(c=>c.num),...convExpenses.map(e=>e.convoyNum)])].sort((a,b)=>a-b);
   const data=allCns.map(cn=>_calcConvoyProfit(cn));
   const n=v=>(v||0).toLocaleString('ar-EG');
-  const totals={totalRev:data.reduce((s,d)=>s+d.totalRev,0),totalExp:data.reduce((s,d)=>s+d.totalExp,0),netProfit:data.reduce((s,d)=>s+d.netProfit,0)};
+  const totals={
+    aptRev:data.reduce((s,d)=>s+d.aptRev,0),busRev:data.reduce((s,d)=>s+d.busRev,0),intRev:data.reduce((s,d)=>s+d.intRev,0),
+    aptExp:data.reduce((s,d)=>s+d.aptExp,0),busExp:data.reduce((s,d)=>s+d.busExp,0),intExp:data.reduce((s,d)=>s+d.intExp,0),otherExp:data.reduce((s,d)=>s+d.otherExp,0),
+    aptProfit:data.reduce((s,d)=>s+d.aptProfit,0),busProfit:data.reduce((s,d)=>s+d.busProfit,0),intProfit:data.reduce((s,d)=>s+d.intProfit,0),
+    totalRev:data.reduce((s,d)=>s+d.totalRev,0),totalExp:data.reduce((s,d)=>s+d.totalExp,0),netProfit:data.reduce((s,d)=>s+d.netProfit,0)};
   const rows=data.map((d,i)=>{
     const c=getConv(d.cn);
+    const exp=v=>v?'-'+n(v):'—';
     return `<tr style="background:${i%2===0?'#fff':'#f7f9fb'}">
       <td>${c?c.label:`فوج ${d.cn}`}</td><td>${d.clientCount}</td>
-      <td>${n(d.aptRev)}</td><td>${n(d.busRev)}</td><td>${n(d.intRev)}</td>
-      <td><strong>${n(d.totalRev)}</strong></td><td style="color:#c0392b">${n(d.totalExp)}</td>
+      <td>${n(d.aptRev)}</td><td style="color:#c0392b">${exp(d.aptExp)}</td><td style="color:${d.aptProfit>=0?'#117a65':'#c0392b'};font-weight:900">${n(d.aptProfit)}</td>
+      <td>${n(d.busRev)}</td><td style="color:#c0392b">${exp(d.busExp)}</td><td style="color:${d.busProfit>=0?'#117a65':'#c0392b'};font-weight:900">${n(d.busProfit)}</td>
+      <td>${n(d.intRev)}</td><td style="color:#c0392b">${exp(d.intExp)}</td><td style="color:${d.intProfit>=0?'#117a65':'#c0392b'};font-weight:900">${n(d.intProfit)}</td>
+      <td><strong>${n(d.totalRev)}</strong></td><td style="color:#c0392b">${exp(d.totalExp)}</td>
       <td style="color:${d.netProfit>=0?'#117a65':'#c0392b'};font-weight:900">${n(d.netProfit)}</td>
     </tr>`;
   }).join('');
+  const catRows=[
+    {lbl:'🏠 الشقق',rev:totals.aptRev,exp:totals.aptExp,profit:totals.aptProfit},
+    {lbl:'🚌 الانتقالات (الباص)',rev:totals.busRev,exp:totals.busExp,profit:totals.busProfit},
+    {lbl:'🚗 الداخلي',rev:totals.intRev,exp:totals.intExp,profit:totals.intProfit},
+  ].map(c=>`<tr><td>${c.lbl}</td><td>${n(c.rev)}</td><td style="color:#c0392b">${c.exp?n(c.exp):'—'}</td><td style="color:${c.profit>=0?'#117a65':'#c0392b'};font-weight:900">${n(c.profit)}</td></tr>`).join('');
   const html=`<html dir="rtl"><head><meta charset="UTF-8"><style>
     body{font-family:Cairo,Arial,sans-serif;font-size:13px;direction:rtl;padding:1.5rem}
     h2{color:#1a5276;margin-bottom:1rem}
-    table{width:100%;border-collapse:collapse}
+    h3{color:#1a5276;margin:1.25rem 0 .5rem}
+    table{width:100%;border-collapse:collapse;margin-bottom:1rem}
     th{background:#1a5276;color:#fff;padding:9px 11px;text-align:right;font-size:12px}
     td{padding:8px 11px;border-bottom:1px solid #dce6f0;text-align:right}
     tfoot td{background:#e8f4fd;font-weight:900;font-size:14px}
     @media print{@page{margin:10mm}}</style></head><body>
     <h2>💰 ملخص حسابات الأفواج — الموسم الكامل</h2>
     <p style="color:#666;font-size:12px">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
+    <h3>📂 ملخص الموسم حسب النوع</h3>
     <table>
-      <thead><tr><th>الفوج</th><th>العملاء</th><th>إيراد الشقق</th><th>إيراد الباص</th><th>إيراد الداخلي</th><th>إجمالي الإيرادات</th><th>المصاريف</th><th>صافي الربح</th></tr></thead>
+      <thead><tr><th>النوع</th><th>الإيراد</th><th>المصروف</th><th>الربح</th></tr></thead>
+      <tbody>${catRows}</tbody>
+      <tfoot><tr><td>إجمالي عام</td><td>${n(totals.totalRev)}</td><td>${n(totals.totalExp)}</td><td style="color:${totals.netProfit>=0?'#117a65':'#c0392b'}">${n(totals.netProfit)}</td></tr></tfoot>
+    </table>
+    ${totals.otherExp?`<p style="font-size:11px;color:#888;margin-top:-.5rem">+ مصاريف عمومية غير مرتبطة بنوع معين: ${n(totals.otherExp)} ج (مخصومة من الصافي العام فقط)</p>`:''}
+    <h3>🚌 تفصيل كل فوج</h3>
+    <table>
+      <thead><tr>
+        <th rowspan="2">الفوج</th><th rowspan="2">العملاء</th>
+        <th colspan="3">🏠 الشقق</th><th colspan="3">🚌 الباص</th><th colspan="3">🚗 الداخلي</th><th colspan="3">💰 الإجمالي</th>
+      </tr><tr>
+        <th>إيراد</th><th>مصروف</th><th>صافي</th>
+        <th>إيراد</th><th>مصروف</th><th>صافي</th>
+        <th>إيراد</th><th>مصروف</th><th>صافي</th>
+        <th>إيراد</th><th>مصروف</th><th>صافي</th>
+      </tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr><td colspan="5">إجمالي الموسم</td><td>${n(totals.totalRev)}</td><td>${n(totals.totalExp)}</td><td style="color:${totals.netProfit>=0?'#117a65':'#c0392b'}">${n(totals.netProfit)}</td></tr></tfoot>
+      <tfoot><tr>
+        <td colspan="2">إجمالي الموسم</td>
+        <td>${n(totals.aptRev)}</td><td>${totals.aptExp?'-'+n(totals.aptExp):'—'}</td><td style="color:${totals.aptProfit>=0?'#117a65':'#c0392b'}">${n(totals.aptProfit)}</td>
+        <td>${n(totals.busRev)}</td><td>${totals.busExp?'-'+n(totals.busExp):'—'}</td><td style="color:${totals.busProfit>=0?'#117a65':'#c0392b'}">${n(totals.busProfit)}</td>
+        <td>${n(totals.intRev)}</td><td>${totals.intExp?'-'+n(totals.intExp):'—'}</td><td style="color:${totals.intProfit>=0?'#117a65':'#c0392b'}">${n(totals.intProfit)}</td>
+        <td>${n(totals.totalRev)}</td><td>${n(totals.totalExp)}</td><td style="color:${totals.netProfit>=0?'#117a65':'#c0392b'}">${n(totals.netProfit)}</td>
+      </tr></tfoot>
     </table></body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);
 }
@@ -11534,14 +11748,26 @@ function _exportConvAccExcel(){
   const allCns=[...new Set([...CONVOYS.map(c=>c.num),...convExpenses.map(e=>e.convoyNum)])].sort((a,b)=>a-b);
   const data=allCns.map(cn=>_calcConvoyProfit(cn));
   const n=v=>(v||0).toLocaleString('ar-EG');
+  const totals={
+    aptRev:data.reduce((s,d)=>s+d.aptRev,0),busRev:data.reduce((s,d)=>s+d.busRev,0),intRev:data.reduce((s,d)=>s+d.intRev,0),
+    aptExp:data.reduce((s,d)=>s+d.aptExp,0),busExp:data.reduce((s,d)=>s+d.busExp,0),intExp:data.reduce((s,d)=>s+d.intExp,0),otherExp:data.reduce((s,d)=>s+d.otherExp,0),
+    aptProfit:data.reduce((s,d)=>s+d.aptProfit,0),busProfit:data.reduce((s,d)=>s+d.busProfit,0),intProfit:data.reduce((s,d)=>s+d.intProfit,0),
+    totalRev:data.reduce((s,d)=>s+d.totalRev,0),totalExp:data.reduce((s,d)=>s+d.totalExp,0),netProfit:data.reduce((s,d)=>s+d.netProfit,0)};
   let csv='\uFEFF'; // BOM for Excel Arabic
-  csv+='الفوج,العملاء,إيراد الشقق,إيراد الباص,إيراد الداخلي,إجمالي الإيرادات,المصاريف,صافي الربح\n';
+  csv+='ملخص الموسم حسب النوع\n';
+  csv+='النوع,الإيراد,المصروف,الربح\n';
+  csv+=`الشقق,${totals.aptRev},${totals.aptExp},${totals.aptProfit}\n`;
+  csv+=`الانتقالات (الباص),${totals.busRev},${totals.busExp},${totals.busProfit}\n`;
+  csv+=`الداخلي,${totals.intRev},${totals.intExp},${totals.intProfit}\n`;
+  csv+=`مصاريف عمومية (غير مرتبطة بنوع),,${totals.otherExp},\n`;
+  csv+=`إجمالي عام,${totals.totalRev},${totals.totalExp},${totals.netProfit}\n\n`;
+  csv+='تفصيل كل فوج\n';
+  csv+='الفوج,العملاء,إيراد الشقق,مصروف الشقق,صافي الشقق,إيراد الباص,مصروف الباص,صافي الباص,إيراد الداخلي,مصروف الداخلي,صافي الداخلي,إجمالي الإيراد,إجمالي المصروف,صافي الفوج\n';
   data.forEach(d=>{
     const c=getConv(d.cn);
-    csv+=`${c?c.label:`فوج ${d.cn}`},${d.clientCount},${d.aptRev},${d.busRev},${d.intRev},${d.totalRev},${d.totalExp},${d.netProfit}\n`;
+    csv+=`${c?c.label:`فوج ${d.cn}`},${d.clientCount},${d.aptRev},${d.aptExp},${d.aptProfit},${d.busRev},${d.busExp},${d.busProfit},${d.intRev},${d.intExp},${d.intProfit},${d.totalRev},${d.totalExp},${d.netProfit}\n`;
   });
-  const totals={totalRev:data.reduce((s,d)=>s+d.totalRev,0),totalExp:data.reduce((s,d)=>s+d.totalExp,0),netProfit:data.reduce((s,d)=>s+d.netProfit,0)};
-  csv+=`إجمالي الموسم,,,,, ${totals.totalRev},${totals.totalExp},${totals.netProfit}\n`;
+  csv+=`إجمالي الموسم,,${totals.aptRev},${totals.aptExp},${totals.aptProfit},${totals.busRev},${totals.busExp},${totals.busProfit},${totals.intRev},${totals.intExp},${totals.intProfit},${totals.totalRev},${totals.totalExp},${totals.netProfit}\n`;
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`حسابات_الأفواج_${new Date().toLocaleDateString('en-CA')}.csv`;
