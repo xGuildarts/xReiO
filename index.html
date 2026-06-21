@@ -466,6 +466,8 @@ tr:hover td{background:#f5f8fc}
   .bus-row{flex-wrap:nowrap!important}
   .bus-aisle{width:16px!important}
 }
+.cl-row td{border-bottom:2px solid #b8c9da}
+.cl-row:hover td{border-bottom:5px solid #e74c3c!important}
 </style>
   <!-- Supabase JS removed - Realtime disabled to reduce egress -->
 </head>
@@ -8680,7 +8682,7 @@ async function renderClosing(){
           <th style="${hs(color)}">الإجمالي</th><th style="${hs(color)}">المدفوع</th><th style="${hs(color)}">المتبقي</th>
           ${isSupplier?`<th style="${hs(color)}">خصم الكراسي (تكلفة)</th><th style="${hs(color)}">الصافي المطلوب من المورد</th>`:''}
         </tr></thead>
-        <tbody>${data.map((r,idx)=>{const rowBg=idx%2===0?'#fff':light;return`<tr style="background:${rowBg};transition:background .15s,box-shadow .15s" onmouseenter="this.style.background='${color}22';this.style.boxShadow='inset 3px 0 0 ${color},0 3px 12px rgba(0,0,0,.1)';this.style.fontSize='13.5px'" onmouseleave="this.style.background='${rowBg}';this.style.boxShadow='none';this.style.fontSize=''">
+        <tbody>${data.map((r,idx)=>{const rowBg=idx%2===0?'#fff':light;return`<tr class="cl-row" style="background:${rowBg}">
           <td style="${ts};font-weight:700;color:${color}">${r.i}</td>
           <td style="${ts};font-weight:800;font-size:14px">${r.name}</td>
           <td style="${ts};font-size:15px;font-weight:900;direction:ltr;text-align:left;color:#1a2535">${r.phone}</td>
