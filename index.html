@@ -8121,9 +8121,13 @@ function _getClosingTableData(sectionKey){
       busSeats,busTot,intSeats,intTot,aptNet,disc:b.disc||0,total:b.total||0,paid:b.paid||0,
       remaining:(b.total||0)-(b.paid||0),hasTransport,via};
   });
-  // supplier keys: supplier_123
+  // supplier keys: 'sup' = كل تحصيلات الموردين مجمّعة، 'sup_123' = مورد واحد بعينه
   if(sectionKey==='bus') return {rows:rows.filter(r=>r.remaining>0&&r.via==='bus'),conv,title:'تحصيلات في الباص',color:'#d68910'};
   if(sectionKey==='bld') return {rows:rows.filter(r=>r.remaining>0&&r.via==='building'),conv,title:'تحصيلات في البرج',color:'#c0392b'};
+  if(sectionKey==='sup'){
+    const filtered=rows.filter(r=>r.remaining>0&&r.via.startsWith('supplier_'));
+    return {rows:filtered,conv,title:'تحصيلات الموردين',color:'#3c4fa8',isSupplier:true};
+  }
   if(sectionKey.startsWith('sup_')){
     const sid=sectionKey.replace('sup_','');
     const sup=suppliers.find(s=>String(s.id)===String(sid));
@@ -8196,6 +8200,13 @@ function exportClosingTablePDF(sectionKey){
   const sd=r=>r.busSeats*((r.b&&r.b.collectViaSeatCost)||0);
   const T={busSeats:rows.reduce((s,r)=>s+r.busSeats,0),busTot:rows.reduce((s,r)=>s+r.busTot,0),intSeats:rows.reduce((s,r)=>s+r.intSeats,0),intTot:rows.reduce((s,r)=>s+r.intTot,0),aptNet:rows.reduce((s,r)=>s+r.aptNet,0),disc:rows.reduce((s,r)=>s+r.disc,0),total:rows.reduce((s,r)=>s+r.total,0),paid:rows.reduce((s,r)=>s+r.paid,0),remaining:rows.reduce((s,r)=>s+r.remaining,0),supDeduct:rows.reduce((s,r)=>s+sd(r),0),supNet:rows.reduce((s,r)=>s+Math.max(0,r.remaining-sd(r)),0)};
   const lightColor=color==='#1a5276'?'#e8f4fd':color==='#d68910'?'#fef9e7':'#fdf2f0';
+  // ===== مصاريف هذا الجزء (باص/برج/مورد) — لازم تظهر كاملة في الـ PDF زي الشاشة بالظبط =====
+  const groupType=sectionKey==='bus'?'bus':sectionKey==='bld'?'building':(sectionKey==='sup'||sectionKey.startsWith('sup_'))?'supplier':null;
+  const groupRef=sectionKey.startsWith('sup_')?sectionKey.replace('sup_',''):'';
+  const exps=sectionKey==='sup'?closingExp.filter(e=>e.groupType==='supplier'):(groupType?_expsFor(groupType,groupRef):[]);
+  const totalExp=exps.reduce((s,e)=>s+e.amount,0);
+  const baseTotal=isSupplier?T.supNet:T.remaining;
+  const netAfterExp=baseTotal-totalExp;
   const trs=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':lightColor}">
     <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700;color:${color}">${r.i}</td>
     <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;font-size:13px">${r.name}</td>
@@ -8230,6 +8241,17 @@ thead tr{background:${color};color:#fff}
 th{padding:10px 12px;font-size:12px;font-weight:800;text-align:right;white-space:nowrap}
 tfoot tr{background:${lightColor}}
 tfoot td{padding:9px 12px;font-weight:800;font-size:12px;border-top:2.5px solid ${color}}
+.exp-box{margin-top:18px;background:${lightColor};border:2px solid ${color};border-radius:12px;padding:14px 18px;page-break-inside:avoid}
+.exp-title{font-size:16px;font-weight:900;color:${color};margin-bottom:10px}
+.exp-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.exp-item{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid ${color}44;border-radius:8px;padding:9px 16px}
+.exp-item span:first-child{font-size:14px;font-weight:700}
+.exp-item span:last-child{font-size:16px;font-weight:900;color:#c0392b}
+.exp-empty{font-size:13px;color:#888;margin-bottom:10px}
+.exp-totals{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:12px;border-top:3px solid ${color}}
+.exp-totals .lbl{font-size:14px;font-weight:700;color:#1a2535}
+.exp-totals .lbl strong{color:#c0392b;font-size:15px}
+.exp-totals .net{font-size:19px;font-weight:900;color:${color}}
 </style></head><body>
 <div class="no-print"><button onclick="window.print()">🖨 طباعة / حفظ PDF</button></div>
 <div class="hdr">
@@ -8271,6 +8293,14 @@ tfoot td{padding:9px 12px;font-weight:800;font-size:12px;border-top:2.5px solid 
     ${isSupplier?`<td style="color:#c0392b">${T.supDeduct?'-'+n(T.supDeduct):'—'}</td><td style="color:#117a65;font-size:15px;font-weight:900">${n(T.supNet)}</td>`:''}
   </tr></tfoot>
 </table>
+${groupType?`<div class="exp-box">
+  <div class="exp-title">💸 مصاريف ${title}</div>
+  ${exps.length?`<div class="exp-list">${exps.map(e=>`<div class="exp-item"><span>${e.label}</span><span>-${n(e.amount)} ج</span></div>`).join('')}</div>`:`<div class="exp-empty">لا توجد مصاريف مسجلة على هذا الجزء</div>`}
+  <div class="exp-totals">
+    <span class="lbl">إجمالي المصاريف: <strong>${n(totalExp)} ج</strong></span>
+    <span class="net">الصافي بعد المصاريف: ${n(netAfterExp)} ج</span>
+  </div>
+</div>`:''}
 <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script>
 </body></html>`;
   openHtmlPrint(h,'سجل النشاط','#7d3c98','سجل_النشاط_'+new Date().toLocaleDateString('en-CA'));}
@@ -8587,25 +8617,25 @@ function _mkExpBox(groupType,groupRef,convoyNum,color,light,baseTotal,baseLabel)
   const totalExp=exps.reduce((s,e)=>s+e.amount,0);
   const net=baseTotal-totalExp;
   const n=v=>(v||0).toLocaleString('ar-EG');
-  return `<div style="margin-top:.6rem;background:${light};border:1px solid ${color}33;border-radius:10px;padding:.75rem .9rem">
-    <div style="font-size:12px;font-weight:800;color:${color};margin-bottom:${exps.length?'.5rem':'0'}">💸 مصاريف ${baseLabel}</div>
-    ${exps.length?`<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:.6rem">
-      ${exps.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:6px;padding:5px 8px;font-size:12px">
-        <span style="font-weight:600">${e.label}</span>
+  return `<div class="exp-box" style="margin-top:.6rem;background:${light};border:1px solid ${color}33;border-radius:10px;padding:.75rem .9rem">
+    <div class="exp-title" style="font-size:12px;font-weight:800;color:${color};margin-bottom:${exps.length?'.5rem':'0'}">💸 مصاريف ${baseLabel}</div>
+    ${exps.length?`<div class="exp-items" style="display:flex;flex-direction:column;gap:4px;margin-bottom:.6rem">
+      ${exps.map(e=>`<div class="exp-row" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:6px;padding:5px 8px;font-size:12px">
+        <span class="exp-label" style="font-weight:600">${e.label}</span>
         <span style="display:flex;align-items:center;gap:8px">
-          <span style="font-weight:800;color:#c0392b">-${n(e.amount)} ج</span>
-          <span onclick="deleteClosingExpense(${e.id},${convoyNum})" style="cursor:pointer;color:#c0392b;font-size:13px" title="حذف">✕</span>
+          <span class="exp-amt" style="font-weight:800;color:#c0392b">-${n(e.amount)} ج</span>
+          <span class="exp-del" onclick="deleteClosingExpense(${e.id},${convoyNum})" style="cursor:pointer;color:#c0392b;font-size:13px" title="حذف">✕</span>
         </span>
       </div>`).join('')}
     </div>`:''}
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <div class="exp-add-row" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <input id="cexp-label-${gid}" placeholder="وصف المصروف (مثلاً مرتب المشرف)" style="flex:2;min-width:140px;padding:6px 8px;border-radius:6px;border:1.5px solid var(--bd2);font-size:12px;font-family:inherit;background:var(--sf);color:var(--tx)">
       <input id="cexp-amt-${gid}" type="number" min="0" placeholder="القيمة" style="flex:1;min-width:80px;padding:6px 8px;border-radius:6px;border:1.5px solid var(--bd2);font-size:12px;font-family:inherit;background:var(--sf);color:var(--tx)">
       <button onclick="addClosingExpense('${groupType}','${groupRef||''}',${convoyNum})" style="background:${color};color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">➕ إضافة</button>
     </div>
-    <div style="display:flex;justify-content:space-between;margin-top:.6rem;padding-top:.5rem;border-top:1.5px solid ${color}33;font-size:13px">
-      <span style="font-weight:700;color:var(--tx2)">إجمالي المصاريف: <strong style="color:#c0392b">${n(totalExp)} ج</strong></span>
-      <span style="font-weight:900;color:${color}">الصافي بعد المصاريف: ${n(net)} ج</span>
+    <div class="exp-totals" style="display:flex;justify-content:space-between;margin-top:.6rem;padding-top:.5rem;border-top:1.5px solid ${color}33;font-size:13px">
+      <span class="exp-totals-lbl" style="font-weight:700;color:var(--tx2)">إجمالي المصاريف: <strong style="color:#c0392b">${n(totalExp)} ج</strong></span>
+      <span class="exp-totals-net" style="font-weight:900;color:${color}">الصافي بعد المصاريف: ${n(net)} ج</span>
     </div>
   </div>`;
 }
@@ -8754,6 +8784,7 @@ async function renderClosing(){
     ${collSupplierTbl?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:.5rem;margin-bottom:.75rem">
       <button class="btn btn-sm" onclick="printOneTable('closing-sup')" style="background:#e8f0fe;color:#3c4fa8;border-color:#3c4fa8">🖨 طباعة تحصيلات المورد</button>
       <button class="btn btn-sm" onclick="exportClosingTableExcel('sup')" style="background:var(--gdl);color:var(--gd);border-color:var(--gd)">📥 Excel المورد</button>
+      <button class="btn btn-sm" onclick="exportClosingTablePDF('sup')" style="background:#e8f0fe;color:#3c4fa8;border-color:#3c4fa8">📄 PDF المورد</button>
     </div><div id="closing-sup">${collSupplierTbl}</div>`:''}
     ${allOk}`;
 }
