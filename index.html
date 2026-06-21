@@ -8195,21 +8195,21 @@ function exportClosingTablePDF(sectionKey){
   const T={busSeats:rows.reduce((s,r)=>s+r.busSeats,0),busTot:rows.reduce((s,r)=>s+r.busTot,0),intSeats:rows.reduce((s,r)=>s+r.intSeats,0),intTot:rows.reduce((s,r)=>s+r.intTot,0),aptNet:rows.reduce((s,r)=>s+r.aptNet,0),disc:rows.reduce((s,r)=>s+r.disc,0),total:rows.reduce((s,r)=>s+r.total,0),paid:rows.reduce((s,r)=>s+r.paid,0),remaining:rows.reduce((s,r)=>s+r.remaining,0),supDeduct:rows.reduce((s,r)=>s+sd(r),0),supNet:rows.reduce((s,r)=>s+Math.max(0,r.remaining-sd(r)),0)};
   const lightColor=color==='#1a5276'?'#e8f4fd':color==='#d68910'?'#fef9e7':'#fdf2f0';
   const trs=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':lightColor}">
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:700;color:${color}">${r.i}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:800;font-size:13px">${r.name}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-size:11px;direction:ltr;text-align:left;color:#555">${r.phone}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center"><span style="background:${lightColor};color:${color};border-radius:5px;padding:2px 8px;font-weight:700;font-size:11px">${r.apts}</span></td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;color:#117a65;font-size:11px">${r.pickup}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center;font-weight:700">${r.busSeats||'—'}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center;font-weight:700;color:#1a5276">${r.busSeats?n(r.busTot):'—'}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats||'—'}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'—'}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:700">${n(r.aptNet)}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;color:${r.disc?'#c0392b':'#bbb'}">${r.disc?n(r.disc):'—'}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:800;color:#1a5276">${n(r.total)}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:700;color:#117a65">${n(r.paid)}</td>
-    <td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:800;color:${color}">${n(r.remaining)}</td>
-    ${isSupplier?`<td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:700;color:#c0392b">${sd(r)?'-'+n(sd(r)):'—'}</td><td style="padding:8px 10px;border-bottom:1.5px solid #e0e7f0;font-weight:800;color:#117a65">${n(Math.max(0,r.remaining-sd(r)))}</td>`:''}
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700;color:${color}">${r.i}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;font-size:13px">${r.name}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-size:15px;font-weight:900;direction:ltr;text-align:left;color:#1a2535">${r.phone}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center"><span style="background:${lightColor};color:${color};border-radius:5px;padding:2px 8px;font-weight:700;font-size:11px">${r.apts}</span></td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;color:#117a65;font-size:11px">${r.pickup}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center;font-weight:700">${r.busSeats||'—'}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center;font-weight:700;color:#1a5276">${r.busSeats?n(r.busTot):'—'}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats||'—'}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'—'}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700">${n(r.aptNet)}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;color:${r.disc?'#c0392b':'#bbb'}">${r.disc?n(r.disc):'—'}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;color:#1a5276">${n(r.total)}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700;color:#117a65">${n(r.paid)}</td>
+    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;color:${color}">${n(r.remaining)}</td>
+    ${isSupplier?`<td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700;color:#c0392b">${sd(r)?'-'+n(sd(r)):'—'}</td><td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;color:#117a65">${n(Math.max(0,r.remaining-sd(r)))}</td>`:''}
   </tr>`).join('');
   const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
 <title>${title} — ${conv?conv.label:''}</title>
@@ -8652,7 +8652,7 @@ async function renderClosing(){
   collSupplier.forEach(r=>{const key=getVia(r);if(!supGroups[key])supGroups[key]=[];supGroups[key].push(r);});
   const n=v=>(v||0).toLocaleString('ar-EG');
   const hs=c=>`background:${c};color:#fff;padding:11px 13px;text-align:right;font-size:12px;font-weight:800;white-space:nowrap;border-bottom:2px solid rgba(0,0,0,.15)`;
-  const ts=`border-bottom:1.5px solid #e8eef5;padding:9px 12px;text-align:right;font-size:13px;vertical-align:middle`;
+  const ts=`border-bottom:2px solid #b8c9da;padding:9px 12px;text-align:right;font-size:13px;vertical-align:middle`;
   const fs=c=>`background:${c}22;padding:9px 12px;font-weight:900;text-align:right;font-size:13px;border-top:2.5px solid ${c}`;
   function mkTable(data,title,color,light,isSupplier,groupType,groupRef){
     if(!data.length)return'';
@@ -8683,7 +8683,7 @@ async function renderClosing(){
         <tbody>${data.map((r,idx)=>{const rowBg=idx%2===0?'#fff':light;return`<tr style="background:${rowBg};transition:background .15s,box-shadow .15s" onmouseenter="this.style.background='${color}22';this.style.boxShadow='inset 3px 0 0 ${color},0 3px 12px rgba(0,0,0,.1)';this.style.fontSize='13.5px'" onmouseleave="this.style.background='${rowBg}';this.style.boxShadow='none';this.style.fontSize=''">
           <td style="${ts};font-weight:700;color:${color}">${r.i}</td>
           <td style="${ts};font-weight:800;font-size:14px">${r.name}</td>
-          <td style="${ts};font-size:11px;direction:ltr;text-align:left">${r.phone}</td>
+          <td style="${ts};font-size:15px;font-weight:900;direction:ltr;text-align:left;color:#1a2535">${r.phone}</td>
           <td style="${ts};text-align:center"><span style="background:${light};color:${color};border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700">${r.apts}</span></td>
           <td style="${ts};color:#117a65;font-size:11px">${r.pickup}</td>
           <td style="${ts};text-align:center;font-weight:700">${r.busSeats||'-'}</td>
@@ -9801,6 +9801,7 @@ window.printOneTable = function(sectionId){
     table{width:100%!important;border-collapse:collapse!important;min-width:unset!important;table-layout:fixed}
     th,td{font-family:'Cairo',Arial,sans-serif;text-align:right;padding:5px 6px!important;font-size:10px!important;word-break:break-word;white-space:normal!important}
     th{font-size:10px!important}
+    table td:nth-child(3){font-size:13px!important;font-weight:900!important;color:#000!important}
     div[style*="overflow-x"]{overflow:visible!important}
     table col,table td:nth-child(1){width:3%}
     table td:nth-child(2){width:14%}
