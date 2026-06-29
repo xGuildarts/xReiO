@@ -8211,14 +8211,17 @@ document.addEventListener('DOMContentLoaded', function(){
 
 function populateClosingConvoys(){
   const sel=document.getElementById('cl-convoy-sel');
-  if(!sel||sel.options.length>1)return;
+  if(!sel)return;
+  const prev=sel.value;
+  sel.innerHTML='<option value="">-- اختار الفوج --</option>';
   CONVOYS.forEach(c=>{
-    const used=bookings.filter(b=>b.convoy===c.num).length;
+    const used=bookings.filter(b=>b.convoy===c.num&&b.status!=='cancelled').length;
     const o=document.createElement('option');
     o.value=c.num;
     o.textContent=c.label+(used?` (${used} حجز)`:'');
     sel.appendChild(o);
   });
+  if(prev)sel.value=prev;
 }
 
 
@@ -8725,7 +8728,7 @@ function populateClosingSel(){
   const prev=sel.value; // save current selection
   sel.innerHTML='<option value="">-- اختار الفوج --</option>';
   CONVOYS.forEach(c=>{
-    const cnt=bookings.filter(b=>b.convoy===c.num).length;
+    const cnt=bookings.filter(b=>b.convoy===c.num&&b.status!=='cancelled').length;
     const o=document.createElement('option');
     o.value=c.num;
     o.textContent=c.label+(cnt?` · ${cnt} حجز`:'');
