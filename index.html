@@ -1204,8 +1204,8 @@ CREATE POLICY "allow_all" ON mtr_closing_expenses FOR ALL USING (true) WITH CHEC
         <div class="fg"><label>حالة الحجز</label>
           <select id="hbk-status">
             <option value="pending">⏳ انتظار</option>
-            <option value="confirmed">✅ مؤكد</option>
-            <option value="cancelled">❌ ملغي</option>
+            <option value="confirmed">✅ Confirmed</option>
+            <option value="cancelled">❌ Cancelled</option>
           </select>
         </div>
         <div class="fg"><label>مسؤول المبيعات</label>
@@ -7584,8 +7584,8 @@ async function editBooking(id){
     <div class="g2" style="margin-top:.75rem">
       <div class="fg"><label>حالة الحجز</label>
         <select id="edit-status" style="font-weight:700">
-          <option value="active" ${(b.status||'active')==='active'?'selected':''}>✅ مؤكد / نشط</option>
-          <option value="cancelled" ${b.status==='cancelled'?'selected':''}>❌ ملغي</option>
+          <option value="active" ${(b.status||'active')==='active'?'selected':''}>✅ Confirmed</option>
+          <option value="cancelled" ${b.status==='cancelled'?'selected':''}>❌ Cancelled</option>
         </select>
         <div id="cancel-warn" style="display:${b.status==='cancelled'?'block':'none'};margin-top:5px;padding:7px;background:var(--dnl);border:1px solid var(--dn);border-radius:7px;font-size:11px;color:var(--dn)">
           ⚠️ الحجز الملغي يُشال من الحسابات والباص والجداول كأنه محذوف
