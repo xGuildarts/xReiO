@@ -6975,7 +6975,7 @@ function genReport(){
   if(rptCard){rptCard.style.display='block';rptCard.classList.remove('collapsed');setTimeout(initCollapsibleCards,50);}
   function inR(d){return!d||(!from||d>=from)&&(!to||d<=to)}
   let html='',title='',total=0,count=0;
-  const allBks=bookings,allAcc=accEntries;
+  const allBks=bookings.filter(b=>b.status!=='cancelled'),allAcc=accEntries;
   function bkTable(bks){
     if(!bks.length)return '<div style="text-align:center;color:var(--tx3);padding:2rem">لا توجد بيانات</div>';
     return `<table><thead><tr><th>العميل</th><th>الهاتف</th><th>الشقق</th><th>الفوج</th><th>مكان الركوب</th><th>المسؤول</th><th>كراسي الباص</th><th>داخلي</th><th>أفراد</th><th>أطفال</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>
@@ -8279,7 +8279,7 @@ function _getClosingTableData(sectionKey){
   const sel=document.getElementById('cl-convoy-sel');
   const cn=sel?parseInt(sel.value):0;
   const conv=cn?getConv(cn):null;
-  const bks=bookings.filter(b=>b.convoy===cn&&b.partyType!=='supplier');
+  const bks=bookings.filter(b=>b.convoy===cn&&b.partyType!=='supplier'&&b.status!=='cancelled');
   const SP=600,IP=200;
   const rows=bks.map((b,i)=>{
     const baseSeats=(b.apts||[]).reduce((s,a)=>{const inf=APTS[a];return s+(inf?(inf.type==='single'?2:4):0);},0);
@@ -8824,7 +8824,7 @@ async function renderClosing(){
   if(!cn||!out){out&&(out.innerHTML='<div class="info-box">اختار الفوج من الأعلى</div>');return;}
   await _loadClosingExp(cn);
   const conv=getConv(cn);
-  const bks=bookings.filter(b=>b.convoy===cn&&b.partyType!=='supplier');
+  const bks=bookings.filter(b=>b.convoy===cn&&b.partyType!=='supplier'&&b.status!=='cancelled');
   const SP=600,IP=200;
   const rows=bks.map((b,i)=>{
     const baseSeats=(b.apts||[]).reduce((s,a)=>{const inf=APTS[a];return s+(inf?(inf.type==='single'?2:4):0);},0);
