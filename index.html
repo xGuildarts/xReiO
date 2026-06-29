@@ -5251,8 +5251,11 @@ async function restoreBooking(id){
     addLog(`استرجاع حجز: ${b.name}`,'edit',`تم تفعيل الحجز مرة أخرى`);
     markAllTabsDirty();
     renderCancelled();
-    // لو صفحة التفاصيل مفتوحة، حدّثها
-    if(document.getElementById('cl-det').style.display!=='none')viewClient(id);
+    // لو صفحة التفاصيل مفتوحة، ارجع للقايمة
+    if(document.getElementById('cl-det').style.display!=='none'){
+      document.getElementById('cl-det').style.display='none';
+      document.getElementById('cl-list').style.display='block';
+    }
     toast('✅ تم استرجاع الحجز بنجاح','ok');
   }catch(e){alert('خطأ في الاسترجاع: '+e.message);}
 }
@@ -5366,11 +5369,11 @@ async function ensureBusSeatsLoaded(cn){
     _busSeatsLoadedConvoys.add(cn);
   }catch(ex){console.warn('ensureBusSeatsLoaded failed',cn,ex.message);}
 }
+let _prevTab='clients';
 async function viewClient(id){
   const b=bookings.find(x=>x.id===id);if(!b)return;
-  // لو جاي من تاب الإلغاءات وهو ملغي، افتحه في clients بس اوعى تمسح الـ cancelled view
-  if(_activeTab!=='cancelled')showTab('clients');
-  else showTab('clients');
+  _prevTab=_activeTab||'clients';
+  if(_activeTab!=='clients')showTab('clients');
   document.getElementById('cl-list').style.display='none';
   document.getElementById('cl-det').style.display='block';
   // ===== جيب الأعمدة الثقيلة on-demand لو مش موجودة =====
@@ -5675,7 +5678,12 @@ async function saveCollectVia(id){
     viewClient(id);
   }catch(e){alert('فشل الحفظ: '+e.message)}
 }
-function showClList(){document.getElementById('cl-list').style.display='block';document.getElementById('cl-det').style.display='none';renderClients()}
+function showClList(){
+  document.getElementById('cl-list').style.display='block';
+  document.getElementById('cl-det').style.display='none';
+  if(_prevTab==='cancelled'){showTab('cancelled');}
+  else{showTab('clients');renderClients();}
+}
 
 // ============================================================
 // BUS
@@ -7608,7 +7616,7 @@ async function editBooking(id){
     <div class="g2" style="margin-top:.75rem">
       <div class="fg"><label>حالة الحجز</label>
         <select id="edit-status" style="font-weight:700">
-          <option value="active" ${(b.status||'active')==='active'?'selected':''}>✅  Confirmed</option>
+          <option value="active" ${(b.status||'active')==='active'?'selected':''}>✅ Confirmed</option>
           <option value="cancelled" ${b.status==='cancelled'?'selected':''}>❌ Cancelled</option>
         </select>
         <div id="cancel-warn" style="display:${b.status==='cancelled'?'block':'none'};margin-top:5px;padding:7px;background:var(--dnl);border:1px solid var(--dn);border-radius:7px;font-size:11px;color:var(--dn)">
