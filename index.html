@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -4793,6 +4794,12 @@ function getConvoys(){
 const CONVOYS=getConvoys();
 function getConv(n){return CONVOYS.find(c=>c.num===n)}
 function convTxt(n){const c=getConv(n);return c?('فوج '+c.label):('فوج '+(n!=null?n:'-'));} // نص "فوج + تاريخه" يُستخدم فى كل الشاشات بدل رقم الفوج وحده
+// الفوج اللي بعد فوج معين مباشرة (خروجه = دخول اللي بعده) — ده اللي باصه فعليًا بيودّي عميل الفوجين وهو راجع
+function nextConvAfter(cn){
+  const c=getConv(cn); if(!c) return cn;
+  const nxt=CONVOYS.find(x=>x.checkin===c.checkout);
+  return nxt?nxt.num:cn;
+}
 function activeBookings(){return bookings.filter(b=>b.status!=='cancelled');}
 function bookedApts(cn,excId){return activeBookings().filter(b=>b.convoy===cn&&b.id!==excId).flatMap(b=>b.apts).concat(activeBookings().filter(b=>b.convoy2===cn&&b.id!==excId).flatMap(b=>b.apts2||[]))}
 function aptSeats1(b){return(b.apts||[]).reduce((s,a)=>{const i=APTS[a];return s+(i?(i.type==='single'?2:4):0);},0);}
@@ -5604,7 +5611,7 @@ async function viewClient(id){
         ${as2?`<div style="font-size:11px;color:var(--wn)">مقاعد الباص (عودة): ${as2}</div>`:''}
         ${b.seatNote?`<div style="font-size:11px;background:var(--wnl);border-radius:5px;padding:2px 7px;color:var(--wn);display:inline-block;margin-top:2px">🪑 ${b.seatNote}</div>`:''}
         <div style="font-size:12px;color:var(--gd);font-weight:600">🚌 ${getBusNames(b.convoy)[b.busIdx||0]||'الباص الأول'}</div>
-        ${b.convoy2?`<div style="font-size:12px;background:var(--wnl);border:1px solid var(--wn);border-radius:6px;padding:3px 8px;margin-top:3px;font-weight:700;color:var(--wn)">⚠ واخد فوجين — هيرجع مع فوج ${getConv(b.convoy2)?.label||b.convoy2} مش الفوج الأول</div>`:''}        
+        ${b.convoy2?`<div style="font-size:12px;background:var(--wnl);border:1px solid var(--wn);border-radius:6px;padding:3px 8px;margin-top:3px;font-weight:700;color:var(--wn)">⚠ واخد فوجين — هيرجع مع فوج ${getConv(nextConvAfter(b.convoy2))?.label||b.convoy2} مش الفوج الأول</div>`:''}        
         ${(b.adults||0)>0||(b.children||0)>0?`<div style="font-size:12px;color:var(--pu)">الأفراد: ${b.adults||0} كبار${(b.children||0)>0?' · '+(b.children||0)+' أطفال':''}</div>`:''}
         <div style="font-size:11px;color:var(--tx3)">المسؤول: ${b.createdBy||'—'}</div>
       </div>
@@ -5983,7 +5990,7 @@ function printBusLayout(cn,busIdx){
   const setts=(typeof settings!=='undefined'?settings:{})||{};
   const allBks=activeBookings().filter(b=>b.convoy===cn&&effSeats(b)>0);
   const bks=allBks.filter(b=>(b.busIdx===undefined?0:b.busIdx)===busIdx).sort((a,z)=>new Date(a.createdAt||0)-new Date(z.createdAt||0));
-  const returnClients=activeBookings().filter(b=>b.convoy2===cn&&effSeats(b)>0);
+  const returnClients=activeBookings().filter(b=>nextConvAfter(b.convoy2)===cn&&effSeats(b)>0);
   const fname=`قائمة_${busName}_${conv.label}_${new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')}`.replace(/\s+/g,'_');
 
   // ألوان العملاء
@@ -6095,7 +6102,7 @@ function downloadBusPDF(cn,busIdx){
   const busName=getBusNames(cn)[busIdx]||'الباص '+(busIdx+1);
   const allBks=activeBookings().filter(b=>b.convoy===cn&&effSeats(b)>0);
   const bks=allBks.filter(b=>(b.busIdx===undefined?0:b.busIdx)===busIdx).sort((a,z)=>new Date(a.createdAt||0)-new Date(z.createdAt||0));
-  const returnClients=activeBookings().filter(b=>b.convoy2===cn&&effSeats(b)>0);
+  const returnClients=activeBookings().filter(b=>nextConvAfter(b.convoy2)===cn&&effSeats(b)>0);
   const occ={};
   bks.forEach(b=>{(b.seatAssign||[]).forEach(sa=>{if(sa.seatNum)occ[sa.seatNum]={name:b.name,phone:b.phone||'',pickup:b.pickup||'',seatNote:b.seatNote||'',isDouble:b.convoy2!=null,remaining:b.remaining||0};});});
   const occ2={};
@@ -6194,7 +6201,7 @@ function renderBusLayout(cn,busIdx){
   // For return-trip clients (convoy2=cn): show them in a separate section as returnees
 
   // Clients that RETURN with convoy cn (their convoy2=cn)
-  const returnClients=activeBookings().filter(b=>b.convoy2===cn&&effSeats(b)>0);
+  const returnClients=activeBookings().filter(b=>nextConvAfter(b.convoy2)===cn&&effSeats(b)>0);
 
   // Occupied seats for this bus
   const occ={};
@@ -6435,7 +6442,7 @@ async function busDrop(e,cn,toSn){
       const totalNeeded=effSeats(b);
       // Check if seat already taken by another return client
       const occ2check={};
-      activeBookings().filter(bb=>bb.convoy2===cn).forEach(bb=>{(bb.seatAssign2||[]).forEach(sa=>{if(sa.seatNum&&bb.id!==bookingId)occ2check[sa.seatNum]=true;});});
+      activeBookings().filter(bb=>nextConvAfter(bb.convoy2)===cn).forEach(bb=>{(bb.seatAssign2||[]).forEach(sa=>{if(sa.seatNum&&bb.id!==bookingId)occ2check[sa.seatNum]=true;});});
       if(occ2check[toSn]){alert('هذا المقعد مأخوذ لعميل عودة آخر');return;}
       // Check if already assigned this seat
       if(b.seatAssign2.some(sa=>sa.seatNum===toSn)){alert('هذا المقعد محجوز بالفعل لنفس العميل');return;}
@@ -6479,7 +6486,7 @@ async function clearSeat(cn,sn){
 async function clearSeat2(cn,sn){
   if(!canDo('edit_bus')){toast('ليس لديك صلاحية تعديل الباص','warn');return;}
   if(!await confirm('إلغاء تخصيص كرسي العودة؟'))return;
-  const b=bookings.find(bb=>bb.convoy2===cn&&(bb.seatAssign2||[]).some(s=>s.seatNum===sn));if(!b)return;
+  const b=bookings.find(bb=>nextConvAfter(bb.convoy2)===cn&&(bb.seatAssign2||[]).some(s=>s.seatNum===sn));if(!b)return;
   b.seatAssign2.forEach((sa,i)=>{if(sa.seatNum===sn)b.seatAssign2[i].seatNum=null;});
   await sbFetch('mtr_bookings','PATCH',{seat_assign2:b.seatAssign2},`?id=eq.${b.id}`);
   renderBusLayout(activeBusConv,activeBusIdx);renderBusTab();
@@ -6491,7 +6498,7 @@ async function clearAllSeats(cn,busIdx){
   if(!await confirm(`إلغاء كل تخصيص المقاعد في ${busName}؟ هيتم تفريغ كل المقاعد المحجوزة للعملاء في هذا الباص (ذهاب وعودة).`))return;
   const allBks=activeBookings().filter(b=>b.convoy===cn&&effSeats(b)>0);
   const bks=allBks.filter(b=>(b.busIdx===undefined?0:b.busIdx)===busIdx);
-  const returnClients=activeBookings().filter(b=>b.convoy2===cn&&effSeats(b)>0);
+  const returnClients=activeBookings().filter(b=>nextConvAfter(b.convoy2)===cn&&effSeats(b)>0);
   for(const b of bks){
     if((b.seatAssign||[]).some(sa=>sa.seatNum)){
       b.seatAssign.forEach(sa=>sa.seatNum=null);
@@ -11808,7 +11815,7 @@ function _mapExp(r){
 function _calcConvoyRevenue(cn){
   const bks = bookings.filter(b=>b.convoy===cn && b.partyType!=='supplier');
   const SP = 600, IP = 200; // أسعار افتراضية — بتجي من CONVOYS لو موجودة
-  let aptRev=0, busRev=0, intRev=0, totalDisc=0;
+  let aptRev=0, busRev=0, intRev=0, aptDisc=0, transDisc=0;
   let aptCount=0, busSeatsCount=0, intSeatsCount=0;
   bks.forEach(b=>{
     const baseSeats=(b.apts||[]).reduce((s,a)=>{const inf=APTS[a];return s+(inf?(inf.type==='single'?2:4):0);},0);
@@ -11823,10 +11830,34 @@ function _calcConvoyRevenue(cn){
     aptRev+=aptNet; busRev+=busTot; intRev+=intTot;
     busSeatsCount+=busSeats; intSeatsCount+=intSeats;
     aptCount+=(b.apts||[]).length;
-    totalDisc+=(b.seatDiscAmt||0)+(b.disc||0);
+    aptDisc+=(b.disc||0);
+    transDisc+=(b.seatDiscAmt||0);
   });
+  const totalDisc = aptDisc+transDisc;
   return {cn, clientCount:bks.length, aptCount, aptRev, busSeatsCount, busRev, intSeatsCount, intRev,
-    totalDisc, totalRev: aptRev+busRev+intRev};
+    aptDisc, transDisc, totalDisc, totalRev: aptRev+busRev+intRev};
+}
+
+// ── قيمة الشقق اللى فات ميعادها بدون حجز (فرص ضايعة) لفوج معين ──
+function _calcLostAptValue(cn){
+  const c = getConv(cn);
+  if(!c) return 0;
+  const convDate = new Date(c.checkin);
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(convDate>=today) return 0; // مفيش قيمة فرص ضايعة إلا للأفواج اللى فاتت
+  const SP=600;
+  const convAptList = APT_LIST.filter(a=>{
+    const apt=APTS[a]; if(!apt._extra) return true;
+    const convs=apt.convoys; if(!convs||!convs.length) return false;
+    return convs.some(v=>parseInt(v)===cn);
+  });
+  const bk = bookedApts(cn);
+  const av = convAptList.filter(a=>!bk.includes(a));
+  const p = PRICE_MAP[c.checkin]||{single:9400,double:12800};
+  const netS = p.single-2*SP, netD = p.double-4*SP;
+  let lostValue=0;
+  av.forEach(a=>{const info=APTS[a]; lostValue+=(info&&info.type==='single')?netS:netD;});
+  return lostValue;
 }
 
 function _getConvExpenses(cn){
@@ -11842,8 +11873,9 @@ function _calcConvoyProfit(cn){
   const intExp=_sumCat(exps,'int_transport');
   const otherExp=_sumCat(exps,'other');
   const totalExp = exps.reduce((s,e)=>s+e.amount,0);
+  const lostAptValue = _calcLostAptValue(cn);
   return {...rev, totalExp, netProfit: rev.totalRev - totalExp, expenses: exps,
-    aptExp, busExp, intExp, otherExp,
+    aptExp, busExp, intExp, otherExp, lostAptValue,
     aptProfit: rev.aptRev-aptExp, busProfit: rev.busRev-busExp, intProfit: rev.intRev-intExp};
 }
 
@@ -11893,6 +11925,9 @@ CREATE POLICY "allow_all" ON mtr_conv_expenses FOR ALL USING (true) WITH CHECK (
     intProfit: seasonData.reduce((s,d)=>s+d.intProfit,0),
     netProfit: seasonData.reduce((s,d)=>s+d.netProfit,0),
     totalDisc: seasonData.reduce((s,d)=>s+(d.totalDisc||0),0),
+    aptDisc: seasonData.reduce((s,d)=>s+(d.aptDisc||0),0),
+    transDisc: seasonData.reduce((s,d)=>s+(d.transDisc||0),0),
+    lostAptValue: seasonData.reduce((s,d)=>s+(d.lostAptValue||0),0),
   };
 
   const n=v=>`${(v||0).toLocaleString('ar-EG')} ج`;
@@ -11906,7 +11941,9 @@ CREATE POLICY "allow_all" ON mtr_conv_expenses FOR ALL USING (true) WITH CHECK (
     <div class="stat" style="border-top-color:#1a5276"><div class="stat-label">إجمالي إيرادات الباص</div><div class="stat-val" style="color:#1a5276">${n(seasonTotals.busRev)}</div></div>
     <div class="stat purple"><div class="stat-label">إجمالي الكراسي الداخلي</div><div class="stat-val" style="color:var(--pu)">${n(seasonTotals.intRev)}</div></div>
     <div class="stat gold"><div class="stat-label">إجمالي الإيرادات</div><div class="stat-val" style="color:var(--gd)">${n(seasonTotals.totalRev)}</div></div>
-    <div class="stat" style="border-top-color:#c0392b"><div class="stat-label">إجمالي الخصومات للعملاء</div><div class="stat-val" style="color:#c0392b">${n(seasonTotals.totalDisc)}</div></div>
+    <div class="stat" style="border-top-color:#c0392b"><div class="stat-label">إجمالي خصومات الشقق</div><div class="stat-val" style="color:#c0392b">${n(seasonTotals.aptDisc)}</div></div>
+    <div class="stat" style="border-top-color:#a04000"><div class="stat-label">إجمالي خصومات النقل</div><div class="stat-val" style="color:#a04000">${n(seasonTotals.transDisc)}</div></div>
+    <div class="stat" style="border-top-color:#7d3c98"><div class="stat-label">شقق فاتت بدون حجز (قيمتها)</div><div class="stat-val" style="color:#7d3c98">${n(seasonTotals.lostAptValue)}</div></div>
     <div class="stat red"><div class="stat-label">إجمالي المصاريف</div><div class="stat-val" style="color:var(--dn)">${n(seasonTotals.totalExp)}</div></div>
     <div class="stat" style="border-top-color:${profColor(seasonTotals.netProfit)}"><div class="stat-label">صافي الموسم</div><div class="stat-val" style="color:${profColor(seasonTotals.netProfit)}">${n(seasonTotals.netProfit)}</div></div>
   </div>`;
