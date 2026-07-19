@@ -1379,7 +1379,7 @@ CREATE POLICY "allow_all" ON mtr_closing_expenses FOR ALL USING (true) WITH CHEC
 ALTER TABLE mtr_electricity ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
   FOR ALL USING (true) WITH CHECK (true);</textarea>
-    <button class="btn btn-sm btn-p" style="margin-top:8px" onclick="navigator.clipboard.writeText(document.getElementById('elec-sql-box').value).then(()=>showToast('✅ تم نسخ الـ SQL','ok'))">📋 نسخ SQL</button>
+    <button class="btn btn-sm btn-p" style="margin-top:8px" onclick="navigator.clipboard.writeText(document.getElementById('elec-sql-box').value).then(()=>toast('✅ تم نسخ الـ SQL','success'))">📋 نسخ SQL</button>
   </div>
   <div class="card" style="border-color:var(--dn);max-width:700px;margin-top:.875rem">
     <div class="ctitle" style="color:var(--dn)">🔌 إعادة ضبط الاتصال</div>
@@ -5569,7 +5569,7 @@ async function restoreBooking(id){
       document.getElementById('cl-det').style.display='none';
       document.getElementById('cl-list').style.display='block';
     }
-    toast('✅ تم استرجاع الحجز بنجاح','ok');
+    toast('✅ تم استرجاع الحجز بنجاح','success');
   }catch(e){alert('خطأ في الاسترجاع: '+e.message);}
 }
 
@@ -5705,7 +5705,7 @@ async function delBookingPayment(id,pIdx){
     }
     addLog(`حذف ${sign}: ${b.name}`,'del',`المبلغ: ${Math.abs(p.amount).toLocaleString()} ج · المتبقي بعد الحذف: ${newRemaining.toLocaleString()} ج${matchAcc?' · تم حذف القيد المقابل من الحسابات':''}`);
     markAllTabsDirty();
-    toast('✅ تم حذف الدفعة بنجاح','ok');
+    toast('✅ تم حذف الدفعة بنجاح','success');
     viewClient(id);
   }catch(e){alert('فشل الحذف: '+e.message);}
 }
@@ -12796,7 +12796,7 @@ async function waAddPhone() {
   const name  = document.getElementById('wa-new-name').value.trim();
   const phone = document.getElementById('wa-new-phone').value.trim();
   const key   = document.getElementById('wa-new-key').value.trim();
-  if (!phone || !key) { showToast('⚠️ أدخل الرقم والكود','warn'); return; }
+  if (!phone || !key) { toast('⚠️ أدخل الرقم والكود','warn'); return; }
   const phones = waGetPhones();
   phones.push({ name: name||phone, phone, key });
   waSetPhones(phones);
@@ -12804,7 +12804,7 @@ async function waAddPhone() {
   document.getElementById('wa-new-phone').value = '';
   document.getElementById('wa-new-key').value = '';
   _renderWaList();
-  showToast('✅ تم إضافة رقم الواتساب','ok');
+  toast('✅ تم إضافة رقم الواتساب','success');
   localStorage.setItem('elec_wa_phone', phone);
   localStorage.setItem('elec_wa_key', key);
 }
@@ -12813,13 +12813,13 @@ function _waDeletePhone(idx) {
   phones.splice(idx, 1);
   waSetPhones(phones);
   _renderWaList();
-  showToast('✅ تم الحذف','ok');
+  toast('✅ تم الحذف','success');
 }
 async function _waTestOne(idx) {
   const p = waGetPhones()[idx];
   if (!p) return;
   await _waSend(p.phone, p.key, `🔔 تجربة — نظام أدريسكا تورز يعمل ✅ (${p.name||p.phone})`);
-  showToast('📱 تم إرسال رسالة تجربة واتساب','ok');
+  toast('📱 تم إرسال رسالة تجربة واتساب','success');
 }
 
 // -- TG list --
@@ -12841,7 +12841,7 @@ async function tgAddChat() {
   const name   = document.getElementById('tg-new-name').value.trim();
   const token  = document.getElementById('tg-new-token').value.trim();
   const chatId = document.getElementById('tg-new-chatid').value.trim();
-  if (!token || !chatId) { showToast('⚠️ أدخل التوكن والـ Chat ID','warn'); return; }
+  if (!token || !chatId) { toast('⚠️ أدخل التوكن والـ Chat ID','warn'); return; }
   const chats = tgGetChats();
   chats.push({ name: name||chatId, token, chatId });
   tgSetChats(chats);
@@ -12849,20 +12849,20 @@ async function tgAddChat() {
   document.getElementById('tg-new-token').value = '';
   document.getElementById('tg-new-chatid').value = '';
   _renderTgList();
-  showToast('✅ تم إضافة التيليجرام','ok');
+  toast('✅ تم إضافة التيليجرام','success');
 }
 function _tgDeleteChat(idx) {
   const chats = tgGetChats();
   chats.splice(idx, 1);
   tgSetChats(chats);
   _renderTgList();
-  showToast('✅ تم الحذف','ok');
+  toast('✅ تم الحذف','success');
 }
 async function _tgTestOne(idx) {
   const c = tgGetChats()[idx];
   if (!c) return;
   await _tgSend(c.token, c.chatId, `🔔 تجربة — نظام أدريسكا تورز يعمل ✅ (${c.name||c.chatId})`);
-  showToast('✈️ تم إرسال رسالة تجربة تيليجرام','ok');
+  toast('✈️ تم إرسال رسالة تجربة تيليجرام','success');
 }
 
 // -- DC list --
@@ -12883,27 +12883,27 @@ function _renderDcList() {
 async function dcAddWebhook() {
   const name = document.getElementById('dc-new-name').value.trim();
   const url  = document.getElementById('dc-new-url').value.trim();
-  if (!url || !url.startsWith('https://discord.com/api/webhooks/')) { showToast('⚠️ أدخل Webhook URL صحيح','warn'); return; }
+  if (!url || !url.startsWith('https://discord.com/api/webhooks/')) { toast('⚠️ أدخل Webhook URL صحيح','warn'); return; }
   const hooks = dcGetWebhooks();
   hooks.push({ name: name||'Webhook', url });
   dcSetWebhooks(hooks);
   document.getElementById('dc-new-name').value = '';
   document.getElementById('dc-new-url').value = '';
   _renderDcList();
-  showToast('✅ تم إضافة الديسكورد','ok');
+  toast('✅ تم إضافة الديسكورد','success');
 }
 function _dcDeleteWebhook(idx) {
   const hooks = dcGetWebhooks();
   hooks.splice(idx, 1);
   dcSetWebhooks(hooks);
   _renderDcList();
-  showToast('✅ تم الحذف','ok');
+  toast('✅ تم الحذف','success');
 }
 async function _dcTestOne(idx) {
   const h = dcGetWebhooks()[idx];
   if (!h) return;
   await _dcSend(h.url, `🔔 تجربة — نظام أدريسكا تورز يعمل ✅ (${h.name})`);
-  showToast('🎮 تم إرسال رسالة تجربة ديسكورد','ok');
+  toast('🎮 تم إرسال رسالة تجربة ديسكورد','success');
 }
 
 // ============================================================
@@ -12955,7 +12955,7 @@ async function _checkTasksWaNotif() {
         if (!await notifLogExists(key)) {
           await notifSendAll(makeMsg('تذكير صباحي — الموعد غداً'));
           await notifLogMark(key, 'task', t.title);
-          showToast('🔔 تذكير صباحي: ' + t.title,'ok');
+          toast('🔔 تذكير صباحي: ' + t.title,'success');
         }
       }
       // مساء (18 مساء - 21 مساء)
@@ -12964,7 +12964,7 @@ async function _checkTasksWaNotif() {
         if (!await notifLogExists(key)) {
           await notifSendAll(makeMsg('تذكير مسائي — الموعد غداً'));
           await notifLogMark(key, 'task', t.title);
-          showToast('🔔 تذكير مسائي: ' + t.title,'ok');
+          toast('🔔 تذكير مسائي: ' + t.title,'success');
         }
       }
     }
@@ -12977,7 +12977,7 @@ async function _checkTasksWaNotif() {
         if (!await notifLogExists(key)) {
           await notifSendAll(makeMsg('⚡ حان الوقت!'));
           await notifLogMark(key, 'task', t.title);
-          showToast('🔔 تنبيه تنفيذ: ' + t.title,'ok');
+          toast('🔔 تنبيه تنفيذ: ' + t.title,'success');
         }
       }
     }
@@ -13080,7 +13080,7 @@ async function checkConvoyWaNotifs() {
     const msg = _buildConvoyMsg(conv, convBookings, diffDays);
     await notifSendAll(msg);
     await notifLogMark(key, 'convoy', 'فوج ' + conv.label);
-    showToast('🔔 تنبيه فوج ' + conv.label + ' (' + (diffDays === 2 ? 'قبل يومين' : 'قبل يوم') + ')','ok');
+    toast('🔔 تنبيه فوج ' + conv.label + ' (' + (diffDays === 2 ? 'قبل يومين' : 'قبل يوم') + ')','success');
   }
 }
 
@@ -13361,9 +13361,9 @@ async function elecSaveCharge() {
   const nextDateVal = document.getElementById('elec-next-date').value;
   const note = document.getElementById('elec-charge-note').value.trim();
 
-  if (currentVal === '') { showToast('⚠️ أدخل الرصيد الفعلي الموجود على العداد','warn'); return; }
-  if (chargeVal === '' || parseFloat(chargeVal) <= 0) { showToast('⚠️ أدخل مبلغ الشحنة','warn'); return; }
-  if (!nextDateVal) { showToast('⚠️ حدد موعد الشحن القادم','warn'); return; }
+  if (currentVal === '') { toast('⚠️ أدخل الرصيد الفعلي الموجود على العداد','warn'); return; }
+  if (chargeVal === '' || parseFloat(chargeVal) <= 0) { toast('⚠️ أدخل مبلغ الشحنة','warn'); return; }
+  if (!nextDateVal) { toast('⚠️ حدد موعد الشحن القادم','warn'); return; }
 
   const currentBal = parseFloat(currentVal);
   const chargeAmt = parseFloat(chargeVal);
@@ -13412,12 +13412,12 @@ async function elecSaveCharge() {
       await sbFetch('mtr_electricity','POST',payload,'');
     }
     elecData[aptNum] = {...existingRow, ...payload, meter_log: newLog};
-    showToast(`✅ تم تسجيل شحنة شقة ${aptNum} — الرصيد الجديد: ${newBal.toFixed(0)}ج`,'ok');
+    toast(`✅ تم تسجيل شحنة شقة ${aptNum} — الرصيد الجديد: ${newBal.toFixed(0)}ج`,'success');
     elecCloseModal();
     _elecRenderGrid();
     _elecCheckAlertBanner();
   } catch(e) {
-    showToast('❌ خطأ في الحفظ: ' + e.message,'err');
+    toast('❌ خطأ في الحفظ: ' + e.message,'error');
   }
 }
 
@@ -13531,7 +13531,7 @@ async function elecSaveEdit() {
   const bal = parseFloat(document.getElementById('elec-edit-balance').value);
   const nextDateVal = document.getElementById('elec-edit-next-date').value;
 
-  if (!rate || rate <= 0) { showToast('⚠️ أدخل المعدل الأسبوعي','warn'); return; }
+  if (!rate || rate <= 0) { toast('⚠️ أدخل المعدل الأسبوعي','warn'); return; }
 
   const payload = {
     weekly_rate: rate,
@@ -13548,12 +13548,12 @@ async function elecSaveEdit() {
       await sbFetch('mtr_electricity','POST',{apt_num:aptNum,...payload},'');
     }
     elecData[aptNum] = {...(elecData[aptNum]||{}), ...payload};
-    showToast(`✅ تم تعديل بيانات شقة ${aptNum}`,'ok');
+    toast(`✅ تم تعديل بيانات شقة ${aptNum}`,'success');
     elecCloseEdit();
     _elecRenderGrid();
     _elecCheckAlertBanner();
   } catch(e) {
-    showToast('❌ خطأ في الحفظ: ' + e.message,'err');
+    toast('❌ خطأ في الحفظ: ' + e.message,'error');
   }
 }
 
@@ -13565,12 +13565,12 @@ async function elecDeleteApt() {
   try {
     await sbFetch('mtr_electricity','DELETE',null,`?apt_num=eq.${aptNum}`);
     delete elecData[aptNum];
-    showToast(`✅ تم مسح بيانات شقة ${aptNum}`,'ok');
+    toast(`✅ تم مسح بيانات شقة ${aptNum}`,'success');
     elecCloseEdit();
     _elecRenderGrid();
     _elecCheckAlertBanner();
   } catch(e) {
-    showToast('❌ خطأ في المسح: ' + e.message,'err');
+    toast('❌ خطأ في المسح: ' + e.message,'error');
   }
 }
 
@@ -13610,11 +13610,11 @@ async function elecDeleteLog(aptNum, idx) {
   try {
     await sbFetch('mtr_electricity','PATCH',payload,`?apt_num=eq.${aptNum}`);
     elecData[aptNum] = {...row, ...payload, meter_log: log};
-    showToast('✅ تم حذف العملية','ok');
+    toast('✅ تم حذف العملية','success');
     elecOpenHist(aptNum); // تحديث السجل
     _elecRenderGrid();
   } catch(e) {
-    showToast('❌ خطأ في الحذف: ' + e.message,'err');
+    toast('❌ خطأ في الحذف: ' + e.message,'error');
   }
 }
 // ============================================================
@@ -13645,7 +13645,7 @@ async function elecSaveSettings() {
       await sbFetch('mtr_electricity','PATCH',{wa_phone:phone,wa_key:key},'?id=gt.0');
     } catch(e) { /* ignore */ }
   }
-  showToast('✅ تم حفظ إعدادات الواتساب','ok');
+  toast('✅ تم حفظ إعدادات الواتساب','success');
   elecCloseSettings();
 }
 
@@ -13743,10 +13743,10 @@ async function elecCheckAllAlerts() {
       alertMsgs.join('\n') +
       '\n━━━━━━━━━━━━━━━━━━━━━';
     await notifSendAll(fullMsg);
-    showToast('🔔 ' + alertMsgs.length + ' تنبيه كهرباء', 'warn');
+    toast('🔔 ' + alertMsgs.length + ' تنبيه كهرباء', 'warn');
     await renderElectricity();
   } else {
-    showToast('✅ لا توجد تنبيهات كهرباء الآن','ok');
+    toast('✅ لا توجد تنبيهات كهرباء الآن','success');
   }
 }
 
@@ -13931,7 +13931,7 @@ function elecDownloadPdf() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('📥 تم تحميل تقرير الكهرباء', 'ok');
+  toast('📥 تم تحميل تقرير الكهرباء', 'success');
 }
 
 // ============================================================
@@ -14085,8 +14085,8 @@ async function saveTask(){
       if(res&&res[0])tasks.unshift(_mapTask(res[0]));
     }
     closeTaskModal();renderTasks();_updateTasksBadge();
-    showToast('success','✅','تم الحفظ بنجاح');
-  }catch(e){showToast('error','❌','فشل الحفظ: '+e.message);}
+    toast('✅ تم الحفظ بنجاح','success');
+  }catch(e){toast('❌ فشل الحفظ: '+e.message,'error');}
   finally{btn.disabled=false;btn.textContent='💾 حفظ';}
 }
 
@@ -14094,8 +14094,8 @@ async function markTaskDone(id){
   try{
     const res=await sbFetch('mtr_tasks','PATCH',{status:'done',done_at:new Date().toISOString()},`?id=eq.${id}`);
     if(res&&res[0]){const idx=tasks.findIndex(x=>x.id===id);if(idx>=0)tasks[idx]=_mapTask(res[0]);}
-    renderTasks();_updateTasksBadge();showToast('success','✅','تم إغلاق التاسك');
-  }catch(e){showToast('error','❌','فشل: '+e.message);}
+    renderTasks();_updateTasksBadge();toast('✅ تم إغلاق التاسك','success');
+  }catch(e){toast('❌ فشل: '+e.message,'error');}
 }
 
 async function reopenTask(id){
@@ -14103,7 +14103,7 @@ async function reopenTask(id){
     const res=await sbFetch('mtr_tasks','PATCH',{status:'open',done_at:null},`?id=eq.${id}`);
     if(res&&res[0]){const idx=tasks.findIndex(x=>x.id===id);if(idx>=0)tasks[idx]=_mapTask(res[0]);}
     renderTasks();_updateTasksBadge();
-  }catch(e){showToast('error','❌','فشل: '+e.message);}
+  }catch(e){toast('❌ فشل: '+e.message,'error');}
 }
 
 async function deleteTask(id){
@@ -14111,8 +14111,8 @@ async function deleteTask(id){
   try{
     await sbFetch('mtr_tasks','DELETE',null,`?id=eq.${id}`);
     tasks=tasks.filter(x=>x.id!==id);
-    renderTasks();_updateTasksBadge();showToast('success','🗑️','تم الحذف');
-  }catch(e){showToast('error','❌','فشل الحذف: '+e.message);}
+    renderTasks();_updateTasksBadge();toast('🗑️ تم الحذف','success');
+  }catch(e){toast('❌ فشل الحذف: '+e.message,'error');}
 }
 
 function renderTasks(){
@@ -14250,7 +14250,7 @@ function snoozeReminder(minutes){
   if(!_activeReminderTask)return;
   sbFetch('mtr_tasks','PATCH',{snoozed_until:new Date(Date.now()+minutes*60000).toISOString()},`?id=eq.${_activeReminderTask.id}`)
     .then(res=>{if(res&&res[0]){const idx=tasks.findIndex(x=>x.id===_activeReminderTask.id);if(idx>=0)tasks[idx]=_mapTask(res[0]);}});
-  showToast('info','😴',`تأجيل ${minutes} دقيقة`);
+  toast(`😴 تأجيل ${minutes} دقيقة`,'info');
   _activeReminderTask=null;
   document.getElementById('task-reminder-overlay').style.display='none';
 }
