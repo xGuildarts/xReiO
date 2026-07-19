@@ -1579,6 +1579,10 @@ CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
     </div>
     <div id="elec-newbal-box" style="display:none;background:var(--acl);border:1px solid var(--ac);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:var(--ac);font-weight:700"></div>
     <div class="fg" style="margin-bottom:10px">
+      <label>تاريخ الشحنة (تقدر تختار تاريخ سابق لو الشحنة كانت قبل كده)</label>
+      <input type="datetime-local" id="elec-charge-date">
+    </div>
+    <div class="fg" style="margin-bottom:10px">
       <label>الموعد القادم للشحن</label>
       <div style="display:flex;gap:6px;margin-bottom:6px">
         <button class="btn btn-sm" id="elec-freq-week" onclick="elecSetFreq(7)" style="flex:1">أسبوع (7 أيام)</button>
@@ -1606,6 +1610,34 @@ CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
       <button class="btn" onclick="elecCloseHist()">✕</button>
     </div>
     <div id="elec-hist-content"></div>
+  </div>
+</div>
+
+<!-- ELEC EDIT LOG ENTRY MODAL -->
+<div id="elec-editlog-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)">
+  <div style="background:var(--sf);border-radius:16px;padding:24px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="font-size:17px;font-weight:800;color:var(--pr);margin-bottom:16px">✏️ تعديل عملية شحن — شقة <span id="elec-editlog-apt-title"></span></div>
+    <div class="fg" style="margin-bottom:10px">
+      <label>تاريخ ووقت العملية</label>
+      <input type="datetime-local" id="elec-editlog-date">
+    </div>
+    <div class="fg" style="margin-bottom:10px">
+      <label>الرصيد قبل الشحنة (ج)</label>
+      <input type="number" id="elec-editlog-before" min="0" placeholder="الرصيد قبل الشحنة">
+    </div>
+    <div class="fg" style="margin-bottom:10px">
+      <label>مبلغ الشحنة (ج)</label>
+      <input type="number" id="elec-editlog-amt" min="0" placeholder="مبلغ الشحنة">
+    </div>
+    <div id="elec-editlog-after-box" style="background:var(--acl);border:1px solid var(--ac);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:var(--ac);font-weight:700"></div>
+    <div class="fg" style="margin-bottom:14px">
+      <label>ملاحظة (اختياري)</label>
+      <input type="text" id="elec-editlog-note" placeholder="ملاحظة على الشحنة">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" style="flex:1" onclick="elecSaveEditLog()">💾 حفظ التعديل</button>
+      <button class="btn" onclick="elecCloseEditLog()">إلغاء</button>
+    </div>
   </div>
 </div>
 
@@ -2828,6 +2860,12 @@ function dismissToast(t){
   t._dismissing=true;
   t.classList.add('hide');
   setTimeout(()=>t.remove(),350);
+}
+// showToast() هو الاسم اللي بينادى بيه من 47 مكان في الكود، لكن الدالة الحقيقية اسمها toast()
+// ده كان بيسبب خطأ صامت (ReferenceError) بيوقف تنفيذ الكود قبل ما يقفل البوب أب أو يعرض الرسالة
+function showToast(msg, type){
+  const map={ok:'success', err:'error', warn:'warn', info:'info', success:'success', error:'error'};
+  toast(msg, map[type] || 'info');
 }
 // Replace alert() for non-blocking successes/info — keep popup for confirms
 const _origAlert=window.alert;
@@ -13288,6 +13326,12 @@ function elecOpenCharge(aptNum) {
   document.getElementById('elec-consumption-box').style.display = 'none';
   document.getElementById('elec-newbal-box').style.display = 'none';
 
+  // تاريخ الشحنة — افتراضيًا دلوقتي، وقابل للتعديل
+  const nowD = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('elec-charge-date').value =
+    nowD.getFullYear()+'-'+pad(nowD.getMonth()+1)+'-'+pad(nowD.getDate())+'T'+pad(nowD.getHours())+':'+pad(nowD.getMinutes());
+
   // أزرار المبالغ السريعة
   const quickBtns = document.getElementById('elec-quick-btns');
   const amounts = [rate, rate * 2, rate * 4].filter((v,i,a)=>a.indexOf(v)===i);
@@ -13357,17 +13401,19 @@ async function elecSaveCharge() {
   if (!aptNum) return;
   const currentVal = document.getElementById('elec-current-bal').value;
   const chargeVal = document.getElementById('elec-charge-amt').value;
+  const chargeDateVal = document.getElementById('elec-charge-date').value;
   const nextDateVal = document.getElementById('elec-next-date').value;
   const note = document.getElementById('elec-charge-note').value.trim();
 
   if (currentVal === '') { showToast('⚠️ أدخل الرصيد الفعلي الموجود على العداد','warn'); return; }
   if (chargeVal === '' || parseFloat(chargeVal) <= 0) { showToast('⚠️ أدخل مبلغ الشحنة','warn'); return; }
+  if (!chargeDateVal) { showToast('⚠️ حدد تاريخ الشحنة','warn'); return; }
   if (!nextDateVal) { showToast('⚠️ حدد موعد الشحن القادم','warn'); return; }
 
   const currentBal = parseFloat(currentVal);
   const chargeAmt = parseFloat(chargeVal);
   const newBal = currentBal + chargeAmt;
-  const now = new Date().toISOString();
+  const now = new Date(chargeDateVal).toISOString(); // تاريخ الشحنة اللي المستخدم اختاره، مش لازم يكون دلوقتي
   const apts = elecGetApts();
   const apt = apts.find(a => String(a.num || a.apt_num || a.id || '') === aptNum);
   const rate = (elecData[aptNum] || {}).weekly_rate || elecRateFromApt({...(apt||{}), num: aptNum});
@@ -13400,7 +13446,7 @@ async function elecSaveCharge() {
     notif_sent: false,
     low_notif_sent: false,
     meter_log: JSON.stringify(newLog),
-    updated_at: now
+    updated_at: new Date().toISOString()
   };
 
   try {
@@ -13461,7 +13507,7 @@ function elecOpenHist(aptNum) {
           <th style="padding:6px 8px;text-align:center">الاستهلاك</th>
           <th style="padding:6px 8px;text-align:center">الرصيد بعد</th>
           <th style="padding:6px 8px;text-align:right">ملاحظة</th>
-          <th style="padding:6px 8px;text-align:center">حذف</th>
+          <th style="padding:6px 8px;text-align:center">إجراءات</th>
         </tr></thead>
         <tbody>
         ${log.map((e,i)=>`<tr style="border-bottom:1px solid var(--bd);${i%2===0?'background:var(--sf2)':''}">
@@ -13471,7 +13517,10 @@ function elecOpenHist(aptNum) {
           <td style="padding:6px 8px;text-align:center;color:var(--wn)">${e.consumed!=null&&e.consumed>=0?e.consumed.toFixed(0)+'ج':'—'}</td>
           <td style="padding:6px 8px;text-align:center;font-weight:700">${e.bal_after!=null?e.bal_after.toFixed(0)+'ج':'—'}</td>
           <td style="padding:6px 8px;color:var(--tx3)">${e.note||''}</td>
-          <td style="padding:4px 6px;text-align:center"><button class="btn btn-d btn-sm" style="font-size:11px;padding:2px 7px" onclick="elecDeleteLog(document.getElementById('elec-hist-title').textContent,${i})">🗑</button></td>
+          <td style="padding:4px 6px;text-align:center;white-space:nowrap">
+            <button class="btn btn-sm" style="font-size:11px;padding:2px 7px" onclick="elecOpenEditLog(document.getElementById('elec-hist-title').textContent,${i})">✏️</button>
+            <button class="btn btn-d btn-sm" style="font-size:11px;padding:2px 7px" onclick="elecDeleteLog(document.getElementById('elec-hist-title').textContent,${i})">🗑</button>
+          </td>
         </tr>`).join('')}
         </tbody>
       </table>`;
@@ -13617,6 +13666,118 @@ async function elecDeleteLog(aptNum, idx) {
   }
 }
 // ============================================================
+// EDIT SINGLE LOG ENTRY (تعديل شحنة اتعملت بالفعل)
+// ============================================================
+var _elecEditLogApt = null;
+var _elecEditLogIdx = null;
+
+function _elecLogOf(aptNum) {
+  const row = elecData[aptNum] || {};
+  return Array.isArray(row.meter_log) ? row.meter_log :
+    (row.meter_log ? JSON.parse(row.meter_log) : []);
+}
+
+function elecOpenEditLog(aptNum, idx) {
+  const log = _elecLogOf(aptNum);
+  const e = log[idx];
+  if (!e) { showToast('❌ العملية غير موجودة','err'); return; }
+
+  _elecEditLogApt = aptNum;
+  _elecEditLogIdx = idx;
+
+  document.getElementById('elec-editlog-apt-title').textContent = aptNum;
+  // datetime-local بيحتاج صيغة YYYY-MM-DDTHH:mm بدون Z
+  const d = new Date(e.date);
+  const pad = n => String(n).padStart(2,'0');
+  const localVal = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+  document.getElementById('elec-editlog-date').value = localVal;
+  document.getElementById('elec-editlog-before').value = e.bal_before != null ? e.bal_before : '';
+  document.getElementById('elec-editlog-amt').value = e.charge_amt != null ? e.charge_amt : '';
+  document.getElementById('elec-editlog-note').value = e.note || '';
+  elecCalcEditLogAfter();
+
+  document.getElementById('elec-editlog-overlay').style.display = 'flex';
+}
+
+function elecCalcEditLogAfter() {
+  const before = parseFloat(document.getElementById('elec-editlog-before').value);
+  const amt = parseFloat(document.getElementById('elec-editlog-amt').value);
+  const box = document.getElementById('elec-editlog-after-box');
+  if (isNaN(before) || isNaN(amt)) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.textContent = '📊 الرصيد بعد الشحنة هيبقى: ' + (before + amt).toFixed(0) + ' ج';
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const b1 = document.getElementById('elec-editlog-before');
+  const b2 = document.getElementById('elec-editlog-amt');
+  if (b1) b1.addEventListener('input', elecCalcEditLogAfter);
+  if (b2) b2.addEventListener('input', elecCalcEditLogAfter);
+});
+
+async function elecSaveEditLog() {
+  const aptNum = _elecEditLogApt, idx = _elecEditLogIdx;
+  if (aptNum == null || idx == null) return;
+
+  const dateVal = document.getElementById('elec-editlog-date').value;
+  const beforeVal = document.getElementById('elec-editlog-before').value;
+  const amtVal = document.getElementById('elec-editlog-amt').value;
+  const note = document.getElementById('elec-editlog-note').value.trim();
+
+  if (!dateVal) { showToast('⚠️ حدد تاريخ ووقت العملية','warn'); return; }
+  if (beforeVal === '' || isNaN(parseFloat(beforeVal))) { showToast('⚠️ أدخل الرصيد قبل الشحنة','warn'); return; }
+  if (amtVal === '' || isNaN(parseFloat(amtVal)) || parseFloat(amtVal) < 0) { showToast('⚠️ أدخل مبلغ الشحنة','warn'); return; }
+
+  const row = elecData[aptNum] || {};
+  let log = _elecLogOf(aptNum).slice();
+  const entry = log[idx];
+  if (!entry) { showToast('❌ العملية غير موجودة','err'); elecCloseEditLog(); return; }
+
+  const balBefore = parseFloat(beforeVal);
+  const chargeAmt = parseFloat(amtVal);
+  const balAfter = balBefore + chargeAmt;
+  // إعادة حساب الاستهلاك بالاستعانة بالعملية الأقدم في السجل (لو موجودة)
+  const prevEntry = log[idx + 1];
+  const consumed = prevEntry && prevEntry.bal_after != null ? (prevEntry.bal_after - balBefore) : (entry.consumed ?? null);
+
+  log[idx] = {
+    ...entry,
+    date: new Date(dateVal).toISOString(),
+    bal_before: balBefore,
+    charge_amt: chargeAmt,
+    bal_after: balAfter,
+    consumed: consumed,
+    note: note || null,
+    edited_at: new Date().toISOString(),
+    edited_by: typeof currentUser !== 'undefined' ? (currentUser?.name || '—') : '—'
+  };
+
+  const payload = { meter_log: JSON.stringify(log), updated_at: new Date().toISOString() };
+  // لو العملية دي أحدث عملية في السجل، حدّث الرصيد الحالي وتاريخ آخر شحنة كمان عشان يفضلوا متزامنين
+  if (idx === 0) {
+    payload.last_balance = balAfter;
+    payload.last_charge_date = log[0].date;
+    payload.last_charge_amt = chargeAmt;
+  }
+
+  try {
+    await sbFetch('mtr_electricity','PATCH',payload,`?apt_num=eq.${aptNum}`);
+    elecData[aptNum] = {...row, ...payload, meter_log: log};
+    showToast('✅ تم حفظ تعديل الشحنة','ok');
+    elecCloseEditLog();
+    elecOpenHist(aptNum); // تحديث السجل المعروض
+    _elecRenderGrid();
+    _elecCheckAlertBanner();
+  } catch(e) {
+    showToast('❌ خطأ في الحفظ: ' + e.message,'err');
+  }
+}
+
+function elecCloseEditLog() {
+  document.getElementById('elec-editlog-overlay').style.display = 'none';
+  _elecEditLogApt = null;
+  _elecEditLogIdx = null;
+}
+// ============================================================
 // END EDIT & DELETE
 // ============================================================
 
@@ -13756,9 +13917,11 @@ function elecStartAutoCheck() {
   if (_elecNotifInterval) clearInterval(_elecNotifInterval);
   _elecNotifInterval = setInterval(async () => {
     try {
-      const rows = await sbFetch('mtr_electricity','GET',null,'?order=apt_num.asc');
-      elecData = {};
-      (rows||[]).forEach(r => { elecData[r.apt_num] = r; });
+      // بس الأعمدة اللازمة للتنبيهات — من غير meter_log (السجل الكامل) عشان نقلل الـ egress
+      const rows = await sbFetch('mtr_electricity','GET',null,
+        '?select=apt_num,last_balance,next_charge_date,last_charge_date,last_charge_amt,weekly_rate,wa_phone,wa_key&order=apt_num.asc');
+      // ندمج بس، مننسخش فوق elecData كله عشان نحافظ على meter_log لو محمّل بالفعل
+      (rows||[]).forEach(r => { elecData[r.apt_num] = {...(elecData[r.apt_num]||{}), ...r}; });
       await elecCheckAllAlerts();
       if (typeof _activeTab !== 'undefined' && _activeTab === 'electricity') {
         _elecRenderGrid();
