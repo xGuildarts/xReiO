@@ -1353,7 +1353,6 @@ CREATE POLICY "allow_all" ON mtr_closing_expenses FOR ALL USING (true) WITH CHEC
       <button class="btn btn-p" onclick="exportBackupJSON()">📥 تصدير نسخة كاملة JSON</button>
       <button class="btn btn-s" onclick="exportBackupCSV();localStorage.setItem('mtr_last_backup',Date.now())">📊 ملخص CSV</button>
       <button class="btn" style="border-color:var(--wn);color:var(--wn)" onclick="importBackupJSON()">📤 استيراد نسخة JSON</button>
-      <button class="btn" style="border-color:#229ED9;color:#229ED9" onclick="runDailyBackup(true)">☁️ نسخة سحابية + تيليجرام الآن</button>
     </div>
     <div style="font-size:11px;color:var(--tx3);margin-top:.75rem">⚠️ احرص على عمل نسخة احتياطية دورية — يُنصح كل أسبوع · الاستيراد يستبدل كل البيانات الحالية</div>
   </div>
@@ -3570,13 +3569,15 @@ async function clearAllData(){
   setTimeout(()=>{pm.remove();location.reload();},1200);
 }
 
-async function _gatherFullBackupData(){
+async function exportBackupJSON(){
+  // ====== جلب كل البيانات من Supabase بدون حد ======
   let allBookings=bookings,allAccEntries=accEntries,allActivityLog=activityLog,
       allUsers=users,allSuppliers=suppliers,allHotels=hotels,
       allHotelBookings=hotelBookings,allTasks=(typeof tasks!=='undefined'?tasks:[]),
       allConvExpenses=(typeof convExpenses!=='undefined'?convExpenses:[]),
       allClosingExpenses=[];
   try{
+    toast('⏳ جاري تجميع النسخة الاحتياطية الكاملة...','info',15000);
     const [bksFull,accFull,tskFull,expFull,supFull,htlFull,hbkFull,cexpFull]=await Promise.all([
       sbFetch('mtr_bookings','GET',null,'?order=id.asc&limit=9999'),
       sbFetch('mtr_acc','GET',null,'?order=id.asc&limit=9999'),
@@ -3589,6 +3590,7 @@ async function _gatherFullBackupData(){
     ]);
     if(bksFull&&bksFull.length)allBookings=bksFull.map(mB);
     if(accFull&&accFull.length)allAccEntries=accFull.map(mA);
+    // mtr_log محذوف من الـ export — بيوفر egress وما بيتستردش في الاستيراد
     if(tskFull&&tskFull.length)allTasks=tskFull;
     if(expFull&&expFull.length)allConvExpenses=expFull;
     if(supFull&&supFull.length)allSuppliers=supFull;
@@ -3596,13 +3598,14 @@ async function _gatherFullBackupData(){
     if(hbkFull&&hbkFull.length)allHotelBookings=hbkFull.map(r=>typeof mHB==='function'?mHB(r):r);
     if(cexpFull&&cexpFull.length)allClosingExpenses=cexpFull;
   }catch(e){console.warn('Full fetch fallback to in-memory:',e);}
+  // ====== snapshot كامل من localStorage ======
   const lsSnap={};
   ['mtr_extra_apts','mtr_bus_names','mtr_price_map','mtr_custom_roles',
    'mtr_role_labels','mtr_locked_convoys','mtr_cats','mtr_perm_labels',
    'mtr_dark','mtr_lang'].forEach(k=>{
     try{const v=localStorage.getItem(k);if(v!==null)lsSnap[k]=v;}catch(e){}
   });
-  return {
+  const data={
     exportedAt:new Date().toISOString(),
     version:'v118-MASTER',
     _meta:{
@@ -3615,6 +3618,7 @@ async function _gatherFullBackupData(){
       totalClosingExpenses:allClosingExpenses.length,
       exportedBy:(typeof currentUser!=='undefined'&&currentUser?currentUser.name:'—'),
     },
+    // ===== Supabase tables =====
     bookings:allBookings,
     accEntries:allAccEntries,
     activityLog:allActivityLog,
@@ -3625,65 +3629,27 @@ async function _gatherFullBackupData(){
     tasks:allTasks,
     convExpenses:allConvExpenses,
     closingExpenses:allClosingExpenses,
+    // ===== إعدادات النظام =====
     settings:settings,
+    // ===== بيانات الأسعار والأدوار والفئات =====
     priceMap:(typeof PRICE_MAP!=='undefined'?PRICE_MAP:{}),
     lockedConvoys:(typeof LOCKED_CONVOYS!=='undefined'?LOCKED_CONVOYS:{}),
     customRoles:(typeof customRoles!=='undefined'?customRoles:{}),
     customRoleLabels:(typeof customRoleLabels!=='undefined'?customRoleLabels:{}),
     pmTypes:(typeof PM_TYPES!=='undefined'?PM_TYPES:[]),
     expCats:(typeof EXP_CATS!=='undefined'?EXP_CATS:[]),
+    // ✅ أسماء الباصات — مهمة جداً للاستيراد
     busNames:(typeof BUS_NAMES!=='undefined'?BUS_NAMES:{}),
+    // ===== localStorage snapshot =====
     localStorage:lsSnap,
   };
-}
-
-async function exportBackupJSON(){
-  toast('⏳ جاري تجميع النسخة الاحتياطية الكاملة...','info',15000);
-  const data=await _gatherFullBackupData();
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='mtr_MASTER_backup_'+new Date().toISOString().split('T')[0]+'.json';
   a.click();URL.revokeObjectURL(a.href);
   localStorage.setItem('mtr_last_backup',Date.now());
-  const total=data.bookings.length+data.accEntries.length+data.users.length+data.tasks.length;
+  const total=allBookings.length+allAccEntries.length+allUsers.length+allTasks.length;
   if(typeof toast==='function')toast('✅ نسخة احتياطية كاملة — '+total+' سجل · حجوزات+حسابات+يوزرات+فنادق+تاسكات+أدوار+أسعار+شروط+إعدادات','success',6000);
-}
-
-// ============================================================
-// نسخة احتياطية تلقائية سحابية — بتشتغل لوحدها من غير أي تدخل
-// بتتخزن في جدول mtr_backups على Supabase (مرة كل 24 ساعة كحد أقصى)
-// SQL (شغّله مرة واحدة في Supabase):
-// CREATE TABLE IF NOT EXISTS mtr_backups (
-//   id           bigserial PRIMARY KEY,
-//   created_at   timestamptz DEFAULT now(),
-//   record_count integer DEFAULT 0,
-//   data         jsonb NOT NULL
-// );
-// ALTER TABLE mtr_backups ENABLE ROW LEVEL SECURITY;
-// CREATE POLICY "allow_all_mtr_backups" ON mtr_backups FOR ALL USING (true) WITH CHECK (true);
-// ============================================================
-var AUTO_BACKUP_MIN_HOURS = 24;
-var AUTO_BACKUP_KEEP = 10; // احتفظ بآخر 10 نسخ بس، امسح الأقدم
-
-async function autoCloudBackup(force){
-  try{
-    const last = parseInt(localStorage.getItem('mtr_last_cloud_backup')||'0');
-    if(!force && Date.now() - last < AUTO_BACKUP_MIN_HOURS*3600*1000) return; // لسه بدري
-    const data = await _gatherFullBackupData();
-    const total = data.bookings.length + data.accEntries.length + data.users.length;
-    await sbFetch('mtr_backups','POST',{ record_count: total, data }, '');
-    localStorage.setItem('mtr_last_cloud_backup', String(Date.now()));
-    // امسح النسخ القديمة الزيادة عن الحد المسموح
-    const rows = await sbFetch('mtr_backups','GET',null,'?order=id.desc&select=id&limit=1000');
-    if(rows && rows.length > AUTO_BACKUP_KEEP){
-      const toDelete = rows.slice(AUTO_BACKUP_KEEP).map(r=>r.id);
-      for(const id of toDelete){ try{ await sbFetch('mtr_backups','DELETE',null,`?id=eq.${id}`); }catch(e){} }
-    }
-    console.log('✅ نسخة احتياطية سحابية تلقائية اتعملت —', total, 'سجل');
-  }catch(e){
-    console.error('❌ فشلت النسخة الاحتياطية السحابية التلقائية:', e);
-    if(typeof toast==='function') toast('⚠️ فشلت النسخة الاحتياطية التلقائية — تأكد من عمل جدول mtr_backups','error',6000);
-  }
 }
 
 // ── تنظيف التواريخ قبل الإرسال لـ Supabase ──────────────────────────────
@@ -4231,103 +4197,8 @@ function exportBackupCSV(){
   URL.revokeObjectURL(a.href);
   if(typeof toast==='function')toast('✅ تم تصدير ملف CSV','success');
 }
-// ============================================================
-// نسخة احتياطية تلقائية يومية + إشعار تيليجرام
-// ============================================================
-var TG_BOT_TOKEN = '8895473713:AAHYFSuNW6_D27XIRql2vEhcwH50_grQxI0';
-var TG_CHAT_ID   = '6724046714';
-
-async function sendTelegramMessage(text){
-  try{
-    await fetch('https://api.telegram.org/bot'+TG_BOT_TOKEN+'/sendMessage',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:TG_CHAT_ID, text:text, parse_mode:'HTML'})
-    });
-  }catch(e){ console.warn('Telegram send failed:',e); }
-}
-
-async function sendTelegramFile(jsonData, filename, caption){
-  try{
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], {type:'application/json'});
-    const fd = new FormData();
-    fd.append('chat_id', TG_CHAT_ID);
-    fd.append('document', blob, filename);
-    fd.append('caption', caption);
-    fd.append('parse_mode', 'HTML');
-    const res = await fetch('https://api.telegram.org/bot'+TG_BOT_TOKEN+'/sendDocument', {
-      method:'POST', body: fd
-    });
-    const result = await res.json();
-    if(!result.ok) throw new Error(result.description||'Telegram error');
-    return true;
-  }catch(e){
-    console.warn('Telegram file send failed:', e);
-    return false;
-  }
-}
-
-async function runDailyBackup(force){
-  try{
-    const last = parseInt(localStorage.getItem('mtr_last_cloud_backup')||'0');
-    const hoursSinceLast = (Date.now() - last) / 3600000;
-    if(!force && hoursSinceLast < 23) return; // أقل من 23 ساعة — لسه بدري
-
-    if(typeof toast==='function') toast('⏳ جاري عمل النسخة الاحتياطية التلقائية...','info',3000);
-
-    const data = await _gatherFullBackupData();
-    const total = data.bookings.length + data.accEntries.length + data.users.length;
-
-    // 1️⃣ احفظ على Supabase
-    await sbFetch('mtr_backups','POST',{ record_count: total, data }, '');
-    localStorage.setItem('mtr_last_cloud_backup', String(Date.now()));
-
-    // امسح النسخ القديمة الزيادة عن 10
-    try{
-      const rows = await sbFetch('mtr_backups','GET',null,'?order=id.desc&select=id&limit=1000');
-      if(rows && rows.length > AUTO_BACKUP_KEEP){
-        const toDelete = rows.slice(AUTO_BACKUP_KEEP).map(r=>r.id);
-        for(const id of toDelete){ try{ await sbFetch('mtr_backups','DELETE',null,'?id=eq.'+id); }catch(e){} }
-      }
-    }catch(e){}
-
-    // 2️⃣ ابعت الملف JSON على تيليجرام
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    const timeStr = now.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-    const filename = 'adriaska_backup_' + now.toISOString().split('T')[0] + '.json';
-    const caption =
-      '✅ <b>نسخة احتياطية تلقائية — أدريسكا تورز</b>\n\n' +
-      '📅 <b>التاريخ:</b> ' + dateStr + '\n' +
-      '🕐 <b>الوقت:</b> ' + timeStr + '\n' +
-      '📦 <b>السجلات:</b> ' + total.toLocaleString('ar-EG') + ' سجل\n' +
-      '   • حجوزات: ' + data.bookings.length.toLocaleString('ar-EG') + '\n' +
-      '   • قيود محاسبية: ' + data.accEntries.length.toLocaleString('ar-EG') + '\n' +
-      '   • مستخدمين: ' + data.users.length.toLocaleString('ar-EG') + '\n\n' +
-      '☁️ محفوظة على Supabase + مرسلة هنا';
-
-    const sent = await sendTelegramFile(data, filename, caption);
-
-    // لو الإرسال فشل — ابعت رسالة نصية على الأقل
-    if(!sent) await sendTelegramMessage('⚠️ <b>النسخة اتحفظت على Supabase بس فشل إرسال الملف على تيليجرام</b>\n' + dateStr + ' — ' + timeStr);
-
-    if(typeof toast==='function') toast('✅ نسخة احتياطية — '+total+' سجل — تم الإرسال على تيليجرام','success',7000);
-    console.log('✅ Daily backup done —', total, 'records — TG file sent:', sent);
-  }catch(e){
-    console.error('❌ فشلت النسخة الاحتياطية التلقائية:', e);
-    try{
-      await sendTelegramMessage('❌ <b>فشلت النسخة الاحتياطية التلقائية!</b>\n\nأدريسكا تورز — ' + new Date().toLocaleString('ar-EG') + '\n\nالخطأ: ' + e.message);
-    }catch(te){}
-    if(typeof toast==='function') toast('⚠️ فشلت النسخة الاحتياطية التلقائية','error',6000);
-  }
-}
-
-function checkAutoBackup(){
-  // شغّل النسخة مباشرة لو فات عليها أكتر من 23 ساعة
-  setTimeout(()=>{ runDailyBackup(false); }, 5000); // 5 ثواني بعد اللوجين عشان البيانات تتحمل
-  // وكمان فعّل مؤقت كل ساعة يتأكد (لو الصفحة فتحت ليلاً)
-  setInterval(()=>{ runDailyBackup(false); }, 3600000);
-}
+// Auto backup reminder every 7 days
+function checkAutoBackup(){} // تم إزالة تذكير الـ 7 أيام
 
 // ============================================================
 // STARTUP
@@ -5050,7 +4921,7 @@ async function togglePerm(uid,perm,checked){
   const cur=u.custom_perms||ROLE_DEFAULTS[u.role]||[];
   const np=checked?[...new Set([...cur,perm])]:cur.filter(p=>p!==perm);
   u.custom_perms=np;
-  try{await sbFetch('mtr_users','PATCH',{custom_perms:np},`?id=eq.${uid}`);}catch(e){u.custom_perms=cur;if(typeof toast==='function')toast('❌ فشل حفظ الصلاحية: '+e.message,'error');}
+  try{await sbFetch('mtr_users','PATCH',{custom_perms:np},`?id=eq.${uid}`);}catch(e){console.warn(e)}
 }
 
 // ============================================================
@@ -6986,7 +6857,7 @@ function printDailyReport(){
   const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);}
 }
 async function refreshAcc(){
-  try{const r=await sbFetch('mtr_acc','GET',null,'?order=id.desc&limit=500');if(r&&Array.isArray(r))accEntries=r.map(mA);renderAccs();}catch(e){if(typeof toast==='function')toast('❌ فشل تحديث بيانات المحاسبة: '+e.message,'error');}
+  try{const r=await sbFetch('mtr_acc','GET',null,'?order=id.desc&limit=500');if(r&&Array.isArray(r))accEntries=r.map(mA);renderAccs();}catch(e){console.warn(e)}
 }
 function renderAccDetail(key){
   const[type,sub]=key.split('|');activeAccTab=key;
@@ -10370,7 +10241,7 @@ window.savePriceMgr = async function(applyAll){
 
 async function doApplyPricesToAll(){
   showLoading('جاري تحديث أسعار الحجوزات...');
-  let updated=0,failed=0;
+  let updated=0;
   for(const b of bookings){
     if(!b.checkin) continue;
     const conv=getConv(b.convoy);
@@ -10384,10 +10255,10 @@ async function doApplyPricesToAll(){
     try{
       await sbFetch('mtr_bookings','PATCH',{apt_prices:newPrices,apts_total:at},`?id=eq.${b.id}`);
       b.aptPrices=newPrices;b.aptsTotal=at;updated++;
-    }catch(e){failed++;console.warn('Update error for booking #'+b.id+':',e);}
+    }catch(e){console.warn('Update error:',e);}
   }
   hideLoading();
-  alert(`تم تحديث ${updated} حجز` + (failed ? `\n⚠️ فشل تحديث ${failed} حجز — راجع الـ Console` : ''));
+  alert(`تم تحديث ${updated} حجز`);
 }
 
 // 7. REFRESH SESSION PERSISTENCE
@@ -11524,16 +11395,16 @@ window.seedPresetsForDest = async function(dest){
   if(!toAdd.length){alert('كل فنادق '+dest+' موجودة بالفعل ✓');return;}
   if(!await confirm('إضافة '+toAdd.length+' فندق جديد لـ '+dest+'؟'))return;
   showLoading('جاري إضافة الفنادق...');
-  let added=0,failed=0;
+  let added=0;
   for(const h of toAdd){
     try{
       const r=await sbFetch('htl_hotels','POST',{name:h.name,destination:dest,stars:h.stars,type:h.type,contact:'',price_single:0,price_double:0,notes:h.notes||''},'');
       if(r&&r[0]){hotels.push(r[0]);added++;}
-    }catch(e){failed++;console.warn('Failed to add',h.name,e);}
+    }catch(e){console.warn('Failed to add',h.name,e);}
   }
   hideLoading();
   renderHotelList();renderHotelStats();
-  alert('✓ تم إضافة '+added+' فندق'+(failed?`\n⚠️ فشل ${failed}`:''));
+  alert('✓ تم إضافة '+added+' فندق');
 };
 
 window.seedAllPresets = async function(){
@@ -11541,7 +11412,7 @@ window.seedAllPresets = async function(){
   const total=dests.reduce((s,d)=>s+PRESET_HOTELS[d].length,0);
   if(!await confirm('إضافة كل الفنادق الجاهزة ('+total+' فندق) لكل الوجهات؟'))return;
   showLoading('جاري إضافة الفنادق...');
-  let added=0,failed=0;
+  let added=0;
   for(const dest of dests){
     const list=PRESET_HOTELS[dest];
     const existing=hotels.filter(h=>h.destination===dest).map(h=>h.name.trim().toLowerCase());
@@ -11550,12 +11421,12 @@ window.seedAllPresets = async function(){
       try{
         const r=await sbFetch('htl_hotels','POST',{name:h.name,destination:dest,stars:h.stars,type:h.type,contact:'',price_single:0,price_double:0,notes:h.notes||''},'');
         if(r&&r[0]){hotels.push(r[0]);added++;}
-      }catch(e){failed++;console.warn(e);}
+      }catch(e){console.warn(e);}
     }
   }
   hideLoading();
   renderHotelList();renderHotelStats();
-  alert('✓ تم إضافة '+added+' فندق'+(failed?`\n⚠️ فشل ${failed}`:''));
+  alert('✓ تم إضافة '+added+' فندق');
 };
 
 function mHB(r){
@@ -12780,39 +12651,11 @@ function waGetPhones() {
 }
 function waSetPhones(arr) { localStorage.setItem('wa_notif_phones', JSON.stringify(arr)); }
 
-// ---- تقسيم الرسائل الطويلة قبل الإرسال (كل منصة عندها حد أقصى) ----
-function _chunkMsg(msg, maxLen) {
-  if (msg.length <= maxLen) return [msg];
-  const lines = msg.split('\n');
-  const chunks = [];
-  let cur = '';
-  for (const line of lines) {
-    if ((cur ? cur.length + 1 : 0) + line.length > maxLen) {
-      if (cur) { chunks.push(cur); cur = ''; }
-      let rest = line;
-      while (rest.length > maxLen) { chunks.push(rest.slice(0, maxLen)); rest = rest.slice(maxLen); }
-      cur = rest;
-    } else {
-      cur = cur ? cur + '\n' + line : line;
-    }
-  }
-  if (cur) chunks.push(cur);
-  return chunks.map((c, i) => chunks.length > 1 ? `(${i + 1}/${chunks.length})\n${c}` : c);
-}
-
-// تجميع أخطاء الإرسال عشان تبان للمستخدم بدل ما تتخفي
-let _notifSendErrors = [];
-function _reportNotifFail(channel, detail) {
-  _notifSendErrors.push({ channel, detail, at: new Date().toISOString() });
-  console.error(`❌ فشل إرسال تنبيه (${channel}):`, detail);
-  if (typeof toast === 'function') toast(`⚠️ فشل إرسال تنبيه عبر ${channel}: ${String(detail).slice(0, 80)}`, 'error', 6000);
-}
-
 async function waSendAll(msg) {
   const phones = waGetPhones();
   for (const p of phones) {
     if (!p.phone || !p.key) continue;
-    for (const part of _chunkMsg(msg, 1500)) await _waSend(p.phone, p.key, part);
+    await _waSend(p.phone, p.key, msg);
   }
 }
 async function _waSend(phone, key, msg) {
@@ -12820,11 +12663,10 @@ async function _waSend(phone, key, msg) {
     try {
       const url = `https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${encodeURIComponent(msg)}&apikey=${key}`;
       const img = new Image();
-      img.onload = () => resolve();
-      img.onerror = () => { _reportNotifFail('واتساب', 'فشل تحميل رابط الإرسال — تأكد من الرقم والـ API Key'); resolve(); };
+      img.onload = img.onerror = () => resolve();
       img.src = url;
       setTimeout(resolve, 5000);
-    } catch(e) { _reportNotifFail('واتساب', e.message); resolve(); }
+    } catch(e) { resolve(); }
   });
 }
 
@@ -12838,21 +12680,17 @@ async function tgSendAll(msg) {
   const chats = tgGetChats();
   for (const c of chats) {
     if (!c.token || !c.chatId) continue;
-    for (const part of _chunkMsg(msg, 4000)) await _tgSend(c.token, c.chatId, part);
+    await _tgSend(c.token, c.chatId, msg);
   }
 }
 async function _tgSend(token, chatId, msg) {
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: 'HTML' })
     });
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      _reportNotifFail('تليجرام', `HTTP ${res.status} — ${body.slice(0, 150)}`);
-    }
-  } catch(e) { _reportNotifFail('تليجرام', e.message); }
+  } catch(e) { /* silent */ }
 }
 
 // ---- DISCORD ----
@@ -12865,21 +12703,17 @@ async function dcSendAll(msg) {
   const hooks = dcGetWebhooks();
   for (const h of hooks) {
     if (!h.url) continue;
-    for (const part of _chunkMsg(msg, 1900)) await _dcSend(h.url, part);
+    await _dcSend(h.url, msg);
   }
 }
 async function _dcSend(url, msg) {
   try {
-    const res = await fetch(url, {
+    await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: msg, username: 'أدريسكا تورز 🏖️' })
     });
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      _reportNotifFail('ديسكورد', `HTTP ${res.status} — ${body.slice(0, 150)}`);
-    }
-  } catch(e) { _reportNotifFail('ديسكورد', e.message); }
+  } catch(e) { /* silent */ }
 }
 
 // ---- SEND TO ALL CHANNELS ----
@@ -12907,12 +12741,12 @@ async function notifLogExists(key) {
   try {
     const r = await sbFetch('mtr_notif_log','GET',null,'?notif_key=eq.'+encodeURIComponent(key)+'&select=id&limit=1');
     return r && r.length > 0;
-  } catch(e) { console.error('❌ notifLogExists فشل — التنبيهات ممكن تتكرر:', e); return false; }
+  } catch(e) { return false; }
 }
 async function notifLogMark(key, type, label) {
   try {
     await sbFetch('mtr_notif_log','POST',{ notif_key: key, notif_type: type, notif_label: label },'');
-  } catch(e) { console.error('❌ notifLogMark فشل — التنبيه ده ممكن يتبعت تاني المرة الجاية:', e); if (typeof toast==='function') toast('⚠️ فشل تسجيل التنبيه في السجل — راجع mtr_notif_log','error',6000); }
+  } catch(e) { /* silent */ }
 }
 
 // ============================================================
@@ -13208,7 +13042,8 @@ function _buildConvoyMsg(conv, convBookings, daysLeft) {
   if (withRemaining.length > 0) {
     const totalRem = withRemaining.reduce((s,b)=>s+b.remaining,0);
     msg += '💰 متبقي على ' + withRemaining.length + ' عميل — إجمالي: ' + totalRem.toLocaleString() + ' ج\n';
-    msg += withRemaining.map(b=>'  • ' + b.name + ': ' + b.remaining.toLocaleString() + ' ج').join('\n');
+    msg += withRemaining.slice(0,8).map(b=>'  • ' + b.name + ': ' + b.remaining.toLocaleString() + ' ج').join('\n');
+    if (withRemaining.length > 8) msg += '\n  ... و' + (withRemaining.length-8) + ' عميل آخر';
   } else {
     msg += '💰 كل العملاء مسددين ✅';
   }
@@ -14149,7 +13984,7 @@ async function loadTasks(){
     tasks=(rows||[]).map(_mapTask);
     _startReminderLoop();
     _updateTasksBadge();
-  }catch(e){console.warn('tasks load fail',e);if(typeof toast==='function')toast('❌ فشل تحميل التاسكات: '+e.message,'error');}
+  }catch(e){console.warn('tasks load fail',e);tasks=[];}
 }
 
 function _mapTask(r){
@@ -14543,7 +14378,7 @@ async function _botHandleCommand(token, chatId, text) {
     case '/tasks':     reply = _botTasks(); break;
     default: reply = '❓ أمر غير معروف: ' + cmd + '\nاكتب /help لقائمة الأوامر';
   }
-  for (const part of _chunkMsg(reply, 4000)) await _tgSend(token, chatId, part);
+  await _tgSend(token, chatId, reply);
 }
 
 function _botHelp() {
@@ -14737,18 +14572,18 @@ function _botTasks() {
   let msg = '📋 التاسكات المفتوحة (' + open.length + ')\n━━━━━━━━━━━━━━━━━━\n';
   if (overdue.length) {
     msg += '⚠️ متأخرة (' + overdue.length + '):\n';
-    msg += overdue.map(t=>'  • ' + t.title + (t.clientName ? ' — ' + t.clientName : '')).join('\n') + '\n\n';
+    msg += overdue.slice(0,5).map(t=>'  • ' + t.title + (t.clientName ? ' — ' + t.clientName : '')).join('\n') + '\n\n';
   }
   if (upcoming.length) {
     msg += '🔜 قادمة (' + upcoming.length + '):\n';
-    msg += upcoming.map(t=>{
+    msg += upcoming.slice(0,5).map(t=>{
       const d = new Date(t.remindAt);
       return '  • ' + t.title + ' (' + d.toLocaleDateString('ar-EG',{day:'numeric',month:'short'}) + ')';
     }).join('\n') + '\n\n';
   }
   if (noDate.length) {
     msg += '📌 بدون موعد (' + noDate.length + '):\n';
-    msg += noDate.map(t=>'  • ' + t.title).join('\n');
+    msg += noDate.slice(0,5).map(t=>'  • ' + t.title).join('\n');
   }
   return msg;
 }
