@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -5459,7 +5458,41 @@ async function saveBooking(){
       }
     }
     addLog(`إضافة ${pt==='supplier'?'حجز مورد':'حجز'}: ${name} - ${convTxt(cn)} (${conv?.checkin||''} → ${conv?.checkout||''})`,'add',`إجمالي: ${total.toLocaleString()} ج · شقق: ${selApts.join('، ')||'-'} · مكان الركوب: ${document.getElementById('f-pickup')?.value||'-'} · هاتف: ${phone||'-'}`);
-    alert('تم حفظ الحجز!');resetForm();
+    // ── popup تأكيد الحجز مع إمكانية الواتساب ──
+    const _savedB=bookings.find(bk=>bk.id===(res&&res[0]?res[0].id:0))||{name,phone,total,paid:pays.reduce((s,p)=>s+p.amount,0),remaining:total-pays.reduce((s,p)=>s+p.amount,0)};
+    const _rem=(_savedB.remaining||total-pays.reduce((s,p)=>s+p.amount,0));
+    const _paid=(_savedB.paid||pays.reduce((s,p)=>s+p.amount,0));
+    const _savedId=res&&res[0]?res[0].id:null;
+    const _existBov=document.getElementById('bk-saved-overlay');if(_existBov)_existBov.remove();
+    const _bov=document.createElement('div');
+    _bov.id='bk-saved-overlay';
+    _bov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)';
+    const _waMsg=`السلام عليكم ورحمة الله وبركاته 🌹\nأ/ ${name}\nتم تسجيل حجزك بنجاح ✅\n━━━━━━━━━━━━━━━\n📋 تفاصيل الحجز:\n🏠 الشقق: ${selApts.join('، ')||'—'}\n🚌 مكان الركوب: ${document.getElementById('f-pickup')?.value||'—'}\n💰 الإجمالي: ${total.toLocaleString()} ج\n✅ المدفوع: ${_paid.toLocaleString()} ج\n⏳ المتبقي: ${_rem.toLocaleString()} ج\n━━━━━━━━━━━━━━━\nنتمنى لحضرتك رحلة سعيدة معانا ان شاءالله ❤️`;
+    _bov.innerHTML=`<div style="background:var(--sf);border-radius:18px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.3);overflow:hidden;font-family:'Cairo',sans-serif;direction:rtl;animation:mtrPopIn .2s ease">
+      <div style="background:linear-gradient(135deg,#117a65,#1abc9c);padding:20px 22px;text-align:center">
+        <div style="font-size:36px;margin-bottom:6px">✅</div>
+        <div style="font-size:18px;font-weight:800;color:#fff">تم حفظ الحجز بنجاح!</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.85);margin-top:4px">${name} · ${total.toLocaleString()} ج</div>
+      </div>
+      <div style="padding:16px 20px">
+        <div style="background:var(--sf2);border-radius:10px;padding:12px 14px;font-size:13px;line-height:2">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--tx2)">الشقق</span><span style="font-weight:700">${selApts.join('، ')||'—'}</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--tx2)">الإجمالي</span><span style="font-weight:700;color:#1a5276">${total.toLocaleString()} ج</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--tx2)">المدفوع</span><span style="font-weight:700;color:#117a65">${_paid.toLocaleString()} ج</span></div>
+          <div style="display:flex;justify-content:space-between;border-top:1px dashed var(--bd);padding-top:6px;margin-top:4px"><span style="color:var(--tx2)">المتبقي</span><span style="font-weight:800;color:${_rem>0?'#c0392b':'#117a65'}">${_rem.toLocaleString()} ج</span></div>
+        </div>
+      </div>
+      <div style="padding:12px 18px 16px;display:flex;gap:8px;background:var(--sf2);border-top:1px solid var(--bd);flex-wrap:wrap">
+        ${phone?`<button onclick="(function(){const txt=document.getElementById('bk-wa-txt')?.value||${JSON.stringify(_waMsg)};window.open('https://wa.me/2'+${JSON.stringify(phone)}.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(txt),'_blank');document.getElementById('bk-saved-overlay').remove();})()" style="flex:2;min-width:140px;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">💬 إرسال واتساب</button>`:''}
+        <button onclick="document.getElementById('bk-saved-overlay').remove()" style="flex:1;min-width:80px;padding:12px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--sf);cursor:pointer;font-size:13px;font-family:inherit;color:var(--tx2)">إغلاق</button>
+      </div>
+      ${phone?`<div style="padding:0 18px 14px;background:var(--sf2)">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px;font-weight:600">✏ تعديل رسالة الواتساب:</div>
+        <textarea id="bk-wa-txt" style="width:100%;min-height:110px;padding:8px;border-radius:8px;border:1.5px solid var(--bd2);font-size:12px;font-family:inherit;background:var(--sf);color:var(--tx);direction:rtl;resize:vertical">${_waMsg}</textarea>
+      </div>`:''}
+    </div>`;
+    document.body.appendChild(_bov);
+    resetForm();
     markTabsDirty('clients','dash','reports','accs');
     if(_activeTab==='clients')renderClients();
     if(_activeTab==='accs')renderAccs();
@@ -8807,52 +8840,65 @@ function _getClosingTableData(sectionKey){
   return {rows,conv,title:'التقفيلة الكاملة',color:'#1a5276'};
 }
 
-function exportClosingTableExcel(sectionKey){
+async function exportClosingTableExcel(sectionKey){
   const setts=(typeof settings!=='undefined'?settings:{})||{};
   const {rows,conv,title,isSupplier}=_getClosingTableData(sectionKey);
   if(!rows.length){alert('لا يوجد بيانات');return;}
+  const cols=await showColumnPicker(isSupplier);
+  if(!cols)return;
   const n=v=>(v||0).toLocaleString();
   const sd=r=>r.busSeats*((r.b&&r.b.collectViaSeatCost)||0);
   const T={busSeats:rows.reduce((s,r)=>s+r.busSeats,0),busTot:rows.reduce((s,r)=>s+r.busTot,0),intSeats:rows.reduce((s,r)=>s+r.intSeats,0),intTot:rows.reduce((s,r)=>s+r.intTot,0),aptNet:rows.reduce((s,r)=>s+r.aptNet,0),disc:rows.reduce((s,r)=>s+r.disc,0),total:rows.reduce((s,r)=>s+r.total,0),paid:rows.reduce((s,r)=>s+r.paid,0),remaining:rows.reduce((s,r)=>s+r.remaining,0),supDeduct:rows.reduce((s,r)=>s+sd(r),0),supNet:rows.reduce((s,r)=>s+Math.max(0,r.remaining-sd(r)),0)};
+  const c=cols;
+  const td=(val,extra='')=>`<td style="padding:7px 10px;border:1px solid #dce6f0;${extra}">${val}</td>`;
   const trs=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':'#f7f9fb'}">
-    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:700">${r.i}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:800;font-size:12pt">${r.name}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;direction:ltr;text-align:left">${r.phone}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center">${r.apts}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0">${r.pickup}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center;font-weight:700">${r.busSeats||'—'}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center;font-weight:700;color:#1a5276">${r.busSeats?n(r.busTot):'—'}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats||'—'}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'—'}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:700">${n(r.aptNet)}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;color:${r.disc?'#c0392b':'#aaa'}">${r.disc?n(r.disc):'—'}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:800;color:#1a5276">${n(r.total)}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:700;color:#117a65">${n(r.paid)}</td>
-    <td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:800;color:#c0392b">${n(r.remaining)}</td>
-    ${isSupplier?`<td style="padding:7px 10px;border:1px solid #dce6f0;color:#c0392b">${sd(r)?'-'+n(sd(r)):'—'}</td><td style="padding:7px 10px;border:1px solid #dce6f0;font-weight:800;color:#117a65">${n(Math.max(0,r.remaining-sd(r)))}</td>`:''}
+    ${c.has('num')?td(r.i,'font-weight:700'):''}
+    ${c.has('name')?td(r.name,'font-weight:800;font-size:12pt'):''}
+    ${c.has('phone')?td(r.phone,'direction:ltr;text-align:left'):''}
+    ${c.has('apts')?td(r.apts,'text-align:center'):''}
+    ${c.has('pickup')?td(r.pickup):''}
+    ${c.has('bus')?td(r.busSeats||'—','text-align:center;font-weight:700'):''}
+    ${c.has('bustot')?td(r.busSeats?n(r.busTot):'—','text-align:center;font-weight:700;color:#1a5276'):''}
+    ${c.has('int')?td(r.intSeats||'—','text-align:center;font-weight:700;color:#7d3c98'):''}
+    ${c.has('inttot')?td(r.intSeats?n(r.intTot):'—','text-align:center;font-weight:700;color:#7d3c98'):''}
+    ${c.has('aptnet')?td(n(r.aptNet),'font-weight:700'):''}
+    ${c.has('disc')?td(r.disc?n(r.disc):'—',`color:${r.disc?'#c0392b':'#aaa'}`):''}
+    ${c.has('total')?td(n(r.total),'font-weight:800;color:#1a5276'):''}
+    ${c.has('paid')?td(n(r.paid),'font-weight:700;color:#117a65'):''}
+    ${c.has('rem')?td(n(r.remaining),'font-weight:800;color:#c0392b'):''}
+    ${isSupplier&&c.has('supded')?td(sd(r)?'-'+n(sd(r)):'—','color:#c0392b'):''}
+    ${isSupplier&&c.has('supnet')?td(n(Math.max(0,r.remaining-sd(r))),'font-weight:800;color:#117a65'):''}
   </tr>`).join('');
-  const BOM='﻿';
+  // legacy placeholder to keep original trs variable (unused)
+  const BOM='\uFEFF';
+  const th=label=>`<th style="background:#1a5276;color:#fff;padding:9px 12px;font-weight:800;border:1px solid #1a5276;font-size:11pt;text-align:right">${label}</th>`;
+  const ftd=(val,extra='')=>`<td style="background:#e8f4fd;font-weight:900;border:1px solid #1a5276;padding:8px 12px;${extra}">${val}</td>`;
+  const fixedColCount=['num','name','phone','apts','pickup'].filter(k=>c.has(k)).length;
   const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8">
-<style>body{font-family:Cairo,Arial;direction:rtl;font-size:11pt}h2{color:#1a5276;font-size:14pt}th{background:#1a5276;color:#fff;padding:9px 12px;font-weight:800;border:1px solid #1a5276;font-size:11pt;text-align:right}tfoot td{background:#e8f4fd;font-weight:900;border:1px solid #1a5276;padding:8px 12px}</style>
+<style>body{font-family:Cairo,Arial;direction:rtl;font-size:11pt}h2{color:#1a5276;font-size:14pt}td{padding:7px 10px;border:1px solid #dce6f0}</style>
 </head><body>
 <h2>📋 ${title} — ${conv?conv.label:''}</h2>
 <p style="color:#888;font-size:10pt;margin-bottom:12px">${setts.name||''} · ${new Date().toLocaleDateString('ar-EG')} · ${rows.length} عميل</p>
 <table border="1" style="border-collapse:collapse;width:100%">
   <thead><tr>
-    <th>#</th><th>الاسم</th><th>الهاتف</th><th>الشقة</th><th>مكان الركوب</th>
-    <th>كراسي باص</th><th>× 600</th><th>داخلي</th><th>× 200</th>
-    <th>سعر الشقة</th><th>الخصم</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th>
-    ${isSupplier?`<th>خصم الكراسي</th><th>الصافي المطلوب من المورد</th>`:''}
+    ${c.has('num')?th('#'):''}${c.has('name')?th('الاسم'):''}${c.has('phone')?th('الهاتف'):''}
+    ${c.has('apts')?th('الشقة'):''}${c.has('pickup')?th('مكان الركوب'):''}
+    ${c.has('bus')?th('كراسي باص'):''}${c.has('bustot')?th('× 600'):''}
+    ${c.has('int')?th('داخلي'):''}${c.has('inttot')?th('× 200'):''}
+    ${c.has('aptnet')?th('سعر الشقة'):''}${c.has('disc')?th('الخصم'):''}
+    ${c.has('total')?th('الإجمالي'):''}${c.has('paid')?th('المدفوع'):''}${c.has('rem')?th('المتبقي'):''}
+    ${isSupplier&&c.has('supded')?th('خصم الكراسي'):''}${isSupplier&&c.has('supnet')?th('الصافي من المورد'):''}
   </tr></thead>
   <tbody>${trs}</tbody>
   <tfoot><tr>
-    <td colspan="5" style="font-size:13pt;font-weight:900;padding:9px 12px">الإجمالي · ${rows.length} عميل</td>
-    <td style="text-align:center">${T.busSeats}</td><td style="text-align:center;color:#1a5276">${n(T.busTot)}</td>
-    <td style="text-align:center;color:#7d3c98">${T.intSeats||'—'}</td><td style="text-align:center;color:#7d3c98">${T.intSeats?n(T.intTot):'—'}</td>
-    <td>${n(T.aptNet)}</td><td style="color:#c0392b">${T.disc?n(T.disc):'—'}</td>
-    <td style="color:#1a5276">${n(T.total)}</td><td style="color:#117a65">${n(T.paid)}</td>
-    <td style="color:#c0392b;font-size:13pt">${n(T.remaining)}</td>
-    ${isSupplier?`<td style="color:#c0392b">${T.supDeduct?'-'+n(T.supDeduct):'—'}</td><td style="color:#117a65;font-size:13pt">${n(T.supNet)}</td>`:''}
+    ${fixedColCount>0?`<td colspan="${fixedColCount}" style="background:#e8f4fd;font-weight:900;border:1px solid #1a5276;padding:9px 12px;font-size:13pt">الإجمالي · ${rows.length} عميل</td>`:''}
+    ${c.has('bus')?ftd(T.busSeats,'text-align:center'):''}${c.has('bustot')?ftd(n(T.busTot),'text-align:center;color:#1a5276'):''}
+    ${c.has('int')?ftd(T.intSeats||'—','text-align:center;color:#7d3c98'):''}${c.has('inttot')?ftd(T.intSeats?n(T.intTot):'—','text-align:center;color:#7d3c98'):''}
+    ${c.has('aptnet')?ftd(n(T.aptNet)):''}${c.has('disc')?ftd(T.disc?n(T.disc):'—','color:#c0392b'):''}
+    ${c.has('total')?ftd(n(T.total),'color:#1a5276'):''}${c.has('paid')?ftd(n(T.paid),'color:#117a65'):''}
+    ${c.has('rem')?ftd(n(T.remaining),'color:#c0392b;font-size:13pt'):''}
+    ${isSupplier&&c.has('supded')?ftd(T.supDeduct?'-'+n(T.supDeduct):'—','color:#c0392b'):''}
+    ${isSupplier&&c.has('supnet')?ftd(n(T.supNet),'color:#117a65;font-size:13pt'):''}
   </tr></tfoot>
 </table>
 </body></html>`;
@@ -8862,10 +8908,13 @@ function exportClosingTableExcel(sectionKey){
   a.click();
 }
 
-function exportClosingTablePDF(sectionKey){
+async function exportClosingTablePDF(sectionKey){
   const setts=(typeof settings!=='undefined'?settings:{})||{};
   const {rows,conv,title,color,isSupplier}=_getClosingTableData(sectionKey);
   if(!rows.length){alert('لا يوجد بيانات');return;}
+  const cols=await showColumnPicker(isSupplier);
+  if(!cols)return;
+  const c=cols;
   const n=v=>(v||0).toLocaleString();
   const sd=r=>r.busSeats*((r.b&&r.b.collectViaSeatCost)||0);
   const T={busSeats:rows.reduce((s,r)=>s+r.busSeats,0),busTot:rows.reduce((s,r)=>s+r.busTot,0),intSeats:rows.reduce((s,r)=>s+r.intSeats,0),intTot:rows.reduce((s,r)=>s+r.intTot,0),aptNet:rows.reduce((s,r)=>s+r.aptNet,0),disc:rows.reduce((s,r)=>s+r.disc,0),total:rows.reduce((s,r)=>s+r.total,0),paid:rows.reduce((s,r)=>s+r.paid,0),remaining:rows.reduce((s,r)=>s+r.remaining,0),supDeduct:rows.reduce((s,r)=>s+sd(r),0),supNet:rows.reduce((s,r)=>s+Math.max(0,r.remaining-sd(r)),0)};
@@ -8877,22 +8926,24 @@ function exportClosingTablePDF(sectionKey){
   const totalExp=exps.reduce((s,e)=>s+e.amount,0);
   const baseTotal=isSupplier?T.supNet:T.remaining;
   const netAfterExp=baseTotal-totalExp;
+  const ptd=(val,extra='')=>`<td style="padding:8px 10px;border-bottom:2px solid #b8c9da;${extra}">${val}</td>`;
   const trs=rows.map((r,i)=>`<tr style="background:${i%2===0?'#fff':lightColor}">
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700;color:${color}">${r.i}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;font-size:13px">${r.name}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-size:15px;font-weight:900;direction:ltr;text-align:left;color:#1a2535">${r.phone}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center"><span style="background:${lightColor};color:${color};border-radius:5px;padding:2px 8px;font-weight:700;font-size:11px">${r.apts}</span></td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;color:#117a65;font-size:11px">${r.pickup}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center;font-weight:700">${r.busSeats||'—'}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center;font-weight:700;color:#1a5276">${r.busSeats?n(r.busTot):'—'}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats||'—'}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'—'}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700">${n(r.aptNet)}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;color:${r.disc?'#c0392b':'#bbb'}">${r.disc?n(r.disc):'—'}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;color:#1a5276">${n(r.total)}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700;color:#117a65">${n(r.paid)}</td>
-    <td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;color:${color}">${n(r.remaining)}</td>
-    ${isSupplier?`<td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:700;color:#c0392b">${sd(r)?'-'+n(sd(r)):'—'}</td><td style="padding:8px 10px;border-bottom:2px solid #b8c9da;font-weight:800;color:#117a65">${n(Math.max(0,r.remaining-sd(r)))}</td>`:''}
+    ${c.has('num')?ptd(r.i,`font-weight:700;color:${color}`):''}
+    ${c.has('name')?ptd(r.name,'font-weight:800;font-size:13px'):''}
+    ${c.has('phone')?ptd(r.phone,'font-size:15px;font-weight:900;direction:ltr;text-align:left;color:#1a2535'):''}
+    ${c.has('apts')?ptd(`<span style="background:${lightColor};color:${color};border-radius:5px;padding:2px 8px;font-weight:700;font-size:11px">${r.apts}</span>`,'text-align:center'):''}
+    ${c.has('pickup')?ptd(r.pickup,'color:#117a65;font-size:11px'):''}
+    ${c.has('bus')?ptd(r.busSeats||'—','text-align:center;font-weight:700'):''}
+    ${c.has('bustot')?ptd(r.busSeats?n(r.busTot):'—','text-align:center;font-weight:700;color:#1a5276'):''}
+    ${c.has('int')?ptd(r.intSeats||'—','text-align:center;font-weight:700;color:#7d3c98'):''}
+    ${c.has('inttot')?ptd(r.intSeats?n(r.intTot):'—','text-align:center;font-weight:700;color:#7d3c98'):''}
+    ${c.has('aptnet')?ptd(n(r.aptNet),'font-weight:700'):''}
+    ${c.has('disc')?ptd(r.disc?n(r.disc):'—',`color:${r.disc?'#c0392b':'#bbb'}`):''}
+    ${c.has('total')?ptd(n(r.total),'font-weight:800;color:#1a5276'):''}
+    ${c.has('paid')?ptd(n(r.paid),'font-weight:700;color:#117a65'):''}
+    ${c.has('rem')?ptd(n(r.remaining),`font-weight:800;color:${color}`):''}
+    ${isSupplier&&c.has('supded')?ptd(sd(r)?'-'+n(sd(r)):'—','font-weight:700;color:#c0392b'):''}
+    ${isSupplier&&c.has('supnet')?ptd(n(Math.max(0,r.remaining-sd(r))),'font-weight:800;color:#117a65'):''}
   </tr>`).join('');
   const h=`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
 <title>${title} — ${conv?conv.label:''}</title>
@@ -8941,26 +8992,28 @@ tfoot td{padding:9px 12px;font-weight:800;font-size:12px;border-top:2.5px solid 
 </div>
 <table>
   <thead><tr>
-    <th>#</th><th>الاسم</th><th>الهاتف</th><th style="text-align:center">الشقة</th><th>مكان الركوب</th>
-    <th style="text-align:center">كراسي باص</th><th style="text-align:center">× 600</th>
-    <th style="text-align:center">داخلي</th><th style="text-align:center">× 200</th>
-    <th>سعر الشقة</th><th>الخصم</th>
-    <th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th>
-    ${isSupplier?`<th>خصم الكراسي</th><th>الصافي المطلوب من المورد</th>`:''}
+    ${c.has('num')?'<th>#</th>':''}${c.has('name')?'<th>الاسم</th>':''}${c.has('phone')?'<th>الهاتف</th>':''}
+    ${c.has('apts')?'<th style="text-align:center">الشقة</th>':''}${c.has('pickup')?'<th>مكان الركوب</th>':''}
+    ${c.has('bus')?'<th style="text-align:center">كراسي باص</th>':''}${c.has('bustot')?'<th style="text-align:center">× 600</th>':''}
+    ${c.has('int')?'<th style="text-align:center">داخلي</th>':''}${c.has('inttot')?'<th style="text-align:center">× 200</th>':''}
+    ${c.has('aptnet')?'<th>سعر الشقة</th>':''}${c.has('disc')?'<th>الخصم</th>':''}
+    ${c.has('total')?'<th>الإجمالي</th>':''}${c.has('paid')?'<th>المدفوع</th>':''}${c.has('rem')?'<th>المتبقي</th>':''}
+    ${isSupplier&&c.has('supded')?'<th>خصم الكراسي</th>':''}${isSupplier&&c.has('supnet')?'<th>الصافي من المورد</th>':''}
   </tr></thead>
   <tbody>${trs}</tbody>
   <tfoot><tr>
-    <td colspan="5" style="font-size:13px;font-weight:900;color:${color}">الإجمالي · ${rows.length} عميل</td>
-    <td style="text-align:center;color:#1a5276">${T.busSeats}</td>
-    <td style="text-align:center;color:#1a5276">${n(T.busTot)}</td>
-    <td style="text-align:center;color:#7d3c98">${T.intSeats||'—'}</td>
-    <td style="text-align:center;color:#7d3c98">${T.intSeats?n(T.intTot):'—'}</td>
-    <td style="color:${color}">${n(T.aptNet)}</td>
-    <td style="color:#c0392b">${T.disc?n(T.disc):'—'}</td>
-    <td style="color:#1a5276;font-size:14px">${n(T.total)}</td>
-    <td style="color:#117a65;font-size:14px">${n(T.paid)}</td>
-    <td style="color:${color};font-size:15px;font-weight:900">${n(T.remaining)}</td>
-    ${isSupplier?`<td style="color:#c0392b">${T.supDeduct?'-'+n(T.supDeduct):'—'}</td><td style="color:#117a65;font-size:15px;font-weight:900">${n(T.supNet)}</td>`:''}
+    ${['num','name','phone','apts','pickup'].filter(k=>c.has(k)).length>0?`<td colspan="${['num','name','phone','apts','pickup'].filter(k=>c.has(k)).length}" style="font-size:13px;font-weight:900;color:${color}">الإجمالي · ${rows.length} عميل</td>`:''}
+    ${c.has('bus')?`<td style="text-align:center;color:#1a5276">${T.busSeats}</td>`:''}
+    ${c.has('bustot')?`<td style="text-align:center;color:#1a5276">${n(T.busTot)}</td>`:''}
+    ${c.has('int')?`<td style="text-align:center;color:#7d3c98">${T.intSeats||'—'}</td>`:''}
+    ${c.has('inttot')?`<td style="text-align:center;color:#7d3c98">${T.intSeats?n(T.intTot):'—'}</td>`:''}
+    ${c.has('aptnet')?`<td style="color:${color}">${n(T.aptNet)}</td>`:''}
+    ${c.has('disc')?`<td style="color:#c0392b">${T.disc?n(T.disc):'—'}</td>`:''}
+    ${c.has('total')?`<td style="color:#1a5276;font-size:14px">${n(T.total)}</td>`:''}
+    ${c.has('paid')?`<td style="color:#117a65;font-size:14px">${n(T.paid)}</td>`:''}
+    ${c.has('rem')?`<td style="color:${color};font-size:15px;font-weight:900">${n(T.remaining)}</td>`:''}
+    ${isSupplier&&c.has('supded')?`<td style="color:#c0392b">${T.supDeduct?'-'+n(T.supDeduct):'—'}</td>`:''}
+    ${isSupplier&&c.has('supnet')?`<td style="color:#117a65;font-size:15px;font-weight:900">${n(T.supNet)}</td>`:''}
   </tr></tfoot>
 </table>
 ${groupType?`<div class="exp-box">
@@ -10475,10 +10528,152 @@ window.openHtmlPrint = function(html, title, color, filename){
 };
 </script>
 <script>
+// ====== COLUMN PICKER FOR CLOSING TABLES ======
+// الأعمدة المتاحة مع مفاتيحها
+const CLOSING_COLS = [
+  {key:'num',   label:'م',              def:true},
+  {key:'name',  label:'الاسم',          def:true},
+  {key:'phone', label:'الهاتف',         def:true},
+  {key:'apts',  label:'الشقة',          def:true},
+  {key:'pickup',label:'مكان الركوب',    def:true},
+  {key:'bus',   label:'كراسي باص',      def:true},
+  {key:'bustot',label:'× 600 (باص)',    def:false},
+  {key:'int',   label:'داخلي',          def:false},
+  {key:'inttot',label:'× 200 (داخلي)',  def:false},
+  {key:'aptnet',label:'سعر الشقة',      def:true},
+  {key:'disc',  label:'الخصم',          def:false},
+  {key:'total', label:'الإجمالي',        def:true},
+  {key:'paid',  label:'المدفوع',         def:true},
+  {key:'rem',   label:'المتبقي',         def:true},
+  {key:'supded',label:'خصم الكراسي (مورد)', def:false},
+  {key:'supnet',label:'الصافي من المورد',   def:false},
+];
+
+// حفظ اختيار المستخدم بين الجلسات
+function _colSaved(){
+  try{return JSON.parse(localStorage.getItem('closing_col_sel')||'null');}catch(e){return null;}
+}
+function _colSave(sel){
+  try{localStorage.setItem('closing_col_sel',JSON.stringify(sel));}catch(e){}
+}
+
+// يرجع Promise بـ {cols: Set} أو null لو ألغى
+function showColumnPicker(isSupplier){
+  return new Promise(resolve=>{
+    const saved=_colSaved();
+    const existing=document.getElementById('col-picker-ov');if(existing)existing.remove();
+    const ov=document.createElement('div');
+    ov.id='col-picker-ov';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)';
+    const colsToShow=CLOSING_COLS.filter(c=>isSupplier||!c.key.startsWith('sup'));
+    const chks=colsToShow.map(c=>{
+      const checked=saved?saved.includes(c.key):c.def;
+      return `<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;background:var(--sf2);border:1.5px solid var(--bd);font-size:13px;font-weight:600;color:var(--tx)">
+        <input type="checkbox" data-col="${c.key}" ${checked?'checked':''} style="width:16px;height:16px;accent-color:#1a5276;cursor:pointer">
+        <span>${c.label}</span>
+      </label>`;
+    }).join('');
+    ov.innerHTML=`<div style="background:var(--sf);border-radius:16px;width:min(500px,95vw);box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden;font-family:'Cairo',sans-serif;direction:rtl">
+      <div style="background:linear-gradient(135deg,#1a5276,#117a65);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:16px;font-weight:800">🗂 اختر الأعمدة المطلوبة</div>
+        <button onclick="document.getElementById('col-picker-ov').remove()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1">✕</button>
+      </div>
+      <div style="padding:16px 18px">
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <button onclick="document.querySelectorAll('#col-picker-ov input[type=checkbox]').forEach(c=>c.checked=true)" style="background:var(--prl);color:var(--pr);border:1.5px solid var(--pr);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">✓ تحديد الكل</button>
+          <button onclick="document.querySelectorAll('#col-picker-ov input[type=checkbox]').forEach(c=>c.checked=false)" style="background:var(--dnl);color:var(--dn);border:1.5px solid var(--dn);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">✗ إلغاء الكل</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:7px;max-height:320px;overflow-y:auto;padding:4px 2px">${chks}</div>
+      </div>
+      <div style="padding:12px 18px 16px;display:flex;gap:8px;background:var(--sf2);border-top:1px solid var(--bd)">
+        <button id="col-picker-ok" style="flex:2;background:linear-gradient(135deg,#1a5276,#2471a3);color:#fff;border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">✅ تطبيق وطباعة</button>
+        <button onclick="document.getElementById('col-picker-ov').remove()" style="flex:1;padding:12px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--sf);cursor:pointer;font-size:13px;font-family:inherit;color:var(--tx2)">إلغاء</button>
+      </div>
+    </div>`;
+    document.getElementById('col-picker-ok',ov)?.addEventListener&&ov.addEventListener('click',e=>{
+      if(e.target.id==='col-picker-ok'){
+        const sel=[...ov.querySelectorAll('input[type=checkbox]:checked')].map(c=>c.dataset.col);
+        if(!sel.length){alert('اختار عمود واحد على الأقل');return;}
+        _colSave(sel);
+        ov.remove();
+        resolve(new Set(sel));
+      }
+    });
+    ov.querySelector('button[id="col-picker-ok"]');
+    // use delegated click on ov
+    document.body.appendChild(ov);
+    // wire ok button
+    ov.querySelector('#col-picker-ok').onclick=()=>{
+      const sel=[...ov.querySelectorAll('input[type=checkbox]:checked')].map(c=>c.dataset.col);
+      if(!sel.length){alert('اختار عمود واحد على الأقل');return;}
+      _colSave(sel);
+      ov.remove();
+      resolve(new Set(sel));
+    };
+    // cancel resolves null
+    ov.querySelectorAll('button').forEach(b=>{if(b.textContent.includes('إلغاء'))b.addEventListener('click',()=>resolve(null));});
+  });
+}
+
+// بناء صف HTML بناءً على الأعمدة المختارة
+function _buildClosingRow(r,cols,isSupplier,rowBg,color,lightColor,ts,n,sd){
+  const c=cols;
+  const sdVal=sd(r);
+  return `<tr style="background:${rowBg}">
+    ${c.has('num')?`<td style="${ts};font-weight:700;color:${color}">${r.i}</td>`:''}
+    ${c.has('name')?`<td style="${ts};font-weight:800;font-size:14px">${r.name}</td>`:''}
+    ${c.has('phone')?`<td style="${ts};font-size:15px;font-weight:900;direction:ltr;text-align:left;color:#1a2535">${r.phone}</td>`:''}
+    ${c.has('apts')?`<td style="${ts};text-align:center"><span style="background:${lightColor};color:${color};border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700">${r.apts}</span></td>`:''}
+    ${c.has('pickup')?`<td style="${ts};color:#117a65;font-size:11px">${r.pickup}</td>`:''}
+    ${c.has('bus')?`<td style="${ts};text-align:center;font-weight:700">${r.busSeats||'—'}</td>`:''}
+    ${c.has('bustot')?`<td style="${ts};text-align:center;font-weight:700;color:#1a5276">${r.busSeats?n(r.busTot):'—'}</td>`:''}
+    ${c.has('int')?`<td style="${ts};text-align:center;font-weight:700;color:#7d3c98">${r.intSeats||'—'}</td>`:''}
+    ${c.has('inttot')?`<td style="${ts};text-align:center;font-weight:700;color:#7d3c98">${r.intSeats?n(r.intTot):'—'}</td>`:''}
+    ${c.has('aptnet')?`<td style="${ts};font-weight:700">${n(r.aptNet)}</td>`:''}
+    ${c.has('disc')?`<td style="${ts};color:${r.disc?'#c0392b':'#aaa'}">${r.disc?n(r.disc):'—'}</td>`:''}
+    ${c.has('total')?`<td style="${ts};font-weight:800;font-size:14px;color:#1a5276">${n(r.total)}</td>`:''}
+    ${c.has('paid')?`<td style="${ts};font-weight:700;font-size:14px;color:#117a65">${n(r.paid)}</td>`:''}
+    ${c.has('rem')?`<td style="${ts};font-weight:900;font-size:14px;color:${color}">${n(r.remaining)}</td>`:''}
+    ${isSupplier&&c.has('supded')?`<td style="${ts};font-weight:700;color:#c0392b">${sdVal?'—'+n(sdVal):'—'}</td>`:''}
+    ${isSupplier&&c.has('supnet')?`<td style="${ts};font-weight:900;font-size:14px;color:#117a65">${n(Math.max(0,r.remaining-sdVal))}</td>`:''}
+  </tr>`;
+}
+function _buildClosingHead(cols,isSupplier,hs,color){
+  const c=cols;
+  return `<thead><tr>
+    ${c.has('num')?`<th style="${hs(color)}">م</th>`:''}
+    ${c.has('name')?`<th style="${hs(color)}">الاسم</th>`:''}
+    ${c.has('phone')?`<th style="${hs(color)}">الهاتف</th>`:''}
+    ${c.has('apts')?`<th style="${hs(color)}">الشقة</th>`:''}
+    ${c.has('pickup')?`<th style="${hs(color)}">مكان الركوب</th>`:''}
+    ${c.has('bus')?`<th style="${hs(color)}">كراسي باص</th>`:''}
+    ${c.has('bustot')?`<th style="${hs(color)}">× 600</th>`:''}
+    ${c.has('int')?`<th style="${hs(color)}">داخلي</th>`:''}
+    ${c.has('inttot')?`<th style="${hs(color)}">× 200</th>`:''}
+    ${c.has('aptnet')?`<th style="${hs(color)}">سعر الشقة</th>`:''}
+    ${c.has('disc')?`<th style="${hs(color)}">الخصم</th>`:''}
+    ${c.has('total')?`<th style="${hs(color)}">الإجمالي</th>`:''}
+    ${c.has('paid')?`<th style="${hs(color)}">المدفوع</th>`:''}
+    ${c.has('rem')?`<th style="${hs(color)}">المتبقي</th>`:''}
+    ${isSupplier&&c.has('supded')?`<th style="${hs(color)}">خصم الكراسي</th>`:''}
+    ${isSupplier&&c.has('supnet')?`<th style="${hs(color)}">الصافي من المورد</th>`:''}
+  </tr></thead>`;
+}
+function _colSpanCount(cols,isSupplier){
+  const base=['num','name','phone','apts','pickup','bus','bustot','int','inttot','aptnet','disc','total','paid','rem'];
+  const sup=['supded','supnet'];
+  const all=isSupplier?[...base,...sup]:base;
+  return all.filter(k=>cols.has(k)).length;
+}
+
 // ====== printOneTable - print individual closing tables ======
-window.printOneTable = function(sectionId){
+window.printOneTable = async function(sectionId){
   const el=document.getElementById(sectionId);
   if(!el){alert('لا توجد بيانات');return;}
+  const isSupEl=el.querySelector('th[style*="الصافي المطلوب"]')||el.innerHTML.includes('الصافي المطلوب');
+  const isSupplier=!!isSupEl;
+  const cols=await showColumnPicker(isSupplier);
+  if(!cols)return;
   const sel=document.getElementById('cl-convoy-sel');
   const cn=sel?parseInt(sel.value):0;
   const conv=cn?getConv(cn):null;
@@ -10497,13 +10692,37 @@ window.printOneTable = function(sectionId){
     if(d.querySelector('button')) d.remove();
   });
   clone.querySelectorAll('button').forEach(b=>b.remove());
-  // إزالة overflow-x:auto من divs الجدول عشان الطباعة تشمل كل الأعمدة
   clone.querySelectorAll('div[style*="overflow-x"]').forEach(d=>{
     d.style.overflow='visible';d.style.overflowX='visible';
   });
-  // إزالة min-width من الجداول
   clone.querySelectorAll('table').forEach(t=>{
     t.style.minWidth='unset';t.style.width='100%';t.style.tableLayout='fixed';
+  });
+
+  // ─── فلترة الأعمدة من الجدول المنسوخ ───
+  const COL_ORDER=['num','name','phone','apts','pickup','bus','bustot','int','inttot','aptnet','disc','total','paid','rem','supded','supnet'];
+  clone.querySelectorAll('table').forEach(tbl=>{
+    // لكل صف (header + body + footer) احذف الـ cells المش مطلوبة
+    tbl.querySelectorAll('tr').forEach(row=>{
+      const cells=[...row.querySelectorAll('th,td')];
+      // عدد الأعمدة الفعلية في الجدول (بدون colspan > 1 في الـ footer)
+      cells.forEach((cell,idx)=>{
+        const colKey=COL_ORDER[idx];
+        if(colKey&&!cols.has(colKey)){
+          // تحقق من colspan في footer (colspan > 1 يعني صف الإجمالي)
+          if(cell.colSpan>1) return; // اترك الـ colspan row
+          cell.remove();
+        }
+      });
+    });
+    // عدّل colspan في footer
+    tbl.querySelectorAll('tfoot tr').forEach(row=>{
+      const firstCell=row.querySelector('td,th');
+      if(firstCell&&firstCell.colSpan>1){
+        const fixedCols=['num','name','phone','apts','pickup'].filter(k=>cols.has(k)).length;
+        firstCell.colSpan=Math.max(1,fixedCols);
+      }
+    });
   });
 
   const hdrHTML=`<div style="border-bottom:3px solid ${color};padding-bottom:10px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-start">
@@ -10520,32 +10739,16 @@ window.printOneTable = function(sectionId){
   const fullHTML = `<style>${cssVars}
     *{font-family:'Cairo',Arial,sans-serif;box-sizing:border-box}
     body{margin:0;padding:8px;direction:rtl;font-size:11px}
-    table{width:100%!important;border-collapse:collapse!important;min-width:unset!important;table-layout:fixed}
-    th,td{font-family:'Cairo',Arial,sans-serif;text-align:right;padding:5px 6px!important;font-size:10px!important;word-break:break-word;white-space:normal!important}
-    th{font-size:10px!important}
-    table td:nth-child(3){font-size:13px!important;font-weight:900!important;color:#000!important}
+    table{width:100%!important;border-collapse:collapse!important;min-width:unset!important;table-layout:auto}
+    th,td{font-family:'Cairo',Arial,sans-serif;text-align:right;padding:5px 8px!important;font-size:11px!important;word-break:break-word;white-space:normal!important}
     div[style*="overflow-x"]{overflow:visible!important}
-    table col,table td:nth-child(1){width:3%}
-    table td:nth-child(2){width:14%}
-    table td:nth-child(3){width:9%}
-    table td:nth-child(4){width:7%}
-    table td:nth-child(5){width:8%}
-    table td:nth-child(6){width:6%}
-    table td:nth-child(7){width:7%}
-    table td:nth-child(8){width:5%}
-    table td:nth-child(9){width:6%}
-    table td:nth-child(10){width:8%}
-    table td:nth-child(11){width:6%}
-    table td:nth-child(12){width:8%}
-    table td:nth-child(13){width:8%}
-    table td:nth-child(14){width:7%}
     @media print{@page{margin:5mm;size:A4 landscape}body{padding:0}tr{page-break-inside:avoid}}
     *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   </style>${hdrHTML}${clone.innerHTML}`;
 
   window.openPrintPreview(fullHTML, {title, color,
     filename: title.replace(/\s+/g,'_')+'_'+(conv?conv.label.replace(/\s+/g,'_')+'_'+conv.checkin:'')+'_'+new Date().toLocaleDateString('en-CA'),
-    size: sectionId==='closing-main'?'297x210':'297x210'});
+    size:'297x210'});
 };
 
 // ====== DESIGN TAB ======
