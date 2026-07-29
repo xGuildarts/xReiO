@@ -1741,6 +1741,15 @@ CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
 </div>
 
 <script>
+
+  // Polyfill for AbortSignal.timeout
+if (!AbortSignal.timeout) {
+  AbortSignal.timeout = function(ms) {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), ms);
+    return controller.signal;
+  };
+}
 // ============================================================
 // ALL CONSTANTS - defined first, no conflicts
 // ============================================================
