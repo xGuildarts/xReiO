@@ -8120,12 +8120,7 @@ async function saveEditBooking(id){
   const newBase2=keptApts2.reduce((s,a)=>{const i=APTS[a];return s+(i?(i.type==='single'?2:4):0);},0);
   const newBase=newBase1+newBase2;
   const newExtra=parseFloat(document.getElementById('edit-extra-seats')?.value)||0;
-  // Validation: extra seats cannot exceed base seats — only applies when client has apartments
-  // If transport-only (no apartments), any number of extra seats is allowed
-  if(!isTransportOnly && newExtra>newBase){
-    alert(`⚠️ الكراسي الإضافية (${newExtra}) لا يمكن أن تتجاوز عدد الكراسي المشمولة بالشقق (${newBase}). يرجى تصحيح العدد.`);
-    return;
-  }
+  // لا يوجد حد أقصى لعدد الكراسي الإضافية — العميل يمكنه إضافة أي عدد يحتاجه
   const newTotal=newBase+newExtra;
   const sp=parseFloat(document.getElementById('edit-seatp')?.value)||b.seatPrice||0;
   const sd=parseFloat(document.getElementById('edit-seatd')?.value)||b.seatDiscount||0;
