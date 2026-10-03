@@ -572,6 +572,7 @@ CREATE POLICY "allow_all" ON mtr_closing_expenses FOR ALL USING (true) WITH CHEC
   <button class="tab" id="tab-sched" onclick="showTab('sched')">جدول الأفواج</button>
   <button class="tab" id="tab-hotels" onclick="showTab('hotels')">🏨 الفنادق</button>
   <button class="tab" id="tab-electricity" onclick="showTab('electricity')">⚡ الكهرباء</button>
+  <button class="tab h" id="tab-contracts" onclick="showTab('contracts')">📄 العقود</button>
 
   <div class="tab-group" id="tabg-vouchers">
     <button class="tab-group-btn" id="tabg-btn-vouchers">📋 الإذونات <span class="tab-group-arrow">▼</span></button>
@@ -1516,6 +1517,50 @@ CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
   <div id="closing-output"></div>
 </div>
 
+<div id="contracts" class="sec">
+<div class="card" style="margin-bottom:.75rem">
+  <div class="ctitle">📄 العقود — عقد إيجار شقق مفروشة (برج الهارون)</div>
+  <div class="info-box">املأ البيانات المتغيرة فقط — الباقي (الطرف الأول، الشقق، البنود، الشروط) ثابت زي العقد الأصلي. الإجماليات والمدة واليوم والتفقيط بتتحسب أوتوماتيك. التوقيعات والأسماء المكتوبة بخط اليد بتفضل فاضية.</div>
+  <div class="g4">
+    <div class="fg"><label>سنة الموسم</label><input type="number" id="ctr-year" value="2027" oninput="ctrCalc()"></div>
+    <div class="fg"><label>تاريخ كتابة العقد</label><input type="date" id="ctr-date" oninput="ctrCalc()"></div>
+    <div class="fg"><label>اليوم (أوتوماتيك)</label><input type="text" id="ctr-dayname" readonly></div>
+    <div class="fg"><label>مكان التحرير</label><input type="text" id="ctr-place" value="مطروح"></div>
+  </div>
+  <div class="ctitle" style="margin-top:.5rem">الطرف الثاني (المستأجر)</div>
+  <div class="g2">
+    <div class="fg"><label>اسم الشركة</label><input type="text" id="ctr-company" value="ادريسكا تورز"></div>
+    <div class="fg"><label>ممثل الشركة</label><input type="text" id="ctr-rep" value="شوقي أحمد أحمد الفارسي"></div>
+    <div class="fg"><label>الرقم القومي للممثل</label><input type="text" id="ctr-nid" value="30111141601513" inputmode="numeric"></div>
+    <div class="fg"><label>عنوان الإقامة</label><input type="text" id="ctr-addr" value="ش الشيوخ - شبشير الحصة - مركز طنطا - الغربية"></div>
+  </div>
+  <div class="ctitle" style="margin-top:.5rem">مدة العقد</div>
+  <div class="g3">
+    <div class="fg"><label>بداية المدة</label><input type="date" id="ctr-from" oninput="ctrCalc()"></div>
+    <div class="fg"><label>نهاية المدة</label><input type="date" id="ctr-to" oninput="ctrCalc()"></div>
+    <div class="fg"><label>عدد الأيام (أوتوماتيك)</label><input type="text" id="ctr-days" readonly></div>
+  </div>
+  <div class="ctitle" style="margin-top:.5rem">الأسعار</div>
+  <div class="g3">
+    <div class="fg"><label>سعر الشقة — شقق (403، 404، 503، 703، 902، 904) × 6</label><input type="number" id="ctr-p1" value="80000" oninput="ctrCalc()"></div>
+    <div class="fg"><label>سعر الشقة — شقق (601–604، 801–804) × 8</label><input type="number" id="ctr-p2" value="72500" oninput="ctrCalc()"></div>
+    <div class="fg"><label>القيمة الإضافية لزيادة المدة (0 = بدون)</label><input type="number" id="ctr-extra" value="70000" oninput="ctrCalc()"></div>
+    <div class="fg"><label>المدة الأساسية بدل (يوم)</label><input type="number" id="ctr-basedays" value="100" oninput="ctrCalc()"></div>
+  </div>
+  <div id="ctr-totals" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:.4rem 0 .6rem"></div>
+  <div class="ctitle" style="margin-top:.5rem">الدفعات (السداد)</div>
+  <div id="ctr-pays"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:.4rem 0">
+    <button class="btn btn-sm" onclick="ctrAddPay()">➕ إضافة دفعة</button>
+    <span id="ctr-paystat" style="font-size:12px;font-weight:700"></span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:.75rem">
+    <button class="btn" onclick="ctrOpen(false)">👁 معاينة</button>
+    <button class="btn btn-p" onclick="ctrOpen(true)">🖨️ طباعة / حفظ PDF</button>
+  </div>
+</div>
+</div>
+
 <div id="electricity" class="sec">
 <div class="card" style="margin-bottom:.75rem">
   <div class="ctitle">⚡ إدارة كهرباء الشقق</div>
@@ -1820,8 +1865,8 @@ async function toggleBkLimit10(uid,checked){
     renderUsers();
   }catch(e){alert('فشل: '+e.message);}
 }
-var ALL_PERMS={'add_booking':'إضافة حجز','edit_booking':'تعديل حجز','delete_booking':'حذف حجز','add_client':'إضافة عميل','add_supplier':'إضافة مورد','view_accounts':'عرض الحسابات','edit_accounts':'تعديل قيود','delete_accounts':'حذف قيود','approve_payments':'اعتماد دفعات','transfer_accounts':'تحويل بين الحسابات','view_log':'سجل النشاط','manage_users':'إدارة المستخدمين','view_bus':'عرض الباص','edit_bus':'تعديل مقاعد الباص','print_bus':'طباعة قائمة الباص','settings':'الإعدادات العامة','manage_prices':'إدارة الأسعار','view_design':'إدارة التصميم','view_reports':'التقارير','print_receipt':'طباعة إيصالات','manage_categories':'إدارة فئات الحسابات','manage_locks':'تقفيل الأفواج','bypass_lock':'تجاوز قفل الفوج','view_conv_accounts':'حسابات الأفواج','view_closing':'تقفيلة الفوج','view_remainings':'كشف المتبقيات','view_reps':'تقرير المندوبين','view_receipt_voucher':'إذن استلام نقدية','view_bulk_voucher':'إذن جماعي','manage_system':'إدارة النظام (نسخ احتياطي + اتصال)','view_cancelled':'عرض الإلغاءات'};
-var ROLE_DEFAULTS={admin:Object.keys(ALL_PERMS),bookings:['add_booking','edit_booking','add_client','view_bus','edit_bus','print_receipt','view_closing','view_receipt_voucher','view_bulk_voucher','view_cancelled'],accounts:['view_accounts','edit_accounts','delete_accounts','approve_payments','transfer_accounts','view_reports','view_remainings','view_conv_accounts','view_receipt_voucher','view_bulk_voucher','view_closing'],operations:['view_bus','edit_bus','print_bus','view_reports','view_closing'],viewer:['view_bus','view_reports']};
+var ALL_PERMS={'add_booking':'إضافة حجز','edit_booking':'تعديل حجز','delete_booking':'حذف حجز','add_client':'إضافة عميل','add_supplier':'إضافة مورد','view_accounts':'عرض الحسابات','edit_accounts':'تعديل قيود','delete_accounts':'حذف قيود','approve_payments':'اعتماد دفعات','transfer_accounts':'تحويل بين الحسابات','view_log':'سجل النشاط','manage_users':'إدارة المستخدمين','view_bus':'عرض الباص','edit_bus':'تعديل مقاعد الباص','print_bus':'طباعة قائمة الباص','settings':'الإعدادات العامة','manage_prices':'إدارة الأسعار','view_design':'إدارة التصميم','view_reports':'التقارير','print_receipt':'طباعة إيصالات','manage_categories':'إدارة فئات الحسابات','manage_locks':'تقفيل الأفواج','bypass_lock':'تجاوز قفل الفوج','view_conv_accounts':'حسابات الأفواج','view_closing':'تقفيلة الفوج','view_remainings':'كشف المتبقيات','view_reps':'تقرير المندوبين','view_receipt_voucher':'إذن استلام نقدية','view_bulk_voucher':'إذن جماعي','manage_system':'إدارة النظام (نسخ احتياطي + اتصال)','view_cancelled':'عرض الإلغاءات','view_contracts':'العقود (إنشاء وطباعة)'};
+var ROLE_DEFAULTS={admin:Object.keys(ALL_PERMS),bookings:['add_booking','edit_booking','add_client','view_bus','edit_bus','print_receipt','view_closing','view_receipt_voucher','view_bulk_voucher','view_cancelled','view_contracts'],accounts:['view_accounts','edit_accounts','delete_accounts','approve_payments','transfer_accounts','view_reports','view_remainings','view_conv_accounts','view_receipt_voucher','view_bulk_voucher','view_closing'],operations:['view_bus','edit_bus','print_bus','view_reports','view_closing'],viewer:['view_bus','view_reports']};
 
 // ============================================================
 // POPUP SYSTEM — replaces browser alert/confirm
@@ -4429,6 +4474,7 @@ function applyPerms(){
   if(perms.includes('view_reps')) showTabs.push('reps');
   if(perms.includes('view_bulk_voucher')) showTabs.push('bulk-voucher');
   if(perms.includes('view_cancelled')) showTabs.push('cancelled');
+  if(perms.includes('view_contracts')) showTabs.push('contracts');
   showTabs.push('hotels');
 
   document.querySelectorAll('.tab[id^="tab-"]').forEach(t=>{
@@ -5034,7 +5080,7 @@ function showTab(t){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   const sc=document.getElementById(t);if(sc)sc.classList.add('active');
   // Only render if tab is dirty (data changed) or always-fresh tabs
-  const alwaysFresh=['add','mgr','locks','prices','bulk-voucher','users','sched','tasks','remainings','reps','system','electricity'];
+  const alwaysFresh=['add','mgr','locks','prices','bulk-voucher','users','sched','tasks','remainings','reps','system','electricity','contracts'];
   const needRender=alwaysFresh.includes(t)||_dirtyTabs.has(t);
   if(!needRender)return;
   _dirtyTabs.delete(t);
@@ -5052,6 +5098,7 @@ function showTab(t){
   if(t==='add'){populateConvoys();populateCities();populateSupSel();renderGrid();}
   if(t==='hotels'){renderHotelStats();renderHotelBookings();}
   if(t==='electricity')renderElectricity();
+  if(t==='contracts')ctrInit();
   if(t==='cancelled')renderCancelled();
   if(t==='bulk-voucher'){bvInit();}
   if(t==='mgr'){loadMgr();renderCatsMgr();}
@@ -14842,6 +14889,212 @@ document.addEventListener('DOMContentLoaded',initCollapsibleCards);
 // تحميل التاسكات بعد login
 (function(){const orig=window.loginUser;window.loginUser=function(f){orig(f);loadTasks();};})();
 
+
+
+// ============================================================
+// CONTRACTS MODULE — عقد إيجار شقق مفروشة (برج الهارون)
+// ============================================================
+var CTR_G1=['403','404','503','703','902','904'];
+var CTR_G2=['601','602','603','604','801','802','803','804'];
+var CTR_BANK='100041536092', CTR_BANK_NAME='CIB', CTR_BANK_HOLDER='سامر هارون جمعة';
+var _ctrPays=[{amt:'',date:'',note:'عند التوقيع على العقد'}];
+var _ctrInited=false;
+
+function ctrAr(s){return String(s).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);}
+function ctrEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function ctrNum(id){return parseFloat(document.getElementById(id).value)||0;}
+function ctrMoney(n){return ctrAr(Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));}
+function ctrPlain(n){return ctrAr(Number(n).toFixed(2));}
+function ctrParse(v){if(!v)return null;const p=v.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function ctrDMY(v){const d=ctrParse(v);if(!d)return '';const z=n=>String(n).padStart(2,'0');return ctrAr(z(d.getDate())+' / '+z(d.getMonth()+1)+' / '+d.getFullYear());}
+function ctrDMYshort(v){const d=ctrParse(v);if(!d)return '';return ctrAr(d.getDate()+' / '+(d.getMonth()+1)+' / '+d.getFullYear());}
+function ctrDayName(v){const d=ctrParse(v);return d?['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'][d.getDay()]:'';}
+function ctrDiffDays(a,b){const x=ctrParse(a),y=ctrParse(b);if(!x||!y)return 0;return Math.round((y-x)/86400000);}
+
+// تفقيط
+function ctrWords(n){
+  n=Math.round(n);if(n===0)return 'صفر';
+  const O=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+  const T=['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
+  const H=['','مائة','مائتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];
+  const b1000=x=>{const p=[],h=Math.floor(x/100),r=x%100;if(h)p.push(H[h]);
+    if(r){if(r<20)p.push(O[r]);else{const o=r%10,t=Math.floor(r/10);p.push(o?O[o]+' و'+T[t]:T[t]);}}
+    return p.join(' و');};
+  const parts=[];
+  const m=Math.floor(n/1e6),t=Math.floor(n/1000)%1000,r=n%1000;
+  if(m){parts.push(m===1?'مليون':m===2?'مليونان':(m<=10?b1000(m)+' ملايين':b1000(m)+' مليون'));}
+  if(t){parts.push(t===1?'ألف':t===2?'ألفان':(t<=10?b1000(t)+' آلاف':b1000(t)+' ألف'));}
+  if(r)parts.push(b1000(r));
+  return parts.join(' و');
+}
+function ctrTafqeet(n){return 'فقط '+ctrWords(n)+' جنيه مصري لا غير';}
+
+function ctrInit(){
+  if(_ctrInited)return;_ctrInited=true;
+  const t=new Date(),z=n=>String(n).padStart(2,'0');
+  document.getElementById('ctr-date').value=t.getFullYear()+'-'+z(t.getMonth()+1)+'-'+z(t.getDate());
+  ctrRenderPays();ctrCalc();
+}
+function ctrCalc(){
+  const dv=document.getElementById('ctr-date').value;
+  document.getElementById('ctr-dayname').value=ctrDayName(dv);
+  const days=ctrDiffDays(document.getElementById('ctr-from').value,document.getElementById('ctr-to').value);
+  document.getElementById('ctr-days').value=days>0?days:'';
+  const t1=CTR_G1.length*ctrNum('ctr-p1'),t2=CTR_G2.length*ctrNum('ctr-p2'),ex=ctrNum('ctr-extra'),tot=t1+t2+ex;
+  const box=(l,v,c)=>`<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:10px;padding:8px 10px"><div style="font-size:11px;color:var(--tx2);font-weight:700">${l}</div><div style="font-size:15px;font-weight:800;color:${c||'var(--tx)'}">${Number(v).toLocaleString('en-US')} جم</div></div>`;
+  document.getElementById('ctr-totals').innerHTML=box('إجمالي الـ 6 شقق',t1)+box('إجمالي الـ 8 شقق',t2)+box('القيمة الإضافية',ex)+box('الإجمالي العام',tot,'var(--ac)');
+  ctrPayStat();
+}
+function ctrRenderPays(){
+  document.getElementById('ctr-pays').innerHTML=_ctrPays.map((p,i)=>`
+  <div style="display:grid;grid-template-columns:30px 1.2fr 1.2fr 2fr 34px;gap:6px;align-items:end;margin-bottom:6px">
+    <div style="font-weight:800;padding-bottom:8px">${i+1}</div>
+    <div class="fg" style="margin:0"><label>المبلغ</label><input type="number" value="${ctrEsc(p.amt)}" oninput="_ctrPays[${i}].amt=this.value;ctrPayStat()"></div>
+    <div class="fg" style="margin:0"><label>التاريخ (اختياري)</label><input type="date" value="${ctrEsc(p.date)}" oninput="_ctrPays[${i}].date=this.value"></div>
+    <div class="fg" style="margin:0"><label>ملاحظة (مثال: عند التوقيع على العقد / عند الاستلام)</label><input type="text" value="${ctrEsc(p.note)}" oninput="_ctrPays[${i}].note=this.value"></div>
+    <button class="btn btn-d btn-sm" style="height:36px" onclick="ctrDelPay(${i})">✕</button>
+  </div>`).join('');
+  ctrPayStat();
+}
+function ctrAddPay(){_ctrPays.push({amt:'',date:'',note:''});ctrRenderPays();}
+function ctrDelPay(i){_ctrPays.splice(i,1);ctrRenderPays();}
+function ctrPayStat(){
+  const el=document.getElementById('ctr-paystat');if(!el)return;
+  const tot=CTR_G1.length*ctrNum('ctr-p1')+CTR_G2.length*ctrNum('ctr-p2')+ctrNum('ctr-extra');
+  const sum=_ctrPays.reduce((s,p)=>s+(parseFloat(p.amt)||0),0),rem=tot-sum;
+  el.style.color=rem===0?'var(--ac)':'var(--dn)';
+  el.textContent='مجموع الدفعات: '+sum.toLocaleString('en-US')+' جم — '+(rem===0?'✓ مطابق للإجمالي':'المتبقي غير موزع: '+rem.toLocaleString('en-US')+' جم');
+}
+
+function ctrOpen(print){
+  const g=id=>document.getElementById(id).value.trim();
+  if(!g('ctr-date')||!g('ctr-from')||!g('ctr-to')){toast('حدد تاريخ العقد وبداية ونهاية المدة','warn');return;}
+  if(ctrDiffDays(g('ctr-from'),g('ctr-to'))<=0){toast('نهاية المدة لازم تكون بعد البداية','warn');return;}
+  if(!g('ctr-company')){toast('اكتب اسم الشركة','warn');return;}
+  const pays=_ctrPays.filter(p=>parseFloat(p.amt)>0);
+  const tot=CTR_G1.length*ctrNum('ctr-p1')+CTR_G2.length*ctrNum('ctr-p2')+ctrNum('ctr-extra');
+  const sum=pays.reduce((s,p)=>s+parseFloat(p.amt),0);
+  if(sum!==tot&&!confirm('مجموع الدفعات ('+sum.toLocaleString('en-US')+') لا يساوي إجمالي العقد ('+tot.toLocaleString('en-US')+'). تكمل الطباعة؟'))return;
+  const w=window.open('','_blank');
+  if(!w){toast('المتصفح منع النافذة — اسمح بالنوافذ المنبثقة','error');return;}
+  w.document.open();w.document.write(ctrBuildHtml({
+    year:g('ctr-year'),date:g('ctr-date'),place:g('ctr-place')||'مطروح',company:g('ctr-company'),rep:g('ctr-rep'),nid:g('ctr-nid'),addr:g('ctr-addr'),
+    from:g('ctr-from'),to:g('ctr-to'),p1:ctrNum('ctr-p1'),p2:ctrNum('ctr-p2'),extra:ctrNum('ctr-extra'),baseDays:g('ctr-basedays')||'100',pays:pays
+  },print));
+  w.document.close();
+  try{addLog&&addLog('إنشاء عقد إيجار: '+g('ctr-company')+' — '+g('ctr-year'),'info','');}catch(e){}
+}
+
+function ctrBuildHtml(d,autoPrint){
+  const E=ctrEsc,A=ctrAr,co=E(d.company),yr=A(E(d.year));
+  const days=ctrDiffDays(d.from,d.to);
+  const t1=CTR_G1.length*d.p1,t2=CTR_G2.length*d.p2,tot=t1+t2+d.extra;
+  const dt=v=>`<span class="dt">${ctrDMY(v)}</span>`;
+  const aptList=a=>a.map(x=>A(x)).join(' ، ');
+  const flr=(title,items)=>`<div class="flr"><div class="ft">${title}</div>${items.map(i=>`<div class="ap">- شقة ${A(i[0])} ( ${i[1]} )</div>`).join('')}</div>`;
+  const R2='مكونة من حجرتين وصالة',R1='مكونة من حجرة و صالة';
+  const payRows=d.pays.map((p,i)=>{
+    const when=p.date?('دفعة في '+dt(p.date)+(p.note?' '+E(p.note):'')):('دفعة '+E(p.note));
+    return `<div class="pay"><span class="pn">${A(i+1)}-</span><span class="pm">مبلغ</span><span class="pa">${ctrMoney(d.pays[i].amt)} جم</span><span class="pw">${ctrTafqeet(parseFloat(p.amt))}</span><span class="pd">${when}</span></div>`;
+  }).join('');
+  const foot=`<div class="foot"><div>( طرف أول )<div class="dots"></div></div><div>( طرف ثاني )<div class="dots"></div></div></div>`;
+  const css=`
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{margin:0;padding:0}
+body{font-family:'Simplified Arabic','Traditional Arabic','Cairo',Arial,sans-serif;direction:rtl;background:#e9edf1;color:#000;font-weight:700}
+.bar{position:sticky;top:0;z-index:5;background:#1a5276;padding:8px 14px;display:flex;gap:8px}
+.bar button{background:#fff;color:#1a5276;border:0;border-radius:8px;padding:7px 18px;font:700 13px 'Cairo',sans-serif;cursor:pointer}
+.pg{width:210mm;height:297mm;margin:12px auto;background:#fff;padding:12mm 16mm 10mm;display:flex;flex-direction:column;box-shadow:0 2px 12px rgba(0,0,0,.25);overflow:hidden}
+.pn0{font-size:10pt;text-align:right;margin-bottom:2mm}
+.body{flex:1;overflow:hidden;font-size:15pt;line-height:1.9;text-align:right}
+.body p{margin:0 0 .35em}
+.u{text-decoration:underline}
+.c{text-align:center}
+.dt{direction:rtl;unicode-bidi:isolate;white-space:nowrap}
+.title{font-size:1.15em;margin:.2em 0}
+.sub{font-style:italic}
+.hr{border-top:2px solid #000;margin:.2em 0 .7em}
+.flrs{display:grid;grid-template-columns:1fr 1fr;gap:.2em 1.5em;margin-top:.5em}
+.ft{text-decoration:underline;margin:.5em 0 .5em}
+.ap{margin-right:1em}
+.pay{display:grid;grid-template-columns:2.2em 2.6em 8.5em 1fr;column-gap:.3em;line-height:1.5;margin:.15em 0}
+.pay .pw{grid-column:4;grid-row:1}
+.pay .pd{grid-column:4;grid-row:2}
+.pay .pn,.pay .pm,.pay .pa{grid-row:1/3}
+.foot{display:flex;justify-content:space-between;padding:6mm 6mm 0;font-size:11pt}
+.foot .dots{border-bottom:1.5px dotted #000;width:60mm;height:9mm}
+.sig{display:flex;justify-content:space-between;margin-top:1.2em;text-align:center}
+.sig>div{width:48%}
+.sig .ln{display:flex;gap:.4em;align-items:flex-end;margin:.9em 0;text-align:right}
+.sig .ln i{flex:1;border-bottom:1.5px dotted #000;height:1.4em}
+@page{size:A4;margin:0}
+@media print{body{background:#fff}.bar{display:none}.pg{margin:0;box-shadow:none;page-break-after:always}.pg:last-child{page-break-after:auto}}
+`;
+  const p1=`<div class="pg"><div class="pn0">صفحة رقم <span class="dt">- ١ -</span></div><div class="body">
+<p class="c" style="font-size:1.2em;margin-top:.6em">بسم الله الرحمن الرحيم</p>
+<p class="c title">عقد إيجار شقق مفروشة صيف / ${yr}</p>
+<p class="c sub">( برج الهارون )</p><div class="hr"></div>
+<p>أنه في يوم ${ctrDayName(d.date)} الموافق ${dt(d.date)} - &nbsp;ب${E(d.place)}</p>
+<p>تحرر هذ العقد بين كلا من :-</p>
+<p>اولا: السيد / سامي هارون جمعة عبد الحفيظ – مصري الجنسية - رقم قومي / ${A('27604013300539')}</p>
+<p>المقيم / شارع المديرين – مطروح ( برج الهارون ) &nbsp;&nbsp; { طرف أول مؤجر }</p>
+<p>ثانيا: السيد / شركة ${co} ويمثلها / ${E(d.rep)} - مصري الجنسية - رقم قومي / ${A(E(d.nid))}</p>
+<p>المقيم / ${E(d.addr)} &nbsp;&nbsp; { طرف ثاني مستأجر }</p>
+<p style="margin-top:.6em">وبعد أقر الطرفان بكامل اهليتهما القانونية والفعلية للتعاقد على:-</p>
+<p><span class="u">( البند الاول )</span> أجر الطرف الأول للطرف الثاني بموجب هذا العقد عدد (أربعة عشر شقة - منهم اثنا عشر شقة غرفتين وصالة وشقتان غرفة وصالة) ببرج الهارون أمام نادي الجمارك متفرع من شارع المديرين.</p>
+<p class="u" style="margin-top:.8em">وبيان الشقق كالتالي :</p>
+<div class="flrs">
+${flr('الدور الرابع علوي',[['403',R2],['404',R2]])}
+${flr('الدور الخامس علوي',[['503',R2]])}
+${flr('الدور السادس علوي',[['601',R1],['602',R2],['603',R2],['604',R2]])}
+${flr('الدور السابع علوي',[['703',R2]])}
+${flr('الدور الثامن علوي',[['801',R1],['802',R2],['803',R2],['804',R2]])}
+${flr('الدور التاسع علوي',[['902',R2],['904',R2]])}
+</div></div>${foot}</div>`;
+  const extraP=d.extra>0?`<p>- قيمة إيجارية إضافية متفق عليها نظير فترة التعاقد الى ${A(days)} يوم بدلا من ${A(E(d.baseDays))} يوم &nbsp;بمبلغ وقدره &nbsp;فقط ${A(d.extra)} جم ( ${ctrTafqeet(d.extra).replace('فقط ','فقط ')} ) .</p>`:'';
+  const p2=`<div class="pg"><div class="pn0">صفحة رقم <span class="dt">- ٢ -</span></div><div class="body">
+<p><span class="u">( البند الثاني )</span> وافق الطرف الأول على تأجير الشقق الموضحة بالبند السابق للطرف الثاني لاتخاذها كمصيف لأعضاء: شركة ${co} (عائلات) – لصيف: موسم ${yr} .</p>
+<p><span class="u">( البند الثالث )</span> مدة هذا العقد : ( ${A(days)} يوم ) تبدأ من : ${dt(d.from)} وتنتهي في : ${dt(d.to)}</p>
+<p class="u">( البند الرابع )</p>
+<p>- القيمة الايجارية المتفق عليها للشقق ارقام (${aptList(CTR_G1)}) للشقة الواحدة وقدرها "${ctrPlain(d.p1)} جم" (${ctrTafqeet(d.p1)}) ليكون اجمالي الست شقق وقدرها "${ctrPlain(t1)} جم" (${ctrTafqeet(t1)}).</p>
+<p>- القيمة الايجارية المتفق عليها للشقق ارقام (${aptList(CTR_G2)}) ليكون أجمالي الثمانية شقق وقدرها "${ctrPlain(t2)} جم" (${ctrTafqeet(t2)}).</p>
+${extraP}
+<p>ليكون أجمالي قيمة التعاقد وقدره ${ctrMoney(tot)} جم (${ctrTafqeet(tot)})</p>
+<p>ويتعهد الطرف الثاني بالسداد في المواعيد المحددة على ان يسلم له الطرف الأول إيصال دال على السداد في حينه.</p>
+<p class="u">ويكون السداد على النحو التالي :-</p>
+${payRows}
+<p class="u" style="margin-top:.5em">على ان يكون السداد على حساب بنكي رقم ( ${A(CTR_BANK)} ) بنك ${CTR_BANK_NAME} باسم / ${CTR_BANK_HOLDER} .</p>
+<p><span class="u">( البنـــد الخامس )</span> يلتزم الطرف الأول بتسليم الشقق المؤجرة محل هذا العقد للطرف الثاني بحالة جيدة كاملة المحتويات بالكشف المرفق ويتم حصر كافة المنقولات والأجهزة وتسليمها للطرف الثاني على ان يتعهد الطرف الثاني بتسليمها بنفس الحالة في نهاية مدة العقد والمحافظة على الدهانات وتسليمها بالشكل التي كانت عليه الوحدة موضوع التعاقد .</p>
+</div>${foot}</div>`;
+  const cl=(n,t)=>`<p><span class="u">( البنــــد ${n} )</span> ${t}</p>`;
+  const p3=`<div class="pg"><div class="pn0">صفحة رقم <span class="dt">- ٣ -</span></div><div class="body">
+${cl('السادس','تم الاتفاق بين طرفي العقد على ان تكون القيمة الايجارية شاملة استهلاك المياه والغاز و رصيد بكارت الكهرباء لكل شقة عن كل أسبوع قيمته١٥٠ جنية ( مائة وخمسون جنيه ) للشقة الغير مكيفة و ٢٥٠ جنية ( مائتان وخمسون جنيه ) للشقة المكيفة وما زاد عن ذلك من قيمة الكهرباء يتحملها الطرف الثاني .')}
+${cl('السابع','يلتزم الطرف الثاني بارسال كشف بأسماء اعضاء كل رحلة وذلك لتسجيلها في دفاتر الامن العام حفاظا من إدارة برج الهارون على جميع الأعضاء.')}
+${cl('الثامن','يلتزم طرفي العقد بجميع البنود السابقة .')}
+${cl('التاسع','يلتزم الطرف الثاني بتسليم الشقق بنفس الحالة التي استلمها عليها ويتعهد بسداد قيمة ما تم اتلافه وفقا لكشف المنقولات.')}
+${cl('العاشر','يلتزم الطرف الثاني بسداد الدفعات المتفق عليها في المواعيد المحددة بالعقد وفى حالة التأخير خلال ثلاث أيام يعتبر العقد مفسوخ من تلقاء نفسه ومن حق الطرف الأول بدون انذار او تنبيه إدارة الوحدات المؤجرة وفاءاً لباقي القيمة المتأخر دفعها وان لم تفي كامل القيمة يتحمل الطرف الثاني قيمة العقد وأي مفقودات من المنقولات.')}
+${cl('الحادي عشر','في حالة عدم تنفيذ العقد من قبل الطرف الأول من تأجيل الدولة للمصيف او أي سبب خارج عن أرادة الطرف الأول يتم تأجيل ميعاد تنفيذ التعاقد إلى السنة التالية بنفس قيمة العقد حالة سداد القيمة في مواعيدها المحددة بهذا العقد وفي حالة تأجيل سداد قيمة التعاقد كلي او جزئي للسنة التالية تكون القيمة الايجارية بزيادة قدرها ١٠% من أجمالي قيمة العقد.')}
+${cl('الثاني عشر','يلتزم الطرف الثاني بالأعداد المسموح بها بكل شقة حسب سعة كل شقة<br>(( شقة ٢ حجرة من ٤ الى ٦ افراد )) ، (( شقة ١ حجرة من ٣ الى ٤ افراد ))')}
+${cl('الثالث عشر','يلتزم الطرف الثاني بسداد مبلغ وقدره " ألفان جنيها " عن كل شقة مستأجرة كتامين ترد في نهاية الموسم في حال عدم وجود تلفيات وذلك بعد خصم أي تلف قد يحدث باي شقة أو تلف الدهانات .')}
+${cl('الرابع عشر','عدد النسخ : &nbsp; تحرر هذا العقد من أربعة عشر بنداً ومن نسختين بيد كل طرف نسخة .')}
+<p class="c" style="margin:.6em 0">والله ولي التوفيق،،،</p>
+<div class="sig">
+ <div><div>الطرف الاول (المؤجر)</div><div class="ln">الاسم /<i></i></div><div class="ln">التوقيع /<i></i></div></div>
+ <div><div>الطرف الثاني (المستأجر)</div><div class="ln">الاسم /<i></i></div><div class="ln">التوقيع /<i></i></div></div>
+</div></div>${foot}</div>`;
+  const fit=`<script>
+function fitAll(){document.querySelectorAll('.body').forEach(b=>{let fs=15;b.style.fontSize=fs+'pt';while(b.scrollHeight>b.clientHeight+1&&fs>8){fs-=0.25;b.style.fontSize=fs+'pt';}});}
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{fitAll();${autoPrint?'setTimeout(()=>window.print(),400);':''}});
+<\/script>`;
+  return `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>عقد إيجار - ${co} - ${yr}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>${css}</style></head><body>
+<div class="bar"><button onclick="window.print()">🖨 طباعة / حفظ PDF</button></div>
+${p1}${p2}${p3}${fit}</body></html>`;
+}
+// ============================================================
+// END CONTRACTS MODULE
+// ============================================================
 
 </script>
 </body>
