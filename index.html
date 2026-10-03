@@ -1527,6 +1527,40 @@ CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
     <div class="fg"><label>اليوم (أوتوماتيك)</label><input type="text" id="ctr-dayname" readonly></div>
     <div class="fg"><label>مكان التحرير</label><input type="text" id="ctr-place" value="مطروح"></div>
   </div>
+  <div class="ctitle" style="margin-top:.5rem">الخط والشكل</div>
+  <div class="g3">
+    <div class="fg"><label>الخط</label>
+      <select id="ctr-font" onchange="ctrFontChange()">
+        <optgroup label="مضمّن (يشتغل بدون إنترنت)">
+          <option value="e:CtrAmiri">أميري (Amiri) — نسخ كلاسيكي</option>
+        </optgroup>
+        <optgroup label="من جوجل (محتاج إنترنت وقت الطباعة)">
+          <option value="g:Cairo">Cairo — كايرو</option>
+          <option value="g:Tajawal">Tajawal — تجوال</option>
+          <option value="g:Almarai">Almarai — المرعي</option>
+          <option value="g:Noto Naskh Arabic">Noto Naskh Arabic — نسخ</option>
+          <option value="g:Noto Kufi Arabic">Noto Kufi Arabic — كوفي</option>
+          <option value="g:Scheherazade New">Scheherazade New — شهرزاد</option>
+          <option value="g:Lateef">Lateef — لطيف</option>
+          <option value="g:Markazi Text">Markazi Text — مركزي</option>
+          <option value="g:El Messiri">El Messiri — المسيري</option>
+          <option value="g:Reem Kufi">Reem Kufi — ريم كوفي</option>
+          <option value="g:IBM Plex Sans Arabic">IBM Plex Sans Arabic</option>
+          <option value="g:Harmattan">Harmattan</option>
+        </optgroup>
+        <optgroup label="من جهازك (لو مثبّت)">
+          <option value="l:Simplified Arabic">Simplified Arabic</option>
+          <option value="l:Traditional Arabic">Traditional Arabic</option>
+          <option value="l:Arabic Typesetting">Arabic Typesetting</option>
+          <option value="l:Sakkal Majalla">Sakkal Majalla</option>
+          <option value="l:Times New Roman">Times New Roman</option>
+        </optgroup>
+        <option value="c:custom">✏️ خط مخصص (اكتب اسمه)</option>
+      </select></div>
+    <div class="fg" id="ctr-fontcustom-wrap" style="display:none"><label>اسم الخط المخصص (مثبّت على جهازك)</label><input type="text" id="ctr-fontcustom" placeholder="مثال: Arial" oninput="ctrFontChange()"></div>
+    <div class="fg"><label>أقصى حجم خط (نقطة) — بيصغر أوتوماتيك لو الصفحة مش مكفية</label><input type="number" id="ctr-fs" value="16" min="10" max="22" step="0.5"></div>
+  </div>
+  <div id="ctr-fontprev" style="border:1px dashed var(--bd2);border-radius:10px;padding:8px 12px;margin-bottom:.5rem;font-size:19px;font-weight:700;background:var(--sf2)">بسم الله الرحمن الرحيم — عقد إيجار شقق مفروشة ٠١٢٣٤٥٦٧٨٩</div>
   <div class="ctitle" style="margin-top:.5rem">الطرف الثاني (المستأجر)</div>
   <div class="g2">
     <div class="fg"><label>اسم الشركة</label><input type="text" id="ctr-company" value="ادريسكا تورز"></div>
@@ -1554,9 +1588,13 @@ CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
     <button class="btn btn-sm" onclick="ctrAddPay()">➕ إضافة دفعة</button>
     <span id="ctr-paystat" style="font-size:12px;font-weight:700"></span>
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:.75rem">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:.75rem;align-items:center">
     <button class="btn" onclick="ctrOpen(false)">👁 معاينة</button>
     <button class="btn btn-p" onclick="ctrOpen(true)">🖨️ طباعة / حفظ PDF</button>
+    <span style="flex:1"></span>
+    <span id="ctr-savestat" style="font-size:12px;font-weight:700;color:var(--tx3)"></span>
+    <button class="btn btn-s" onclick="ctrSave()">💾 حفظ البيانات</button>
+    <button class="btn btn-d" onclick="ctrClearSaved()">🗑 مسح المحفوظ</button>
   </div>
 </div>
 </div>
@@ -14930,11 +14968,65 @@ function ctrWords(n){
 }
 function ctrTafqeet(n){return 'فقط '+ctrWords(n)+' جنيه مصري لا غير';}
 
+var CTR_KEY='mtr_ctr_draft_v1';
+var CTR_IDS=['ctr-year','ctr-date','ctr-place','ctr-font','ctr-fontcustom','ctr-fs','ctr-company','ctr-rep','ctr-nid','ctr-addr','ctr-from','ctr-to','ctr-p1','ctr-p2','ctr-extra','ctr-basedays'];
+var _ctrDirty=false;
+function ctrSetStat(){
+  const el=document.getElementById('ctr-savestat');if(!el)return;
+  if(_ctrDirty){el.textContent='● تغييرات غير محفوظة';el.style.color='var(--wn)';}
+  else{let ts='';try{const o=JSON.parse(localStorage.getItem(CTR_KEY)||'null');if(o&&o.savedAt)ts=new Date(o.savedAt).toLocaleString('ar-EG');}catch(e){}
+    el.textContent=ts?'✓ محفوظ — '+ts:'لا توجد بيانات محفوظة';el.style.color=ts?'var(--ac)':'var(--tx3)';}
+}
+function ctrMarkDirty(){_ctrDirty=true;ctrSetStat();}
+function ctrSave(){
+  try{
+    const o={savedAt:Date.now(),pays:_ctrPays};
+    CTR_IDS.forEach(id=>{o[id]=document.getElementById(id).value;});
+    localStorage.setItem(CTR_KEY,JSON.stringify(o));
+    _ctrDirty=false;ctrSetStat();toast('💾 تم حفظ بيانات العقد','success');
+  }catch(e){toast('تعذر الحفظ: '+e.message,'error');}
+}
+function ctrLoadSaved(){
+  try{
+    const o=JSON.parse(localStorage.getItem(CTR_KEY)||'null');if(!o)return false;
+    CTR_IDS.forEach(id=>{if(o[id]!==undefined){const el=document.getElementById(id);if(el)el.value=o[id];}});
+    if(Array.isArray(o.pays)&&o.pays.length)_ctrPays=o.pays;
+    return true;
+  }catch(e){return false;}
+}
+async function ctrClearSaved(){
+  if(!await confirm('تمسح البيانات المحفوظة؟ (الحقول الحالية هتفضل زي ما هي لحد ما تعمل ريفريش)'))return;
+  try{localStorage.removeItem(CTR_KEY);}catch(e){}
+  _ctrDirty=true;ctrSetStat();toast('تم مسح البيانات المحفوظة','info');
+}
+// ---- الخطوط ----
+function ctrFontSpec(){
+  let v=document.getElementById('ctr-font').value,k=v.slice(0,1),n=v.slice(2);
+  if(k==='c'){n=(document.getElementById('ctr-fontcustom').value||'').trim();k='l';if(!n){n='CtrAmiri';k='e';}}
+  return {kind:k,name:n};
+}
+function ctrGoogleLink(n){return 'https://fonts.googleapis.com/css2?family='+encodeURIComponent(n).replace(/%20/g,'+')+':wght@700&display=swap';}
+function ctrFontChange(){
+  const sel=document.getElementById('ctr-font');
+  document.getElementById('ctr-fontcustom-wrap').style.display=sel.value==='c:custom'?'block':'none';
+  const f=ctrFontSpec();
+  if(f.kind==='g'&&!document.querySelector('link[data-ctrfont="'+f.name+'"]')){
+    const l=document.createElement('link');l.rel='stylesheet';l.href=ctrGoogleLink(f.name);l.setAttribute('data-ctrfont',f.name);document.head.appendChild(l);
+  }
+  document.getElementById('ctr-fontprev').style.fontFamily="'"+f.name.replace(/'/g,'')+"','CtrAmiri',serif";
+}
 function ctrInit(){
   if(_ctrInited)return;_ctrInited=true;
+  if(!document.getElementById('ctr-fontface')){const s=document.createElement('style');s.id='ctr-fontface';s.textContent=CTR_FONT_CSS;document.head.appendChild(s);}
   const t=new Date(),z=n=>String(n).padStart(2,'0');
   document.getElementById('ctr-date').value=t.getFullYear()+'-'+z(t.getMonth()+1)+'-'+z(t.getDate());
-  ctrRenderPays();ctrCalc();
+  ctrLoadSaved();
+  ctrRenderPays();ctrCalc();ctrFontChange();
+  const root=document.getElementById('contracts');
+  root.addEventListener('input',e=>{if(!e.target.readOnly)ctrMarkDirty();});
+  root.addEventListener('change',e=>{if(!e.target.readOnly)ctrMarkDirty();});
+  window.addEventListener('beforeunload',e=>{if(_ctrDirty){e.preventDefault();e.returnValue='';}});
+  _ctrDirty=false;ctrSetStat();
 }
 function ctrCalc(){
   const dv=document.getElementById('ctr-date').value;
@@ -14957,8 +15049,8 @@ function ctrRenderPays(){
   </div>`).join('');
   ctrPayStat();
 }
-function ctrAddPay(){_ctrPays.push({amt:'',date:'',note:''});ctrRenderPays();}
-function ctrDelPay(i){_ctrPays.splice(i,1);ctrRenderPays();}
+function ctrAddPay(){_ctrPays.push({amt:'',date:'',note:''});ctrRenderPays();ctrMarkDirty();}
+function ctrDelPay(i){_ctrPays.splice(i,1);ctrRenderPays();ctrMarkDirty();}
 function ctrPayStat(){
   const el=document.getElementById('ctr-paystat');if(!el)return;
   const tot=CTR_G1.length*ctrNum('ctr-p1')+CTR_G2.length*ctrNum('ctr-p2')+ctrNum('ctr-extra');
@@ -14967,7 +15059,7 @@ function ctrPayStat(){
   el.textContent='مجموع الدفعات: '+sum.toLocaleString('en-US')+' جم — '+(rem===0?'✓ مطابق للإجمالي':'المتبقي غير موزع: '+rem.toLocaleString('en-US')+' جم');
 }
 
-function ctrOpen(print){
+async function ctrOpen(print){
   const g=id=>document.getElementById(id).value.trim();
   if(!g('ctr-date')||!g('ctr-from')||!g('ctr-to')){toast('حدد تاريخ العقد وبداية ونهاية المدة','warn');return;}
   if(ctrDiffDays(g('ctr-from'),g('ctr-to'))<=0){toast('نهاية المدة لازم تكون بعد البداية','warn');return;}
@@ -14975,12 +15067,12 @@ function ctrOpen(print){
   const pays=_ctrPays.filter(p=>parseFloat(p.amt)>0);
   const tot=CTR_G1.length*ctrNum('ctr-p1')+CTR_G2.length*ctrNum('ctr-p2')+ctrNum('ctr-extra');
   const sum=pays.reduce((s,p)=>s+parseFloat(p.amt),0);
-  if(sum!==tot&&!confirm('مجموع الدفعات ('+sum.toLocaleString('en-US')+') لا يساوي إجمالي العقد ('+tot.toLocaleString('en-US')+'). تكمل الطباعة؟'))return;
+  if(sum!==tot&&!await confirm('مجموع الدفعات ('+sum.toLocaleString('en-US')+') لا يساوي إجمالي العقد ('+tot.toLocaleString('en-US')+'). تكمل الطباعة؟'))return;
   const w=window.open('','_blank');
   if(!w){toast('المتصفح منع النافذة — اسمح بالنوافذ المنبثقة','error');return;}
   w.document.open();w.document.write(ctrBuildHtml({
     year:g('ctr-year'),date:g('ctr-date'),place:g('ctr-place')||'مطروح',company:g('ctr-company'),rep:g('ctr-rep'),nid:g('ctr-nid'),addr:g('ctr-addr'),
-    from:g('ctr-from'),to:g('ctr-to'),p1:ctrNum('ctr-p1'),p2:ctrNum('ctr-p2'),extra:ctrNum('ctr-extra'),baseDays:g('ctr-basedays')||'100',pays:pays
+    from:g('ctr-from'),to:g('ctr-to'),p1:ctrNum('ctr-p1'),p2:ctrNum('ctr-p2'),extra:ctrNum('ctr-extra'),baseDays:g('ctr-basedays')||'100',pays:pays,font:ctrFontSpec(),fs:parseFloat(g('ctr-fs'))||16
   },print));
   w.document.close();
   try{addLog&&addLog('إنشاء عقد إيجار: '+g('ctr-company')+' — '+g('ctr-year'),'info','');}catch(e){}
@@ -15002,13 +15094,13 @@ function ctrBuildHtml(d,autoPrint){
   const css=CTR_FONT_CSS+`
 *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 html,body{margin:0;padding:0}
-body{font-family:'CtrAmiri','Simplified Arabic','Traditional Arabic','Cairo',serif;direction:rtl;background:#d9dee3;color:#111;font-weight:700}
+body{font-family:'${(d.font&&d.font.name||'CtrAmiri').replace(/'/g,'')}','CtrAmiri','Simplified Arabic','Traditional Arabic',serif;direction:rtl;background:#d9dee3;color:#111;font-weight:700}
 .bar{position:sticky;top:0;z-index:5;background:#1a5276;padding:8px 14px;display:flex;gap:8px}
 .bar button{background:#fff;color:#1a5276;border:0;border-radius:8px;padding:7px 18px;font:700 13px 'Cairo',sans-serif;cursor:pointer}
 .pg{position:relative;width:210mm;height:297mm;margin:14px auto;background:#fff;padding:15mm 19mm 13mm;display:flex;flex-direction:column;box-shadow:0 3px 16px rgba(0,0,0,.3);overflow:hidden}
 .pg::before{content:"";position:absolute;inset:7mm;border:1.6mm double #333;pointer-events:none}
 .pn0{font-size:11pt;text-align:right;margin-bottom:1mm;color:#333}
-.body{flex:1;overflow:hidden;font-size:16pt;line-height:1.75;text-align:justify;text-align-last:right;text-justify:inter-word}
+.body{flex:1;overflow:hidden;font-size:${d.fs||16}pt;line-height:1.75;text-align:justify;text-align-last:right;text-justify:inter-word}
 .body p{margin:0 0 .4em}
 .u{text-decoration:underline;text-underline-offset:.2em}
 .c{text-align:center;text-align-last:center}
@@ -15088,12 +15180,15 @@ ${cl('الرابع عشر','عدد النسخ : &nbsp; تحرر هذا العق�
  <div><div>الطرف الاول (المؤجر)</div><div class="ln">الاسم /<i></i></div><div class="ln">التوقيع /<i></i></div></div>
  <div><div>الطرف الثاني (المستأجر)</div><div class="ln">الاسم /<i></i></div><div class="ln">التوقيع /<i></i></div></div>
 </div></div>${foot}</div>`;
+  const fam=JSON.stringify((d.font&&d.font.name)||'CtrAmiri'),maxFs=d.fs||16;
   const fit=`<script>
-function fitAll(){document.querySelectorAll('.body').forEach(b=>{let fs=16;b.style.fontSize=fs+'pt';while(b.scrollHeight>b.clientHeight+1&&fs>9){fs-=0.25;b.style.fontSize=fs+'pt';}});}
-(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{fitAll();${autoPrint?'setTimeout(()=>window.print(),400);':''}});
+function fitAll(){document.querySelectorAll('.body').forEach(b=>{let fs=${maxFs};b.style.fontSize=fs+'pt';while(b.scrollHeight>b.clientHeight+1&&fs>8){fs-=0.25;b.style.fontSize=fs+'pt';}});}
+var _t=new Promise(r=>setTimeout(r,5000));
+var _l=(document.fonts&&document.fonts.load)?document.fonts.load("700 16pt '"+${fam}+"'"):Promise.resolve();
+Promise.race([_l,_t]).then(()=>document.fonts?document.fonts.ready:0).then(()=>{fitAll();${autoPrint?'setTimeout(()=>window.print(),400);':''}});
 <\/script>`;
   return `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>عقد إيجار - ${co} - ${yr}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap" rel="stylesheet">${d.font&&d.font.kind==='g'?`<link href="${ctrGoogleLink(d.font.name)}" rel="stylesheet">`:''}
 <style>${css}</style></head><body>
 <div class="bar"><button onclick="window.print()">🖨 طباعة / حفظ PDF</button></div>
 ${p1}${p2}${p3}${fit}</body></html>`;
