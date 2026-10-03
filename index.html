@@ -503,6 +503,18 @@ tr:hover td{background:#f5f8fc}
 ALTER TABLE mtr_closing_expenses ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all" ON mtr_closing_expenses FOR ALL USING (true) WITH CHECK (true);</code>
   </div>
+  <div class="step"><strong>8. للتحديث الجديد (العقود المحفوظة)</strong>شغّل:
+    <code style="font-size:10px;display:block;direction:ltr;text-align:left;white-space:pre-wrap">CREATE TABLE IF NOT EXISTS mtr_contracts (
+  id bigint generated always as identity primary key,
+  title text default '',
+  data jsonb not null default '{}',
+  updated_by text default '',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+ALTER TABLE mtr_contracts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all" ON mtr_contracts FOR ALL USING (true) WITH CHECK (true);</code>
+  </div>
   <div class="cfg-err" id="cfg-err"></div>
   <div class="cfg-ok" id="cfg-ok"></div>
   <div class="fg"><label>Project URL</label><input type="text" id="sb-url" placeholder="https://xxxx.supabase.co"></div>
@@ -1521,6 +1533,19 @@ CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
 <div class="card" style="margin-bottom:.75rem">
   <div class="ctitle">📄 العقود — عقد إيجار شقق مفروشة (برج الهارون)</div>
   <div class="info-box">املأ البيانات المتغيرة فقط — الباقي (الطرف الأول، الشقق، البنود، الشروط) ثابت زي العقد الأصلي. الإجماليات والمدة واليوم والتفقيط بتتحسب أوتوماتيك. التوقيعات والأسماء المكتوبة بخط اليد بتفضل فاضية.</div>
+  <div id="ctr-setup" class="warn-box" style="display:none">
+    <div style="font-weight:800;margin-bottom:4px">⚠️ جدول العقود مش موجود على Supabase (أو فيه مشكلة اتصال)</div>
+    <div style="margin-bottom:6px">افتح <b>SQL Editor</b> في Supabase وشغّل الأمر ده مرة واحدة بس، وبعدين اضغط 🔄:</div>
+    <code id="ctr-sql" style="display:block;direction:ltr;text-align:left;white-space:pre-wrap;font-size:11px;background:var(--sf);padding:8px;border-radius:8px;border:1px solid var(--bd2)"></code>
+    <div id="ctr-seterr" style="font-size:11px;margin-top:5px;direction:ltr;text-align:left;opacity:.8"></div>
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn btn-sm" onclick="ctrCopySql()">📋 نسخ الأمر</button><button class="btn btn-sm" onclick="ctrBoot()">🔄 إعادة المحاولة</button></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:.6rem">
+    <div class="fg" style="margin:0;flex:1;min-width:220px"><label>العقود المحفوظة (على السيرفر — بتظهر من أي جهاز)</label><select id="ctr-saved"><option value="">— لا توجد عقود محفوظة —</option></select></div>
+    <button class="btn" onclick="ctrLoadSel()">📂 فتح</button>
+    <button class="btn" onclick="ctrNew()">➕ عقد جديد</button>
+    <button class="btn btn-d" onclick="ctrDeleteSel()">🗑 حذف</button>
+  </div>
   <div class="g4">
     <div class="fg"><label>سنة الموسم</label><input type="number" id="ctr-year" value="2027" oninput="ctrCalc()"></div>
     <div class="fg"><label>تاريخ كتابة العقد</label><input type="date" id="ctr-date" oninput="ctrCalc()"></div>
@@ -1593,8 +1618,8 @@ CREATE POLICY "allow_all_mtr_electricity" ON mtr_electricity
     <button class="btn btn-p" onclick="ctrOpen(true)">🖨️ طباعة / حفظ PDF</button>
     <span style="flex:1"></span>
     <span id="ctr-savestat" style="font-size:12px;font-weight:700;color:var(--tx3)"></span>
-    <button class="btn btn-s" onclick="ctrSave()">💾 حفظ البيانات</button>
-    <button class="btn btn-d" onclick="ctrClearSaved()">🗑 مسح المحفوظ</button>
+    <button class="btn btn-s" onclick="ctrSave(false)">💾 حفظ</button>
+    <button class="btn" onclick="ctrSave(true)">📑 حفظ كعقد جديد</button>
   </div>
 </div>
 </div>
@@ -14968,36 +14993,110 @@ function ctrWords(n){
 }
 function ctrTafqeet(n){return 'فقط '+ctrWords(n)+' جنيه مصري لا غير';}
 
-var CTR_KEY='mtr_ctr_draft_v1';
+var CTR_KEY='mtr_ctr_draft_v1'; // نسخة احتياطية محلية فقط
+var CTR_TABLE='mtr_contracts';
+var CTR_SQL="CREATE TABLE IF NOT EXISTS mtr_contracts (\n  id bigint generated always as identity primary key,\n  title text default '',\n  data jsonb not null default '{}',\n  updated_by text default '',\n  created_at timestamptz default now(),\n  updated_at timestamptz default now()\n);\nALTER TABLE mtr_contracts ENABLE ROW LEVEL SECURITY;\nCREATE POLICY \"allow_all\" ON mtr_contracts FOR ALL USING (true) WITH CHECK (true);";
 var CTR_IDS=['ctr-year','ctr-date','ctr-place','ctr-font','ctr-fontcustom','ctr-fs','ctr-company','ctr-rep','ctr-nid','ctr-addr','ctr-from','ctr-to','ctr-p1','ctr-p2','ctr-extra','ctr-basedays'];
-var _ctrDirty=false;
+var _ctrDirty=false,_ctrId=null,_ctrDefaults=null,_ctrSavedAt=null,_ctrBusy=false;
+
 function ctrSetStat(){
   const el=document.getElementById('ctr-savestat');if(!el)return;
+  if(_ctrBusy){el.textContent='⏳ جاري الاتصال بالسيرفر...';el.style.color='var(--tx3)';return;}
   if(_ctrDirty){el.textContent='● تغييرات غير محفوظة';el.style.color='var(--wn)';}
-  else{let ts='';try{const o=JSON.parse(localStorage.getItem(CTR_KEY)||'null');if(o&&o.savedAt)ts=new Date(o.savedAt).toLocaleString('ar-EG');}catch(e){}
-    el.textContent=ts?'✓ محفوظ — '+ts:'لا توجد بيانات محفوظة';el.style.color=ts?'var(--ac)':'var(--tx3)';}
+  else if(_ctrId&&_ctrSavedAt){el.textContent='✓ محفوظ على السيرفر — '+new Date(_ctrSavedAt).toLocaleString('ar-EG');el.style.color='var(--ac)';}
+  else{el.textContent=_ctrId?'✓ محفوظ على السيرفر':'عقد جديد — لم يُحفظ بعد';el.style.color='var(--tx3)';}
 }
 function ctrMarkDirty(){_ctrDirty=true;ctrSetStat();}
-function ctrSave(){
-  try{
-    const o={savedAt:Date.now(),pays:_ctrPays};
-    CTR_IDS.forEach(id=>{o[id]=document.getElementById(id).value;});
-    localStorage.setItem(CTR_KEY,JSON.stringify(o));
-    _ctrDirty=false;ctrSetStat();toast('💾 تم حفظ بيانات العقد','success');
-  }catch(e){toast('تعذر الحفظ: '+e.message,'error');}
+function ctrCollect(){const o={pays:_ctrPays};CTR_IDS.forEach(id=>{o[id]=document.getElementById(id).value;});return o;}
+function ctrApply(o){
+  CTR_IDS.forEach(id=>{if(o[id]!==undefined){const el=document.getElementById(id);if(el)el.value=o[id];}});
+  _ctrPays=(Array.isArray(o.pays)&&o.pays.length)?o.pays:[{amt:'',date:'',note:'عند التوقيع على العقد'}];
+  ctrRenderPays();ctrCalc();ctrFontChange();
 }
-function ctrLoadSaved(){
-  try{
-    const o=JSON.parse(localStorage.getItem(CTR_KEY)||'null');if(!o)return false;
-    CTR_IDS.forEach(id=>{if(o[id]!==undefined){const el=document.getElementById(id);if(el)el.value=o[id];}});
-    if(Array.isArray(o.pays)&&o.pays.length)_ctrPays=o.pays;
-    return true;
-  }catch(e){return false;}
+function ctrShowSetup(err){
+  document.getElementById('ctr-sql').textContent=CTR_SQL;
+  document.getElementById('ctr-seterr').textContent=err?String(err).slice(0,300):'';
+  document.getElementById('ctr-setup').style.display='block';
 }
-async function ctrClearSaved(){
-  if(!await confirm('تمسح البيانات المحفوظة؟ (الحقول الحالية هتفضل زي ما هي لحد ما تعمل ريفريش)'))return;
-  try{localStorage.removeItem(CTR_KEY);}catch(e){}
-  _ctrDirty=true;ctrSetStat();toast('تم مسح البيانات المحفوظة','info');
+function ctrCopySql(){try{navigator.clipboard.writeText(CTR_SQL);toast('📋 تم نسخ الأمر','success');}catch(e){toast('انسخه يدوي من المربع','warn');}}
+function ctrFmtOpt(r){
+  let d='';try{d=new Date(r.updated_at).toLocaleDateString('ar-EG');}catch(e){}
+  return (r.title||'بدون عنوان')+(d?'  ·  '+d:'');
+}
+async function ctrRefreshList(){
+  const rows=await sbFetch(CTR_TABLE,'GET',null,'?select=id,title,updated_at,updated_by&order=updated_at.desc&limit=300');
+  const sel=document.getElementById('ctr-saved');
+  sel.innerHTML=rows.length?rows.map(r=>`<option value="${r.id}">${ctrEsc(ctrFmtOpt(r))}</option>`).join(''):'<option value="">— لا توجد عقود محفوظة —</option>';
+  if(_ctrId&&rows.some(r=>r.id===_ctrId))sel.value=String(_ctrId);
+  return rows;
+}
+async function ctrLoad(id){
+  const rows=await sbFetch(CTR_TABLE,'GET',null,'?id=eq.'+id+'&select=*');
+  if(!rows.length)throw new Error('العقد غير موجود');
+  ctrApply(rows[0].data||{});
+  _ctrId=rows[0].id;_ctrSavedAt=rows[0].updated_at;_ctrDirty=false;
+  const sel=document.getElementById('ctr-saved');if(sel)sel.value=String(_ctrId);
+  ctrSetStat();
+}
+async function ctrBoot(){
+  _ctrBusy=true;ctrSetStat();
+  try{
+    const rows=await ctrRefreshList();
+    document.getElementById('ctr-setup').style.display='none';
+    if(rows.length&&!_ctrDirty)await ctrLoad(rows[0].id);
+    else if(!rows.length){
+      // ترحيل نسخة المتصفح القديمة (لو موجودة)
+      try{const o=JSON.parse(localStorage.getItem(CTR_KEY)||'null');if(o&&!_ctrDirty){ctrApply(o);ctrMarkDirty();toast('تم استرجاع مسودة من المتصفح — اضغط حفظ لرفعها للسيرفر','info',6000);}}catch(e){}
+    }
+  }catch(e){
+    ctrShowSetup(e.message);
+    try{const o=JSON.parse(localStorage.getItem(CTR_KEY)||'null');if(o&&!_ctrDirty){ctrApply(o);}}catch(x){}
+  }
+  _ctrBusy=false;ctrSetStat();
+}
+async function ctrSave(asNew){
+  const o=ctrCollect();
+  const title=((o['ctr-company']||'').trim()||'بدون اسم')+' — '+(o['ctr-year']||'');
+  try{localStorage.setItem(CTR_KEY,JSON.stringify(Object.assign({savedAt:Date.now()},o)));}catch(e){}
+  const payload={title:title,data:o,updated_by:(typeof currentUser!=='undefined'&&currentUser&&currentUser.name)||'',updated_at:new Date().toISOString()};
+  _ctrBusy=true;ctrSetStat();
+  try{
+    let row;
+    if(_ctrId&&!asNew){const r=await sbFetch(CTR_TABLE,'PATCH',payload,'?id=eq.'+_ctrId);row=r[0];}
+    else{const r=await sbFetch(CTR_TABLE,'POST',payload,'');row=r[0];}
+    if(!row)throw new Error('لم يتم الحفظ');
+    _ctrId=row.id;_ctrSavedAt=row.updated_at||payload.updated_at;_ctrDirty=false;
+    document.getElementById('ctr-setup').style.display='none';
+    await ctrRefreshList();
+    toast('💾 تم الحفظ على السيرفر','success');
+  }catch(e){
+    ctrShowSetup(e.message);
+    toast('تعذر الحفظ على السيرفر — اتحفظت نسخة على المتصفح فقط','error',6000);
+  }
+  _ctrBusy=false;ctrSetStat();
+}
+async function ctrLoadSel(){
+  const id=document.getElementById('ctr-saved').value;if(!id){toast('اختار عقد من القائمة','warn');return;}
+  if(_ctrDirty&&!await confirm('فيه تغييرات غير محفوظة هتضيع. تفتح العقد المحفوظ؟'))return;
+  _ctrBusy=true;ctrSetStat();
+  try{await ctrLoad(id);toast('تم فتح العقد','success');}catch(e){toast('تعذر الفتح: '+e.message,'error');}
+  _ctrBusy=false;ctrSetStat();
+}
+async function ctrNew(){
+  if(_ctrDirty&&!await confirm('فيه تغييرات غير محفوظة هتضيع. تبدأ عقد جديد؟'))return;
+  const d=_ctrDefaults||{};
+  const t=new Date(),z=n=>String(n).padStart(2,'0');
+  ctrApply(Object.assign({},d,{'ctr-date':t.getFullYear()+'-'+z(t.getMonth()+1)+'-'+z(t.getDate()),'ctr-from':'','ctr-to':'','pays':null}));
+  _ctrId=null;_ctrSavedAt=null;_ctrDirty=false;ctrSetStat();
+}
+async function ctrDeleteSel(){
+  const sel=document.getElementById('ctr-saved'),id=sel.value;if(!id){toast('اختار عقد من القائمة','warn');return;}
+  if(!await confirm('تحذف العقد المحفوظ ده نهائياً من السيرفر؟\n'+sel.options[sel.selectedIndex].text))return;
+  try{
+    await sbFetch(CTR_TABLE,'DELETE',null,'?id=eq.'+id);
+    if(String(_ctrId)===String(id)){_ctrId=null;_ctrSavedAt=null;_ctrDirty=true;}
+    await ctrRefreshList();ctrSetStat();toast('تم الحذف','info');
+  }catch(e){toast('تعذر الحذف: '+e.message,'error');}
 }
 // ---- الخطوط ----
 function ctrFontSpec(){
@@ -15020,13 +15119,14 @@ function ctrInit(){
   if(!document.getElementById('ctr-fontface')){const s=document.createElement('style');s.id='ctr-fontface';s.textContent=CTR_FONT_CSS;document.head.appendChild(s);}
   const t=new Date(),z=n=>String(n).padStart(2,'0');
   document.getElementById('ctr-date').value=t.getFullYear()+'-'+z(t.getMonth()+1)+'-'+z(t.getDate());
-  ctrLoadSaved();
+  _ctrDefaults={};CTR_IDS.forEach(id=>{_ctrDefaults[id]=document.getElementById(id).value;});
   ctrRenderPays();ctrCalc();ctrFontChange();
   const root=document.getElementById('contracts');
-  root.addEventListener('input',e=>{if(!e.target.readOnly)ctrMarkDirty();});
-  root.addEventListener('change',e=>{if(!e.target.readOnly)ctrMarkDirty();});
+  root.addEventListener('input',e=>{if(!e.target.readOnly&&e.target.id!=='ctr-saved')ctrMarkDirty();});
+  root.addEventListener('change',e=>{if(!e.target.readOnly&&e.target.id!=='ctr-saved')ctrMarkDirty();});
   window.addEventListener('beforeunload',e=>{if(_ctrDirty){e.preventDefault();e.returnValue='';}});
   _ctrDirty=false;ctrSetStat();
+  ctrBoot();
 }
 function ctrCalc(){
   const dv=document.getElementById('ctr-date').value;
